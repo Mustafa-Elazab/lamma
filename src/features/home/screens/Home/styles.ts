@@ -19,22 +19,6 @@ export function createStyles(theme: Theme) {
       paddingHorizontal: theme.spacing.lg,
       marginTop: theme.spacing.xs,
     },
-    fab: {
-      position: 'absolute',
-      right: theme.spacing.lg,
-      bottom: 96,
-      alignItems: 'center',
-      gap: theme.spacing.xs,
-    },
-    fabButton: {
-      width: 60,
-      height: 60,
-      borderRadius: 30,
-      backgroundColor: theme.colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...theme.shadows.floating,
-    },
     stateWrap: { paddingVertical: theme.spacing.xxl },
     loadingCard: {
       height: 120,

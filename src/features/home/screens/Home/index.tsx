@@ -1,17 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Pressable,
   RefreshControl,
   View,
   type ListRenderItemInfo,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppSkeleton } from '../../../../design-system/atoms/Skeleton';
-import { AppText } from '../../../../design-system/atoms/Text';
 import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
@@ -28,15 +25,20 @@ export function HomeScreen(): React.ReactElement {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const c = useHomeController();
 
-  const renderItem = ({ item }: ListRenderItemInfo<LammaEvent>) => (
-    <View style={styles.compactItem}>
-      <AppEventCard
-        data={c.toCard(item)}
-        variant="compact"
-        onPress={() => c.openEvent(item.id)}
-      />
-    </View>
+  const { toCard, openEvent } = c;
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<LammaEvent>) => (
+      <View style={styles.compactItem}>
+        <AppEventCard
+          data={toCard(item)}
+          variant="compact"
+          onPress={() => openEvent(item.id)}
+        />
+      </View>
+    ),
+    [openEvent, styles.compactItem, toCard],
   );
+  const keyExtractor = useCallback((item: LammaEvent) => item.id, []);
 
   const header = (
     <View style={styles.body}>
@@ -99,7 +101,7 @@ export function HomeScreen(): React.ReactElement {
       <FlatList
         data={c.isLoading ? [] : c.events}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={keyExtractor}
         ListHeaderComponent={header}
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={styles.listContent}
@@ -121,19 +123,6 @@ export function HomeScreen(): React.ReactElement {
           ) : undefined
         }
       />
-      <View style={styles.fab}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={c.t('home.createEvent')}
-          onPress={c.openCreate}
-          style={styles.fabButton}
-        >
-          <AppIcon name="plus" size={28} color="textInverse" />
-        </Pressable>
-        <AppText variant="caption" color="primary" weight="700">
-          {c.t('home.createEvent')}
-        </AppText>
-      </View>
     </SafeAreaView>
   );
 }

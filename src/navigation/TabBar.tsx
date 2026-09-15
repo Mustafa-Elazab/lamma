@@ -76,7 +76,14 @@ export function TabBar({
                 <View style={styles.badge} />
               ) : null}
             </View>
-            <AppText variant="caption" color={color} weight={focused ? '700' : '500'}>
+            <AppText
+              variant="caption"
+              color={color}
+              weight={focused ? '700' : '500'}
+              numberOfLines={1}
+              allowFontScaling={false}
+              style={styles.label}
+            >
               {label}
             </AppText>
             {focused ? <View style={styles.activeDot} /> : null}
@@ -102,7 +109,10 @@ function createStyles(theme: Theme) {
       alignItems: 'center',
       justifyContent: 'center',
       gap: 2,
+      paddingHorizontal: 2,
     },
+    // Smaller than the caption token so "Notifications" stays on a single line.
+    label: { fontSize: 10, lineHeight: 13 },
     activeDot: {
       width: 4,
       height: 4,
