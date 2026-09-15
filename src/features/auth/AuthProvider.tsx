@@ -115,8 +115,8 @@ export function AuthProvider({
   const signOut = useCallback(async () => {
     try {
       await detachStoredMessagingToken();
-    } catch (error) {
-      reportError(error, 'messaging.detach-on-sign-out');
+    } catch (detachError) {
+      reportError(detachError, 'messaging.detach-on-sign-out');
     } finally {
       await repository.signOut();
     }

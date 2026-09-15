@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ErrorInfo, ReactNode } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { AppErrorState } from '../design-system/molecules/ErrorState';
 import { AppScreenTemplate } from '../design-system/templates/ScreenTemplate';
@@ -11,7 +12,7 @@ function ErrorFallback({ onReset }: { onReset: () => void }) {
   return (
     <AppScreenTemplate
       scroll={false}
-      contentStyle={{ justifyContent: 'center' }}
+      contentStyle={styles.content}
       testID="global-error-fallback"
     >
       <AppErrorState
@@ -23,6 +24,10 @@ function ErrorFallback({ onReset }: { onReset: () => void }) {
     </AppScreenTemplate>
   );
 }
+
+const styles = StyleSheet.create({
+  content: { justifyContent: 'center' },
+});
 
 type Props = { children: ReactNode };
 type State = { error: Error | null; resetKey: number };

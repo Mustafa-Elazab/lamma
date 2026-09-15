@@ -156,11 +156,13 @@ export function LocationPickerModal({
             setResults(places);
           }
         })
-        .catch(searchError => {
+        .catch(placeSearchError => {
           if (!cancelled) {
             setSearchError(true);
             setResults([]);
-            reportError(searchError, 'maps.place-search', { query: trimmed });
+            reportError(placeSearchError, 'maps.place-search', {
+              query: trimmed,
+            });
           }
         })
         .finally(() => {
