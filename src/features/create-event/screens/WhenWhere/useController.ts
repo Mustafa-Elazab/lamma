@@ -15,8 +15,6 @@ import {
   MS_PER_DAY,
   minutesOfDay,
   startOfDay,
-  timezoneLabel,
-  TIMEZONE_OPTIONS,
 } from '../../components/dateTime';
 import { wizardSteps } from '../steps';
 
@@ -24,7 +22,6 @@ export type ActivePicker =
   | 'date'
   | 'start'
   | 'end'
-  | 'timezone'
   | 'location'
   | null;
 
@@ -50,8 +47,6 @@ export function useWhenWhereController() {
   const endLabel = draft.endAt
     ? formatTime(draft.endAt, language)
     : undefined;
-  const tzLabel = timezoneLabel(draft.timezone);
-
   const dateValue = useMemo(
     () => (draft.startAt ? new Date(draft.startAt) : new Date()),
     [draft.startAt],
@@ -112,11 +107,6 @@ export function useWhenWhereController() {
     [draft.startAt, update],
   );
 
-  const onSelectTimezone = useCallback(
-    (value: string) => update({ timezone: value }),
-    [update],
-  );
-
   const setVenue = useCallback(
     (venueName: string) => update({ venueName }),
     [update],
@@ -152,11 +142,9 @@ export function useWhenWhereController() {
     whenWhere,
     picker,
     setPicker,
-    timezoneOptions: TIMEZONE_OPTIONS,
     dateLabel,
     startLabel,
     endLabel,
-    tzLabel,
     dateValue,
     startValue: dateValue,
     endValue,
@@ -164,7 +152,6 @@ export function useWhenWhereController() {
     onPickDate,
     onPickStart,
     onPickEnd,
-    onSelectTimezone,
     onConfirmLocation,
     setVenue,
     setAddress,

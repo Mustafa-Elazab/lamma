@@ -198,7 +198,10 @@ public usage policy. Event Details' **Open in maps** opens the selected coordina
 device's mapping app.
 
 Dates and times use native pickers via `@react-native-community/datetimepicker`, formatted as
-the product copy (e.g. `Fri, 18 Dec · 8:00 PM`).
+the product copy (e.g. `Fri, 18 Dec · 8:00 PM`). The picker interprets values in the
+device's local time, stores the resulting UTC epoch milliseconds, and Home/Event Details
+render those timestamps in the viewer's device-local time. There is intentionally no
+event-timezone field or picker.
 
 ## Deep links & Android App Links
 

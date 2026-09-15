@@ -145,7 +145,6 @@ export class LocalEventRepository implements EventRepository {
       themeKey: input.themeKey,
       startAt: input.startAt,
       endAt: input.endAt,
-      timezone: input.timezone,
       venueName: input.venueName,
       areaAddress: input.areaAddress,
       latitude: input.latitude ?? null,

@@ -14,7 +14,6 @@ import type { Theme } from '../../../../design-system/theme/tokens';
 import { CreateHeader } from '../../components/CreateHeader';
 import { DetailRow } from '../../components/DetailRow';
 import { LocationPickerModal } from '../../components/LocationPickerModal';
-import { OptionPickerModal } from '../../components/OptionPickerModal';
 import { WIZARD_STEP } from '../steps';
 import { createStyles } from './styles';
 import { useWhenWhereController, type ActivePicker } from './useController';
@@ -28,7 +27,7 @@ export function WhenWhereScreen(): React.ReactElement {
   const { picker, setPicker, onPickDate, onPickStart, onPickEnd } = c;
 
   const handleNativeChange = useCallback(
-    (mode: Exclude<ActivePicker, 'timezone' | 'location' | null>) =>
+    (mode: Exclude<ActivePicker, 'location' | null>) =>
       (event: DateTimePickerEvent, selected?: Date) => {
         // Android renders a dialog and fires once; close it either way.
         if (Platform.OS !== 'ios') {
@@ -97,12 +96,6 @@ export function WhenWhereScreen(): React.ReactElement {
             placeholder={!c.endLabel}
             onPress={() => setPicker('end')}
           />
-          <DetailRow
-            icon="language"
-            label={c.t('create.timezone')}
-            value={c.tzLabel}
-            onPress={() => setPicker('timezone')}
-          />
         </View>
       </View>
 
@@ -166,15 +159,6 @@ export function WhenWhereScreen(): React.ReactElement {
           onChange={handleNativeChange('end')}
         />
       ) : null}
-
-      <OptionPickerModal
-        visible={picker === 'timezone'}
-        title={c.t('create.selectTimezone')}
-        options={c.timezoneOptions}
-        selectedValue={c.draft.timezone}
-        onSelect={c.onSelectTimezone}
-        onClose={() => setPicker(null)}
-      />
 
       <LocationPickerModal
         visible={picker === 'location'}

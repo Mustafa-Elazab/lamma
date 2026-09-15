@@ -8,8 +8,6 @@ import type { CreateEventInput } from '../../events';
 
 export const MAX_TITLE_LENGTH = 60;
 export const MAX_DESCRIPTION_LENGTH = 250;
-export const DEFAULT_TIMEZONE = 'Africa/Cairo';
-export const DEFAULT_TIMEZONE_LABEL = 'Eastern European Time (EET)';
 
 export type EventDraft = {
   id: string;
@@ -18,7 +16,6 @@ export type EventDraft = {
   description: string;
   startAt: number | null;
   endAt: number | null;
-  timezone: string;
   venueName: string;
   areaAddress: string;
   latitude: number | null;
@@ -37,7 +34,6 @@ export function createEmptyDraft(id: string): EventDraft {
     description: '',
     startAt: null,
     endAt: null,
-    timezone: DEFAULT_TIMEZONE,
     venueName: '',
     areaAddress: '',
     latitude: null,
@@ -77,7 +73,6 @@ export function draftToCreateInput(
     themeKey: resolveDraftTheme(draft),
     startAt: draft.startAt,
     endAt: draft.endAt,
-    timezone: draft.timezone,
     venueName: draft.venueName.trim(),
     areaAddress: draft.areaAddress.trim(),
     latitude: draft.latitude,

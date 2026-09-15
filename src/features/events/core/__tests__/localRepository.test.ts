@@ -60,7 +60,6 @@ describe('LocalEventRepository', () => {
       themeKey: 'generic',
       startAt: Date.now() + 86_400_000,
       endAt: Date.now() + 90_000_000,
-      timezone: 'Africa/Cairo',
       venueName: 'My Place',
       areaAddress: 'Cairo',
       visibility: 'private',
