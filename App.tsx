@@ -17,7 +17,6 @@ function ThemedStatusBar(): React.ReactElement {
   return (
     <StatusBar
       barStyle={dark ? 'light-content' : 'dark-content'}
-      backgroundColor={theme.colors.background}
     />
   );
 }

@@ -26,7 +26,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 export function resolveAppTheme(
   mode: ThemeMode,
-  systemScheme: ColorSchemeName,
+  systemScheme: ColorSchemeName | null,
 ): Theme {
   return mode === 'dark' || (mode === 'system' && systemScheme === 'dark')
     ? darkTheme
