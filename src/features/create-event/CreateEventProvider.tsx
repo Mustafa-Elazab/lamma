@@ -9,6 +9,8 @@ import React, {
   useState,
 } from 'react';
 
+import { trackEvent } from '../../services/analytics';
+import { reportError } from '../../services/crashReporting';
 import { useCreateEvent, type LammaEvent } from '../events';
 import {
   createEmptyDraft,
@@ -118,8 +120,13 @@ export function CreateEventProvider({
       const event = await createEvent.mutateAsync(input);
       await repository.remove(draft.id);
       await queryClient.invalidateQueries({ queryKey: draftKeys.list() });
+      await trackEvent('event_published', {
+        event_id: event.id,
+        visibility: event.visibility,
+      });
       return event;
     } catch (error) {
+      reportError(error, 'create-event.publish', { draftId: draft.id });
       setPublishError(
         error instanceof Error ? error.message : 'events/create-failed',
       );

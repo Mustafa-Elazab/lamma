@@ -1,18 +1,24 @@
 import {
+  createNavigationContainerRef,
   DefaultTheme,
   NavigationContainer,
   type Theme as NavTheme,
 } from '@react-navigation/native';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import BootSplash from 'react-native-bootsplash';
 
 import { SplashScreen } from '../app/SplashScreen';
 import { useTheme } from '../design-system/theme/ThemeProvider';
 import { useAuth, useOnboardingContext } from '../features/auth';
 import { OnboardingScreen } from '../features/auth/screens/Onboarding';
+import { trackScreen } from '../services/analytics';
+import { reportError } from '../services/crashReporting';
 import { AppNavigator } from './AppNavigator';
 import { AuthNavigator } from './AuthNavigator';
 import { linking } from './linking';
+import type { RootStackParamList } from './types';
+
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 function RootContent(): React.ReactElement {
   const { status } = useAuth();
@@ -23,7 +29,9 @@ function RootContent(): React.ReactElement {
     if (gateReady) {
       // Cross-fade the native bootsplash logo away once auth + onboarding are
       // resolved. Safe to call repeatedly; ignore if not natively initialized.
-      BootSplash.hide({ fade: true }).catch(() => undefined);
+      BootSplash.hide({ fade: true }).catch(error => {
+        reportError(error, 'bootsplash.hide');
+      });
     }
   }, [gateReady]);
 
@@ -42,6 +50,7 @@ function RootContent(): React.ReactElement {
 
 export function RootNavigator(): React.ReactElement {
   const theme = useTheme();
+  const routeNameRef = useRef<string | undefined>(undefined);
   const navTheme = useMemo<NavTheme>(
     () => ({
       ...DefaultTheme,
@@ -59,7 +68,26 @@ export function RootNavigator(): React.ReactElement {
     [theme],
   );
   return (
-    <NavigationContainer theme={navTheme} linking={linking}>
+    <NavigationContainer
+      ref={navigationRef}
+      theme={navTheme}
+      linking={linking}
+      onReady={() => {
+        const routeName = navigationRef.getCurrentRoute()?.name;
+        routeNameRef.current = routeName;
+        if (routeName) {
+          void trackScreen(routeName);
+        }
+      }}
+      onStateChange={() => {
+        const previousRouteName = routeNameRef.current;
+        const currentRouteName = navigationRef.getCurrentRoute()?.name;
+        if (currentRouteName && previousRouteName !== currentRouteName) {
+          void trackScreen(currentRouteName);
+        }
+        routeNameRef.current = currentRouteName;
+      }}
+    >
       <RootContent />
     </NavigationContainer>
   );
