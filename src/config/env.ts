@@ -10,7 +10,7 @@ export const env = {
   firebaseEnabled: false,
   deepLinkHost: 'lamma.app',
   /** Populate with your Firebase OAuth web client id to enable Google sign-in. */
-  googleWebClientId: 'REPLACE_WITH_FIREBASE_WEB_CLIENT_ID',
+  googleWebClientId: '937768660160-22qau4s57qb7fg5cve0tgvgb3bs16b3k.apps.googleusercontent.com',
 } as const;
 
 export type Env = typeof env;
