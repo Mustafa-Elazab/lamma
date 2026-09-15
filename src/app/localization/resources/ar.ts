@@ -136,6 +136,7 @@ export const ar: TranslationSchema = {
     visibilityPrivateHint: 'فقط المدعوون يمكنهم رؤية هذه المناسبة',
     published: 'مناسبتك أصبحت جاهزة!',
     publishing: 'جارٍ النشر…',
+    publishError: 'تعذّر نشر المناسبة. مسودتك محفوظة—حاول مرة أخرى.',
     discardTitle: 'تجاهل هذه المسودة؟',
     discardMessage: 'سيتم فقدان تقدمك في هذه المناسبة.',
     discard: 'تجاهل',

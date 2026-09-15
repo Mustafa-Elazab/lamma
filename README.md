@@ -114,6 +114,21 @@ Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid
 `users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
 `users/{uid}/meta/preferences`.
 
+The repository includes `firestore.rules` and `firebase.json`. Deploy the reviewed rules
+with `firebase deploy --only firestore:rules`. Event creation requires both `hostId` and
+`ownerId` to equal the fresh Firebase ID token's `uid`; user subcollections are restricted
+to that same uid.
+
+The prior event-write failure had two concrete client/rules contract problems: no Firestore
+rules were versioned with the app, and the event repository silently substituted the string
+`anonymous` when Firebase Auth had no current user. A protected write could therefore carry
+`hostId: "anonymous"` while the rules evaluated an absent or different `request.auth.uid`,
+resulting in `permission-denied`. Event creation now rejects missing auth, force-refreshes
+and validates the ID token immediately before writing, writes matching `hostId` and
+`ownerId`, awaits both the write and read-back, and retains the draft on any failure. The
+repository logs the exact payload and sanitized Firestore result/error at the write
+boundary (never the token itself).
+
 To develop **without** native Firebase config, set `firebaseEnabled` to `false` — the app
 falls back to the empty in-memory dev repositories described above.
 

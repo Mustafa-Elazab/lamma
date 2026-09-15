@@ -33,6 +33,7 @@ type CreateEventContextValue = {
   whenWhere: ValidationResult;
   publishable: boolean;
   isPublishing: boolean;
+  publishError: string | null;
   publish: () => Promise<LammaEvent | null>;
 };
 
@@ -58,6 +59,7 @@ export function CreateEventProvider({
   const [draft, setDraft] = useState<EventDraft>(() =>
     createEmptyDraft(initialDraftId ?? newDraftId()),
   );
+  const [publishError, setPublishError] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hydrated = useRef(false);
 
@@ -105,14 +107,24 @@ export function CreateEventProvider({
   const publishable = useMemo(() => canPublish(draft), [draft]);
 
   const publish = useCallback(async (): Promise<LammaEvent | null> => {
+    setPublishError(null);
     const input = draftToCreateInput(draft);
     if (!input) {
       return null;
     }
-    const event = await createEvent.mutateAsync(input);
-    await repository.remove(draft.id);
-    void queryClient.invalidateQueries({ queryKey: draftKeys.list() });
-    return event;
+    try {
+      // mutateAsync and draft removal are deliberately awaited. A failed write
+      // leaves the draft intact so it can be retried.
+      const event = await createEvent.mutateAsync(input);
+      await repository.remove(draft.id);
+      await queryClient.invalidateQueries({ queryKey: draftKeys.list() });
+      return event;
+    } catch (error) {
+      setPublishError(
+        error instanceof Error ? error.message : 'events/create-failed',
+      );
+      return null;
+    }
   }, [createEvent, draft, queryClient, repository]);
 
   const value = useMemo<CreateEventContextValue>(
@@ -124,9 +136,20 @@ export function CreateEventProvider({
       whenWhere,
       publishable,
       isPublishing: createEvent.isPending,
+      publishError,
       publish,
     }),
-    [draft, update, reset, basics, whenWhere, publishable, createEvent.isPending, publish],
+    [
+      draft,
+      update,
+      reset,
+      basics,
+      whenWhere,
+      publishable,
+      createEvent.isPending,
+      publishError,
+      publish,
+    ],
   );
 
   return (

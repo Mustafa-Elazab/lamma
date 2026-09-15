@@ -134,6 +134,7 @@ export const en = {
     visibilityPrivateHint: 'Only invited guests can see this event',
     published: 'Your event is live!',
     publishing: 'Publishing…',
+    publishError: 'Could not publish your event. Your draft is safe—please try again.',
     discardTitle: 'Discard this draft?',
     discardMessage: 'Your progress on this event will be lost.',
     discard: 'Discard',
