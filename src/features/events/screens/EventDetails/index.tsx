@@ -1,24 +1,22 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useMemo } from 'react';
 import { ImageBackground, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppAvatar } from '../../../../design-system/atoms/Avatar';
 import { AppBadge } from '../../../../design-system/atoms/Badge';
-import { AppIcon, type IconName } from '../../../../design-system/atoms/Icon';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
+import { AppRsvpButton } from '../../../../design-system/molecules/RsvpButton';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
 import { AppAvatarStack } from '../../../../design-system/organisms/AvatarStack';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
-import type { AppStackParamList } from '../../../../navigation/types';
 import { formatDateShort } from '../../../../utils/format';
 import { createStyles } from './styles';
+import type { EventDetailsScreenProps } from './types';
 import { useEventDetailsController } from './useController';
 
-type Props = NativeStackScreenProps<AppStackParamList, 'EventDetails'>;
-
-export function EventDetailsScreen({ route }: Props): React.ReactElement {
+export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.ReactElement {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const c = useEventDetailsController(route.params.eventId);
@@ -111,19 +109,19 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
             </View>
 
             <View style={styles.rsvpRow}>
-              <RsvpButton
+              <AppRsvpButton
                 label={c.t('event.going')}
                 icon="check"
                 active={event.viewerRsvp === 'going'}
                 onPress={() => c.setRsvp('going')}
               />
-              <RsvpButton
+              <AppRsvpButton
                 label={c.t('event.maybe')}
                 icon="help"
                 active={event.viewerRsvp === 'maybe'}
                 onPress={() => c.setRsvp('maybe')}
               />
-              <RsvpButton
+              <AppRsvpButton
                 label={c.t('event.cantGo')}
                 icon="close"
                 active={event.viewerRsvp === 'declined'}
@@ -186,31 +184,5 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
         ) : null}
       </ScrollView>
     </View>
-  );
-}
-
-function RsvpButton({
-  label,
-  icon,
-  active,
-  onPress,
-}: {
-  label: string;
-  icon: IconName;
-  active: boolean;
-  onPress: () => void;
-}): React.ReactElement {
-  const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.rsvpButton, active && styles.rsvpButtonActive]}
-    >
-      <AppIcon name={icon} size={18} color={active ? 'textInverse' : 'text'} />
-      <AppText variant="label" color={active ? 'textInverse' : 'text'}>
-        {label}
-      </AppText>
-    </Pressable>
   );
 }

@@ -5,6 +5,8 @@ import type { Theme } from '../../../../design-system/theme/tokens';
 export function createStyles(theme: Theme) {
   return StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.colors.background },
+    content: { paddingBottom: 120, gap: theme.spacing.lg },
+    cardPad: { paddingVertical: theme.spacing.lg },
     header: {
       paddingHorizontal: theme.spacing.lg,
       paddingTop: theme.spacing.sm,

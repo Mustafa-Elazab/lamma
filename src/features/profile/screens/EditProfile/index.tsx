@@ -1,52 +1,23 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppInput } from '../../../../design-system/atoms/Input';
+import { AppleMark, GoogleMark } from '../../../../design-system/atoms/ProviderMarks';
 import { AppText } from '../../../../design-system/atoms/Text';
+import { SocialButton } from '../../../../design-system/molecules/SocialButton';
 import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
-import type { Theme } from '../../../../design-system/theme/tokens';
-import { useAuth } from '../../../auth';
-import { GoogleMark, AppleMark } from '../../../auth/components/ProviderMarks';
-import { SocialButton } from '../../../auth/components/SocialButton';
+import { createStyles } from './styles';
+import { useEditProfileController } from './useController';
 
 export function EditProfileScreen(): React.ReactElement {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  const navigation = useNavigation();
-  const {
-    user,
-    updateProfile,
-    signInWithGoogle,
-    signInWithApple,
-    isAppleSupported,
-    isSigningIn,
-    activeProvider,
-  } = useAuth();
-
-  const isGuest = Boolean(user?.isAnonymous);
-  const [name, setName] = useState(user?.displayName ?? '');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const onSave = async () => {
-    if (!name.trim()) {
-      return;
-    }
-    setSaving(true);
-    setSaved(false);
-    try {
-      await updateProfile({ displayName: name.trim() });
-      setSaved(true);
-    } finally {
-      setSaving(false);
-    }
-  };
+  const c = useEditProfileController();
 
   return (
     <AppScreenTemplate
@@ -54,11 +25,11 @@ export function EditProfileScreen(): React.ReactElement {
       header={
         <AppScreenHeader
           title={t('profile.editProfileTitle')}
-          onBack={() => navigation.goBack()}
+          onBack={c.goBack}
         />
       }
     >
-      {isGuest ? (
+      {c.isGuest ? (
         <View style={styles.section}>
           <AppText variant="subheading">{t('profile.upgradeTitle')}</AppText>
           <AppText variant="body" color="textMuted">
@@ -69,18 +40,18 @@ export function EditProfileScreen(): React.ReactElement {
               label={t('auth.continueWithGoogle')}
               mark={<GoogleMark />}
               tone="light"
-              onPress={() => void signInWithGoogle()}
-              loading={activeProvider === 'google'}
-              disabled={isSigningIn}
+              onPress={() => void c.signInWithGoogle()}
+              loading={c.activeProvider === 'google'}
+              disabled={c.isSigningIn}
             />
-            {isAppleSupported ? (
+            {c.isAppleSupported ? (
               <SocialButton
                 label={t('auth.continueWithApple')}
                 mark={<AppleMark />}
                 tone="dark"
-                onPress={() => void signInWithApple()}
-                loading={activeProvider === 'apple'}
-                disabled={isSigningIn}
+                onPress={() => void c.signInWithApple()}
+                loading={c.activeProvider === 'apple'}
+                disabled={c.isSigningIn}
               />
             ) : null}
           </View>
@@ -90,41 +61,31 @@ export function EditProfileScreen(): React.ReactElement {
           <AppInput
             label={t('profile.displayNameLabel')}
             placeholder={t('profile.displayNamePlaceholder')}
-            value={name}
-            onChangeText={text => {
-              setName(text);
-              setSaved(false);
-            }}
+            value={c.name}
+            onChangeText={c.setName}
             leftIcon="profile"
           />
-          {user?.email ? (
+          {c.user?.email ? (
             <AppInput
               label="Email"
-              value={user.email}
+              value={c.user.email}
               editable={false}
               leftIcon="link"
             />
           ) : null}
-          {saved ? (
+          {c.saved ? (
             <AppText variant="caption" color="success">
               {t('profile.profileSaved')}
             </AppText>
           ) : null}
           <AppButton
             label={t('common.save')}
-            onPress={() => void onSave()}
-            loading={saving}
-            disabled={!name.trim() || saving}
+            onPress={() => void c.onSave()}
+            loading={c.saving}
+            disabled={!c.name.trim() || c.saving}
           />
         </View>
       )}
     </AppScreenTemplate>
   );
-}
-
-function createStyles(theme: Theme) {
-  return StyleSheet.create({
-    section: { gap: theme.spacing.md },
-    socials: { gap: theme.spacing.sm, marginTop: theme.spacing.sm },
-  });
 }

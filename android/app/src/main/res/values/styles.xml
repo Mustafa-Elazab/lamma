@@ -9,7 +9,7 @@
     <!-- react-native-bootsplash launch theme (Android 12+ SplashScreen API).
          Regenerate the logo assets with:
          npx react-native-bootsplash generate src/assets/branding/lamma_logo_exact_transparent.png \
-           --platforms=android,ios --background=FFF8F4 --logo-width=180 -->
+           platforms=android,ios background=FFF8F4 logo-width=180 -->
     <style name="BootTheme" parent="Theme.BootSplash">
         <item name="bootSplashBackground">@color/bootsplash_background</item>
         <item name="bootSplashLogo">@mipmap/bootsplash_logo</item>

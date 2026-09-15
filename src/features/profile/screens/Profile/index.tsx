@@ -8,6 +8,7 @@ import { AppText } from '../../../../design-system/atoms/Text';
 import { AppListItem } from '../../../../design-system/molecules/ListItem';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import { createStyles } from './styles';
+import type {} from './types';
 import { useProfileController } from './useController';
 
 export function ProfileScreen(): React.ReactElement {
@@ -18,7 +19,7 @@ export function ProfileScreen(): React.ReactElement {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
-        contentContainerStyle={contentStyle}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
@@ -29,7 +30,7 @@ export function ProfileScreen(): React.ReactElement {
         </View>
 
         <View style={styles.group}>
-          <View style={[styles.profileCard, cardPad]}>
+          <View style={[styles.profileCard, styles.cardPad]}>
             <AppAvatar source={c.avatar} name={c.name} size={64} showStatus />
             <View style={styles.profileText}>
               <AppText variant="subheading">{c.name}</AppText>
@@ -133,6 +134,3 @@ export function ProfileScreen(): React.ReactElement {
     </SafeAreaView>
   );
 }
-
-const contentStyle = { paddingBottom: 120, gap: 16 } as const;
-const cardPad = { paddingVertical: 16 } as const;

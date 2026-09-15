@@ -4,6 +4,7 @@ export * from './Button';
 export * from './Chip';
 export * from './Icon';
 export * from './Input';
+export * from './ProviderMarks';
 export * from './Skeleton';
 export * from './Text';
 export * from './Toggle';

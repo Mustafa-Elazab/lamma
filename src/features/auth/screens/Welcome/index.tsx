@@ -6,26 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { branding } from '../../../../assets';
 import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppText } from '../../../../design-system/atoms/Text';
+import { GoogleMark, AppleMark } from '../../../../design-system/atoms/ProviderMarks';
+import { LanguageToggle } from '../../../../design-system/molecules/LanguageToggle';
+import { SocialButton } from '../../../../design-system/molecules/SocialButton';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
-import { useAuth } from '../../AuthProvider';
-import { GoogleMark, AppleMark } from '../../components/ProviderMarks';
-import { LanguageToggle } from '../../components/LanguageToggle';
-import { SocialButton } from '../../components/SocialButton';
 import { createStyles } from './styles';
+import { useWelcomeController } from './useController';
 
 export function WelcomeScreen(): React.ReactElement {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  const {
-    continueAsGuest,
-    signInWithGoogle,
-    signInWithApple,
-    isAppleSupported,
-    isSigningIn,
-    activeProvider,
-    error,
-  } = useAuth();
+  const c = useWelcomeController();
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -50,9 +42,9 @@ export function WelcomeScreen(): React.ReactElement {
 
         <AppButton
           label={t('auth.continueAsGuest')}
-          onPress={() => void continueAsGuest()}
-          loading={activeProvider === 'guest'}
-          disabled={isSigningIn}
+          onPress={() => void c.continueAsGuest()}
+          loading={c.activeProvider === 'guest'}
+          disabled={c.isSigningIn}
         />
 
         <View style={styles.dividerRow}>
@@ -68,18 +60,18 @@ export function WelcomeScreen(): React.ReactElement {
             label={t('auth.continueWithGoogle')}
             mark={<GoogleMark />}
             tone="light"
-            onPress={() => void signInWithGoogle()}
-            loading={activeProvider === 'google'}
-            disabled={isSigningIn}
+            onPress={() => void c.signInWithGoogle()}
+            loading={c.activeProvider === 'google'}
+            disabled={c.isSigningIn}
           />
-          {isAppleSupported ? (
+          {c.isAppleSupported ? (
             <SocialButton
               label={t('auth.continueWithApple')}
               mark={<AppleMark />}
               tone="dark"
-              onPress={() => void signInWithApple()}
-              loading={activeProvider === 'apple'}
-              disabled={isSigningIn}
+              onPress={() => void c.signInWithApple()}
+              loading={c.activeProvider === 'apple'}
+              disabled={c.isSigningIn}
             />
           ) : null}
         </View>
@@ -91,7 +83,7 @@ export function WelcomeScreen(): React.ReactElement {
           <AppText variant="caption" color="textMuted">
             {t('auth.noPhoneSubtitle')}
           </AppText>
-          {error ? (
+          {c.error ? (
             <AppText variant="caption" color="error">
               {t('auth.errorGeneric')}
             </AppText>
