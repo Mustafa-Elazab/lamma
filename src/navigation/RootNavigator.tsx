@@ -8,6 +8,7 @@ import React from 'react';
 import { SplashScreen } from '../app/SplashScreen';
 import { lammaColors } from '../design-system/theme/tokens';
 import { useAuth, useOnboardingContext } from '../features/auth';
+import { OnboardingScreen } from '../features/auth/screens/Onboarding';
 import { AppNavigator } from './AppNavigator';
 import { AuthNavigator } from './AuthNavigator';
 import { linking } from './linking';
@@ -27,10 +28,16 @@ const navTheme: NavTheme = {
 
 function RootContent(): React.ReactElement {
   const { status } = useAuth();
-  const { checked } = useOnboardingContext();
+  const { checked, completed } = useOnboardingContext();
 
   if (status === 'loading' || !checked) {
     return <SplashScreen />;
+  }
+
+  // Onboarding is a first-run gate that is independent of auth: every new user
+  // (guest or social) sees it before Home, and it never re-appears on sign-out.
+  if (!completed) {
+    return <OnboardingScreen />;
   }
 
   return status === 'authenticated' ? <AppNavigator /> : <AuthNavigator />;

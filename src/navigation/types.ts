@@ -30,7 +30,6 @@ export type AppStackParamList = {
 };
 
 export type AuthStackParamList = {
-  Onboarding: undefined;
   Welcome: undefined;
 };
 
