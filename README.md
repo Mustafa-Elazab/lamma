@@ -23,11 +23,13 @@ coming — with first‑class Arabic + English (RTL) support and a warm, Egypt�
 
 ## Screens
 
-Onboarding · Auth (guest/Google/Apple) · Home (Upcoming/Hosting/Past, featured card, FAB) ·
-Create Event wizard (Basics → When & Where → Choose Theme → Preview, with draft autosave) ·
+Onboarding (always shown to first-time users) · Auth (guest/Google/Apple) ·
+Home (Upcoming/Hosting/Past, featured card — no floating FAB, the Create tab is used) ·
+Create Event wizard (Basics → When & Where → Choose Theme → Preview, with **native date/time
+pickers**, an **OpenStreetMap** location picker, and draft autosave/resume) ·
 Event Details · Guest List · Share Invite · Discover · Notifications feed ·
-Profile & Settings (Language, Notifications, Appearance, My drafts, Saved themes, Help,
-Sign out).
+Profile & Settings (Edit profile, Language, Notifications, Appearance, My drafts, Saved
+themes, Help, Sign out).
 
 ## Project structure
 
@@ -71,9 +73,15 @@ npm run android
 npm run ios
 ```
 
-The app boots straight into the tab bar and is **fully usable without any backend**: when
-`firebaseEnabled` is `false` (the default in `src/config/env.ts`), local repositories with
-realistic seed data back every feature (auth, events, drafts, notifications, preferences).
+The production path is **Firebase Auth + Cloud Firestore only** — there is **no mock/seed
+data anywhere in the default app path**. `firebaseEnabled` defaults to `true` in
+`src/config/env.ts`, so Home, Discover and Notifications render real data (and real empty
+states when the signed-in user has none yet).
+
+For local development without native Firebase config, flip `firebaseEnabled` to `false`: the
+app then uses `__DEV__`-only in-memory/AsyncStorage repositories that **start empty**. The
+old seed content now lives only in `src/features/*/testFixtures.ts`, which is imported
+exclusively by Jest and never bundled into the app.
 
 ## Quality checks
 
@@ -83,29 +91,88 @@ npx tsc --noEmit   # TypeScript type-check (no `any`)
 npm run lint       # ESLint
 ```
 
-## Enabling Firebase
+## Firebase (default backend)
 
-Firebase is integrated behind a flag so development/CI never require native config files.
+`firebaseEnabled` defaults to `true`, so the app expects real Firebase config. To run it:
 
 1. Create a Firebase project and enable **Authentication** providers: Google, Apple, and
-   Anonymous. (Do **not** enable Phone — the app never uses it.)
+   Anonymous. (Do **not** enable Phone — the app never uses it; there is no phone/OTP flow.)
 2. Enable **Cloud Firestore**.
 3. Add the platform apps and config files:
    - Android: `android/app/google-services.json`
    - iOS: `ios/GoogleService-Info.plist` (add to the Xcode project)
-4. Google Sign-In: copy your **Web client ID** (OAuth 2.0) into
-   `googleWebClientId` in `src/config/env.ts`.
+4. Google Sign-In: copy your **Web client ID** (OAuth 2.0) into `googleWebClientId` in
+   `src/config/env.ts` (this id is passed to `GoogleSignin.configure`).
 5. Apple Sign-In: enable the *Sign in with Apple* capability in Xcode (iOS only).
-6. Flip `firebaseEnabled` to `true` in `src/config/env.ts`.
 
-Once enabled, the `FirebaseAuthRepository`, `FirebaseEventRepository`,
-`FirebaseDraftRepository`, `FirebaseNotificationRepository` and
-`FirebasePreferencesRepository` are used automatically. Guest → provider **account linking**
-is handled so a guest's data is preserved when they upgrade.
+`FirebaseAuthRepository`, `FirebaseEventRepository`, `FirebaseDraftRepository`,
+`FirebaseNotificationRepository` and `FirebasePreferencesRepository` are used automatically.
+Guest → provider **account linking** preserves a guest's data when they upgrade, and
+`updateProfile` backs the Edit Profile screen.
 
 Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid),
 `users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
 `users/{uid}/meta/preferences`.
+
+To develop **without** native Firebase config, set `firebaseEnabled` to `false` — the app
+falls back to the empty in-memory dev repositories described above.
+
+## Splash screen (react-native-bootsplash)
+
+The launch splash uses [`react-native-bootsplash`](https://github.com/zoontek/react-native-bootsplash)
+with the Lamma logo. On JS start the logo fades/scales in (`src/app/SplashScreen.tsx`) and the
+native splash is hidden with a cross-fade once the auth/onboarding gate is ready
+(`src/navigation/RootNavigator.tsx`).
+
+Android is preconfigured (`BootTheme` in `res/values/styles.xml`, `bootsplash_background`
+color, `bootsplash_logo` mipmaps, the launch theme in `AndroidManifest.xml`, and
+`RNBootSplash.init` in `MainActivity.kt`). To regenerate crisp per-density assets (and the
+iOS `BootSplash.storyboard` + `AppDelegate` wiring), run:
+
+```sh
+npx react-native-bootsplash generate src/assets/branding/lamma_logo_exact_transparent.png \
+  --platforms=android,ios --background=FFF8F4 --logo-width=180
+```
+
+## Maps & location (OpenStreetMap)
+
+The Create Event wizard resolves **real** places — there are no hardcoded locations. The
+location picker (`src/features/create-event/components/LocationPickerModal.tsx`) searches the
+free [OpenStreetMap Nominatim](https://nominatim.org/) API and stores the selected place's
+name and latitude/longitude on the draft (`src/features/create-event/core/geocoding.ts`
+exposes `searchPlaces` and `reverseGeocode`). Event Details' **Open in maps** opens the
+device's Apple/Google Maps at those coordinates. Nominatim's usage policy asks for a
+descriptive `User-Agent` (set for you) and low request volume (search input is debounced).
+
+Dates and times use native pickers via `@react-native-community/datetimepicker`, formatted as
+the product copy (e.g. `Fri, 18 Dec · 8:00 PM`).
+
+## Deep links & Android App Links
+
+Invite links use `https://lamma.app/e/{id}` (and the `lamma://` scheme). React Navigation
+`linking` maps `e/:eventId` → Event Details, so cold/warm starts open the event in-app.
+
+- **Android App Links**: `AndroidManifest.xml` declares an `autoVerify` intent filter for
+  `https://lamma.app/e/*` plus a `lamma://` scheme filter.
+- **iOS**: the `lamma://` URL scheme is registered in `Info.plist`. For universal links, add an
+  Associated Domains entitlement (`applinks:lamma.app`) in Xcode.
+- **Digital Asset Links**: to make Android verify the links (open in-app without a chooser),
+  host `https://lamma.app/.well-known/assetlinks.json`:
+
+```json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.lamma",
+      "sha256_cert_fingerprints": ["<your app signing SHA-256 fingerprint>"]
+    }
+  }
+]
+```
+
+For iOS universal links, host `https://lamma.app/.well-known/apple-app-site-association`.
 
 ## Localization & RTL
 
