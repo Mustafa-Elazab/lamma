@@ -1,0 +1,131 @@
+import { useQueryClient } from '@tanstack/react-query';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+
+import { useCreateEvent, type LammaEvent } from '../events';
+import {
+  createEmptyDraft,
+  draftToCreateInput,
+  isDraftEmpty,
+  type EventDraft,
+} from './core/draftEntity';
+import { getDraftRepository } from './core/draftRepositoryFactory';
+import { draftKeys } from './core/queryKeys';
+import {
+  canPublish,
+  validateBasics,
+  validateWhenWhere,
+  type ValidationResult,
+} from './core/validators';
+
+type CreateEventContextValue = {
+  draft: EventDraft;
+  update: (patch: Partial<EventDraft>) => void;
+  reset: () => void;
+  basics: ValidationResult;
+  whenWhere: ValidationResult;
+  publishable: boolean;
+  isPublishing: boolean;
+  publish: () => Promise<LammaEvent | null>;
+};
+
+const CreateEventContext = createContext<CreateEventContextValue | undefined>(
+  undefined,
+);
+
+function newDraftId(): string {
+  return `draft_${Date.now().toString(36)}`;
+}
+
+export function CreateEventProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
+  const repository = useMemo(() => getDraftRepository(), []);
+  const queryClient = useQueryClient();
+  const createEvent = useCreateEvent();
+  const [draft, setDraft] = useState<EventDraft>(() =>
+    createEmptyDraft(newDraftId()),
+  );
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const update = useCallback((patch: Partial<EventDraft>) => {
+    setDraft(prev => ({ ...prev, ...patch, updatedAt: Date.now() }));
+  }, []);
+
+  const reset = useCallback(() => {
+    setDraft(createEmptyDraft(newDraftId()));
+  }, []);
+
+  useEffect(() => {
+    if (isDraftEmpty(draft)) {
+      return;
+    }
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+    }
+    saveTimer.current = setTimeout(() => {
+      void repository.save(draft).then(() => {
+        void queryClient.invalidateQueries({ queryKey: draftKeys.list() });
+      });
+    }, 600);
+    return () => {
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+      }
+    };
+  }, [draft, queryClient, repository]);
+
+  const basics = useMemo(() => validateBasics(draft), [draft]);
+  const whenWhere = useMemo(() => validateWhenWhere(draft), [draft]);
+  const publishable = useMemo(() => canPublish(draft), [draft]);
+
+  const publish = useCallback(async (): Promise<LammaEvent | null> => {
+    const input = draftToCreateInput(draft);
+    if (!input) {
+      return null;
+    }
+    const event = await createEvent.mutateAsync(input);
+    await repository.remove(draft.id);
+    void queryClient.invalidateQueries({ queryKey: draftKeys.list() });
+    return event;
+  }, [createEvent, draft, queryClient, repository]);
+
+  const value = useMemo<CreateEventContextValue>(
+    () => ({
+      draft,
+      update,
+      reset,
+      basics,
+      whenWhere,
+      publishable,
+      isPublishing: createEvent.isPending,
+      publish,
+    }),
+    [draft, update, reset, basics, whenWhere, publishable, createEvent.isPending, publish],
+  );
+
+  return (
+    <CreateEventContext.Provider value={value}>
+      {children}
+    </CreateEventContext.Provider>
+  );
+}
+
+export function useCreateEventContext(): CreateEventContextValue {
+  const ctx = useContext(CreateEventContext);
+  if (!ctx) {
+    throw new Error(
+      'useCreateEventContext must be used within a CreateEventProvider',
+    );
+  }
+  return ctx;
+}
