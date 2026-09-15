@@ -129,6 +129,29 @@ and validates the ID token immediately before writing, writes matching `hostId` 
 repository logs the exact payload and sanitized Firestore result/error at the write
 boundary (never the token itself).
 
+### Cloud Functions decision
+
+Basic event creation remains a direct, awaited client Firestore write protected by security
+rules; a callable function adds no trust or consistency benefit for that operation.
+
+One server-side function is required by the current data model:
+`updateEventRsvpCounters` in `functions/src/index.ts` recalculates `goingCount` and
+`attendeeCount` from the RSVP map after event writes. Rules prevent clients from changing
+those aggregate fields directly. Deploy it with:
+
+```sh
+npm --prefix functions install
+npm --prefix functions run build
+firebase deploy --only functions:updateEventRsvpCounters
+```
+
+No invite-slug function is added because invite links currently use Firestore's unique
+event document ID, not a user-facing slug. No notification fan-out function is added
+because the current publish model has no invitee uid list or publish-state transition to
+fan out; adding one now would invent a production data contract. When either feature is
+introduced, unique slug allocation, invite notification fan-out, and any client-untrusted
+publish validation belong in callable functions/triggers rather than client code.
+
 To develop **without** native Firebase config, set `firebaseEnabled` to `false` — the app
 falls back to the empty in-memory dev repositories described above.
 

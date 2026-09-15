@@ -9,7 +9,10 @@ service cloud.firestore {
     function ownsNewEvent() {
       return signedIn()
         && request.resource.data.hostId == request.auth.uid
-        && request.resource.data.ownerId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.rsvps[request.auth.uid] == 'going'
+        && request.resource.data.attendeeCount == 1
+        && request.resource.data.goingCount == 1;
     }
 
     function ownershipIsUnchanged() {
@@ -24,12 +27,18 @@ service cloud.firestore {
           .affectedKeys().hasOnly([request.auth.uid]);
     }
 
+    function aggregatesAreUnchanged() {
+      return request.resource.data.attendeeCount == resource.data.attendeeCount
+        && request.resource.data.goingCount == resource.data.goingCount;
+    }
+
     match /events/{eventId} {
       // The signed-in app may open public events and private invitation links.
       allow read: if signedIn();
       allow create: if ownsNewEvent();
       allow update: if signedIn()
         && ownershipIsUnchanged()
+        && aggregatesAreUnchanged()
         && (
           resource.data.ownerId == request.auth.uid
           || changesOnlyOwnRsvp()
