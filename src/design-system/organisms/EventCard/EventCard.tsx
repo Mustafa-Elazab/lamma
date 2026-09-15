@@ -173,6 +173,8 @@ function createStyles(theme: Theme) {
     },
     featured: {
       flexDirection: 'row',
+      alignItems: 'stretch',
+      minHeight: 176,
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       borderWidth: 1,
@@ -180,7 +182,9 @@ function createStyles(theme: Theme) {
       overflow: 'hidden',
       ...theme.shadows.card,
     },
-    featuredCover: { width: 150, height: '100%', resizeMode: 'cover' },
+    // No percentage height (its parent has no fixed height, which collapsed the
+    // cover to 0). alignSelf:'stretch' fills the row's cross-axis instead.
+    featuredCover: { width: 150, alignSelf: 'stretch', resizeMode: 'cover' },
     featuredBody: {
       flex: 1,
       padding: theme.spacing.lg,

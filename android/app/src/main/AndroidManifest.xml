@@ -22,6 +22,22 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <!-- Custom scheme deep links: lamma://e/{id} -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="lamma" />
+        </intent-filter>
+        <!-- Verified Android App Links: https://lamma.app/e/{id} opens in-app.
+             Requires /.well-known/assetlinks.json on the domain (see README). -->
+        <intent-filter android:autoVerify="true">
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" android:host="lamma.app" android:pathPrefix="/e/" />
+            <data android:scheme="https" android:host="www.lamma.app" android:pathPrefix="/e/" />
+        </intent-filter>
       </activity>
     </application>
 </manifest>

@@ -4,6 +4,7 @@ import {
 } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Linking, Platform } from 'react-native';
 
 import { useLanguage } from '../../../../app/localization';
 import type { AppStackParamList } from '../../../../navigation/types';
@@ -14,7 +15,7 @@ import {
 } from '../../../../utils/format';
 import { goingAttendees, type RSVPStatus } from '../../core/entity';
 import { useEvent, useRsvpMutation } from '../../core/hooks';
-import { themeSource } from '../../core/media';
+import { eventCover } from '../../core/media';
 
 export function useEventDetailsController(eventId: string) {
   const { t } = useTranslation();
@@ -42,7 +43,23 @@ export function useEventDetailsController(eventId: string) {
     [eventId, navigation],
   );
 
-  const heroImage = event ? themeSource(event.themeKey) : undefined;
+  const openInMaps = useCallback(() => {
+    if (!event) {
+      return;
+    }
+    const label = encodeURIComponent(event.venueName || event.areaAddress);
+    const hasCoords = event.latitude !== null && event.longitude !== null;
+    const query = hasCoords
+      ? `${event.latitude},${event.longitude}`
+      : encodeURIComponent(event.areaAddress || event.venueName);
+    const url =
+      Platform.OS === 'ios'
+        ? `https://maps.apple.com/?q=${label}&ll=${query}`
+        : `https://www.google.com/maps/search/?api=1&query=${query}`;
+    void Linking.openURL(url);
+  }, [event]);
+
+  const heroImage = event ? eventCover(event) : undefined;
   const dateLabel = event ? formatDateLong(event.startAt, language) : '';
   const timeRange = event
     ? `${formatTime(event.startAt, language)} — ${formatTime(
@@ -72,5 +89,6 @@ export function useEventDetailsController(eventId: string) {
     goBack,
     openGuests,
     openShare,
+    openInMaps,
   };
 }

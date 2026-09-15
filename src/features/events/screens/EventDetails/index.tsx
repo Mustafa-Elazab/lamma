@@ -78,11 +78,6 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
                 </AppText>
                 <AppText variant="bodyStrong">{event.hostName}</AppText>
               </View>
-              <Pressable>
-                <AppText variant="label" color="primary">
-                  {c.t('event.contactHost')}
-                </AppText>
-              </Pressable>
             </View>
 
             <View style={styles.infoCard}>
@@ -103,9 +98,16 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
                   {event.areaAddress}
                 </AppText>
               </View>
-              <AppText variant="label" color="primary">
-                {c.t('event.openInMaps')}
-              </AppText>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={c.t('event.openInMaps')}
+                hitSlop={8}
+                onPress={c.openInMaps}
+              >
+                <AppText variant="label" color="primary">
+                  {c.t('event.openInMaps')}
+                </AppText>
+              </Pressable>
             </View>
 
             <View style={styles.rsvpRow}>
@@ -132,7 +134,13 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
             <View style={styles.goingCard}>
               <View style={styles.goingHeader}>
                 <AppText variant="bodyStrong">{c.goingLabel}</AppText>
-                <Pressable onPress={c.openGuests}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={c.t('common.seeAll')}
+                  hitSlop={12}
+                  onPress={c.openGuests}
+                  style={styles.seeAll}
+                >
                   <AppText variant="label" color="primary">
                     {c.t('common.seeAll')}
                   </AppText>
@@ -148,11 +156,7 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
 
             {event.updates.length > 0 ? (
               <View>
-                <AppSectionHeader
-                  title={c.t('event.eventUpdates')}
-                  actionLabel={c.t('common.seeAll')}
-                  onPressAction={() => undefined}
-                />
+                <AppSectionHeader title={c.t('event.eventUpdates')} />
                 {event.updates.map(update => (
                   <View key={update.id} style={styles.updateItem}>
                     <AppAvatar name={update.authorName} size={40} />

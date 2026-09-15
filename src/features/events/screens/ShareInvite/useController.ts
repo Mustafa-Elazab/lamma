@@ -8,7 +8,7 @@ import { useLanguage } from '../../../../app/localization';
 import { buildEventDeepLink } from '../../../../navigation/linking';
 import { formatDateShort } from '../../../../utils/format';
 import { useEvent } from '../../core/hooks';
-import { themeSource } from '../../core/media';
+import { eventCover } from '../../core/media';
 
 export function useShareInviteController(eventId: string) {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ export function useShareInviteController(eventId: string) {
 
   const event = query.data ?? null;
   const link = buildEventDeepLink(eventId);
-  const heroImage = event ? themeSource(event.themeKey) : undefined;
+  const heroImage = event ? eventCover(event) : undefined;
 
   const inviteMessage = event
     ? `${t('share.invitedTo', { title: event.title })}\n${formatDateShort(

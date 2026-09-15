@@ -77,6 +77,8 @@ export function createStyles(theme: Theme) {
       alignItems: 'center',
       justifyContent: 'space-between',
     },
+    // Generous vertical padding so the "See all" control has a real hit area.
+    seeAll: { paddingVertical: theme.spacing.xs, paddingLeft: theme.spacing.md },
     updateItem: {
       flexDirection: 'row',
       gap: theme.spacing.md,
