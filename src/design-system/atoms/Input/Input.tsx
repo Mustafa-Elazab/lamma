@@ -1,0 +1,142 @@
+import React, { useMemo, useState } from 'react';
+import {
+  I18nManager,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+  type StyleProp,
+  type TextInputProps,
+  type ViewStyle,
+} from 'react-native';
+
+import { useTheme } from '../../theme/ThemeProvider';
+import type { Theme } from '../../theme/tokens';
+import { Icon, type IconName } from '../Icon';
+import { Text } from '../Text';
+
+export type InputProps = TextInputProps & {
+  label?: string;
+  helperText?: string;
+  errorText?: string;
+  leftIcon?: IconName;
+  rightIcon?: IconName;
+  onPressRightIcon?: () => void;
+  counterMax?: number;
+  containerStyle?: StyleProp<ViewStyle>;
+};
+
+export function Input({
+  label,
+  helperText,
+  errorText,
+  leftIcon,
+  rightIcon,
+  onPressRightIcon,
+  counterMax,
+  containerStyle,
+  value,
+  onFocus,
+  onBlur,
+  multiline,
+  style,
+  ...rest
+}: InputProps): React.ReactElement {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const [focused, setFocused] = useState(false);
+  const hasError = Boolean(errorText);
+
+  return (
+    <View style={containerStyle}>
+      {label ? (
+        <View style={styles.labelRow}>
+          <Text variant="label">{label}</Text>
+          {typeof counterMax === 'number' ? (
+            <Text variant="caption" color="textMuted">
+              {`${value?.length ?? 0}/${counterMax}`}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+      <View
+        style={[
+          styles.field,
+          multiline && styles.fieldMultiline,
+          focused && styles.fieldFocused,
+          hasError && styles.fieldError,
+        ]}
+      >
+        {leftIcon ? (
+          <Icon name={leftIcon} size={20} color="textMuted" />
+        ) : null}
+        <TextInput
+          value={value}
+          multiline={multiline}
+          placeholderTextColor={theme.colors.textMuted}
+          textAlign={I18nManager.isRTL ? 'right' : 'left'}
+          onFocus={e => {
+            setFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={e => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
+          style={[styles.input, multiline && styles.inputMultiline, style]}
+          {...rest}
+        />
+        {rightIcon ? (
+          <Pressable onPress={onPressRightIcon} hitSlop={8}>
+            <Icon name={rightIcon} size={20} color="textMuted" />
+          </Pressable>
+        ) : null}
+      </View>
+      {hasError ? (
+        <Text variant="caption" color="error" style={styles.helper}>
+          {errorText}
+        </Text>
+      ) : helperText ? (
+        <Text variant="caption" color="textMuted" style={styles.helper}>
+          {helperText}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    labelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.sm,
+    },
+    field: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.sm,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.radius.md,
+      paddingHorizontal: theme.spacing.lg,
+      minHeight: 56,
+    },
+    fieldMultiline: {
+      alignItems: 'flex-start',
+      paddingVertical: theme.spacing.md,
+    },
+    fieldFocused: { borderColor: theme.colors.primary },
+    fieldError: { borderColor: theme.colors.error },
+    input: {
+      flex: 1,
+      color: theme.colors.text,
+      fontSize: theme.typography.body.fontSize,
+      paddingVertical: theme.spacing.md,
+    },
+    inputMultiline: { minHeight: 88, textAlignVertical: 'top' },
+    helper: { marginTop: theme.spacing.xs },
+  });
+}
