@@ -71,7 +71,8 @@ export function LocationPickerModal({
   const [query, setQuery] = useState(initialQuery ?? '');
   const [results, setResults] = useState<GeoPlace[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [searchError, setSearchError] = useState(false);
+  const [confirmError, setConfirmError] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapFailed, setMapFailed] = useState(!mapConfigured);
   const [confirming, setConfirming] = useState(false);
@@ -91,7 +92,8 @@ export function LocationPickerModal({
     }
     setQuery(initialQuery ?? '');
     setResults([]);
-    setError(false);
+    setSearchError(false);
+    setConfirmError(false);
     setMapLoaded(false);
     setMapFailed(!mapConfigured);
     if (initialLocation) {
@@ -99,6 +101,8 @@ export function LocationPickerModal({
         latitude: initialLocation.lat,
         longitude: initialLocation.lng,
       });
+    } else {
+      setCoordinate(DEFAULT_COORDINATE);
     }
   }, [initialLocation, initialQuery, mapConfigured, visible]);
 
@@ -139,11 +143,11 @@ export function LocationPickerModal({
     if (trimmed.length < 3) {
       setResults([]);
       setLoading(false);
-      setError(false);
+      setSearchError(false);
       return;
     }
     setLoading(true);
-    setError(false);
+    setSearchError(false);
     let cancelled = false;
     debounce.current = setTimeout(() => {
       void searchPlaces(trimmed)
@@ -154,7 +158,7 @@ export function LocationPickerModal({
         })
         .catch(searchError => {
           if (!cancelled) {
-            setError(true);
+            setSearchError(true);
             setResults([]);
             reportError(searchError, 'maps.place-search', { query: trimmed });
           }
@@ -201,7 +205,7 @@ export function LocationPickerModal({
 
   const handleConfirm = useCallback(async () => {
     setConfirming(true);
-    setError(false);
+    setConfirmError(false);
     try {
       const place = await reverseGeocode(
         coordinate.latitude,
@@ -218,7 +222,7 @@ export function LocationPickerModal({
       });
       onClose();
     } catch (reverseGeocodeError) {
-      setError(true);
+      setConfirmError(true);
       reportError(reverseGeocodeError, 'maps.reverse-geocode', {
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
@@ -304,7 +308,6 @@ export function LocationPickerModal({
                 setMapFailed(false);
               }}
               showsCompass
-              showsMyLocationButton
               toolbarEnabled={false}
             >
               <Marker
@@ -340,6 +343,36 @@ export function LocationPickerModal({
                 keyboardShouldPersistTaps="handled"
               />
             ) : null}
+            {!loading && query.trim().length < 3 ? (
+              <AppText
+                variant="caption"
+                color="textMuted"
+                style={styles.searchMessage}
+              >
+                {t('create.locationHint')}
+              </AppText>
+            ) : null}
+            {!loading &&
+            !searchError &&
+            query.trim().length >= 3 &&
+            results.length === 0 ? (
+              <AppText
+                variant="caption"
+                color="textMuted"
+                style={styles.searchMessage}
+              >
+                {t('create.locationNoResults')}
+              </AppText>
+            ) : null}
+            {searchError ? (
+              <AppText
+                variant="caption"
+                color="error"
+                style={styles.searchMessage}
+              >
+                {t('create.locationError')}
+              </AppText>
+            ) : null}
           </View>
 
           <View style={styles.coordinateCard}>
@@ -359,14 +392,14 @@ export function LocationPickerModal({
           ) : null}
         </View>
 
-        {error ? (
+        {confirmError ? (
           <AppText
             variant="caption"
             color="error"
             align="center"
             style={styles.error}
           >
-            {t('create.locationError')}
+            {t('create.locationConfirmError')}
           </AppText>
         ) : null}
       </AppScreenTemplate>
@@ -406,6 +439,14 @@ function createStyles(theme: Theme) {
       borderRadius: theme.radius.md,
       backgroundColor: theme.colors.surface,
       ...theme.shadows.card,
+    },
+    searchMessage: {
+      marginTop: theme.spacing.xs,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.surface,
+      ...theme.shadows.soft,
     },
     result: {
       flexDirection: 'row',

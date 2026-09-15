@@ -119,6 +119,8 @@ export const ar: TranslationSchema = {
     locationHint: 'اكتب 3 أحرف على الأقل للبحث في OpenStreetMap',
     locationNoResults: 'لم يتم العثور على أماكن. جرّب بحثًا مختلفًا.',
     locationError: 'تعذّر البحث الآن. تحقق من اتصالك.',
+    locationConfirmError:
+      'تعذّر تحديد هذا الموقع. حرّك العلامة وحاول مجددًا.',
     mapUnavailable:
       'تعذّر تحميل الخريطة. تحقق من إعداد مفتاح Google Maps في التطبيق الأصلي.',
     chooseTheme: 'اختر تصميمًا',

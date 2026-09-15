@@ -20,7 +20,7 @@ export function ChooseThemeScreen(): React.ReactElement {
 
   return (
     <AppScreenTemplate
-      edges={['top']}
+      edges={['top', 'bottom']}
       header={
         <CreateHeader
           title={c.t('create.chooseTheme')}
@@ -43,21 +43,26 @@ export function ChooseThemeScreen(): React.ReactElement {
         imageStyle={styles.heroImage}
       >
         <View style={styles.heroOverlay}>
-          <AppText variant="heading" numberOfLines={2} align="center">
+          <AppText
+            variant="heading"
+            color="textInverse"
+            numberOfLines={2}
+            align="center"
+          >
             {c.draft.title.trim() || c.t('create.eventTitle')}
           </AppText>
           {c.dateLabel ? (
             <View style={styles.metaRow}>
-              <AppIcon name="calendar" size={16} color="text" />
-              <AppText variant="caption">
+              <AppIcon name="calendar" size={16} color="textInverse" />
+              <AppText variant="caption" color="textInverse">
                 {c.dateLabel}
               </AppText>
             </View>
           ) : null}
           {c.locationLabel ? (
             <View style={styles.metaRow}>
-              <AppIcon name="location" size={16} color="text" />
-              <AppText variant="caption">
+              <AppIcon name="location" size={16} color="textInverse" />
+              <AppText variant="caption" color="textInverse">
                 {c.locationLabel}
               </AppText>
             </View>
