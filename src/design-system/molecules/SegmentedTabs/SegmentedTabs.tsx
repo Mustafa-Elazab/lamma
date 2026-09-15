@@ -9,7 +9,7 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Text } from '../../atoms/Text';
+import { AppText } from '../../atoms/Text';
 
 export type SegmentedTabItem<T extends string> = {
   key: T;
@@ -23,7 +23,7 @@ export type SegmentedTabsProps<T extends string> = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function SegmentedTabs<T extends string>({
+export function AppSegmentedTabs<T extends string>({
   items,
   value,
   onChange,
@@ -44,12 +44,12 @@ export function SegmentedTabs<T extends string>({
             onPress={() => onChange(item.key)}
             style={[styles.segment, active && styles.segmentActive]}
           >
-            <Text
+            <AppText
               variant="label"
               color={active ? 'textInverse' : 'textMuted'}
             >
               {item.label}
-            </Text>
+            </AppText>
           </Pressable>
         );
       })}

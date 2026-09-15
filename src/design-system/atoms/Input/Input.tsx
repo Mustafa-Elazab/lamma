@@ -12,8 +12,8 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Icon, type IconName } from '../Icon';
-import { Text } from '../Text';
+import { AppIcon, type IconName } from '../Icon';
+import { AppText } from '../Text';
 
 export type InputProps = TextInputProps & {
   label?: string;
@@ -26,7 +26,7 @@ export type InputProps = TextInputProps & {
   containerStyle?: StyleProp<ViewStyle>;
 };
 
-export function Input({
+function AppInputComponent({
   label,
   helperText,
   errorText,
@@ -51,11 +51,11 @@ export function Input({
     <View style={containerStyle}>
       {label ? (
         <View style={styles.labelRow}>
-          <Text variant="label">{label}</Text>
+          <AppText variant="label">{label}</AppText>
           {typeof counterMax === 'number' ? (
-            <Text variant="caption" color="textMuted">
+            <AppText variant="caption" color="textMuted">
               {`${value?.length ?? 0}/${counterMax}`}
-            </Text>
+            </AppText>
           ) : null}
         </View>
       ) : null}
@@ -68,7 +68,7 @@ export function Input({
         ]}
       >
         {leftIcon ? (
-          <Icon name={leftIcon} size={20} color="textMuted" />
+          <AppIcon name={leftIcon} size={20} color="textMuted" />
         ) : null}
         <TextInput
           value={value}
@@ -88,18 +88,18 @@ export function Input({
         />
         {rightIcon ? (
           <Pressable onPress={onPressRightIcon} hitSlop={8}>
-            <Icon name={rightIcon} size={20} color="textMuted" />
+            <AppIcon name={rightIcon} size={20} color="textMuted" />
           </Pressable>
         ) : null}
       </View>
       {hasError ? (
-        <Text variant="caption" color="error" style={styles.helper}>
+        <AppText variant="caption" color="error" style={styles.helper}>
           {errorText}
-        </Text>
+        </AppText>
       ) : helperText ? (
-        <Text variant="caption" color="textMuted" style={styles.helper}>
+        <AppText variant="caption" color="textMuted" style={styles.helper}>
           {helperText}
-        </Text>
+        </AppText>
       ) : null}
     </View>
   );
@@ -140,3 +140,5 @@ function createStyles(theme: Theme) {
     helper: { marginTop: theme.spacing.xs },
   });
 }
+
+export const AppInput = React.memo(AppInputComponent);

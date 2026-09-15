@@ -3,11 +3,11 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
-import { ThemeSwatch } from '../../../../design-system/organisms/ThemeSwatch';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
+import { AppThemeSwatch } from '../../../../design-system/organisms/ThemeSwatch';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
 import { themeSource, type EventThemeKey } from '../../../events';
@@ -36,24 +36,24 @@ export function SavedThemesScreen(): React.ReactElement {
   };
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
-        <ScreenHeader
+        <AppScreenHeader
           title={t('settings.savedThemesTitle')}
           onBack={() => navigation.goBack()}
         />
       }
     >
-      <Text variant="caption" color="textMuted">
+      <AppText variant="caption" color="textMuted">
         {t('settings.savedThemesHint')}
-      </Text>
+      </AppText>
       <View style={styles.grid}>
         {ALL_THEMES.map(key => {
           const saved = preferences.savedThemes.includes(key);
           return (
             <View key={key} style={styles.cell}>
-              <ThemeSwatch
+              <AppThemeSwatch
                 label={t(`themeNames.${key}`)}
                 image={themeSource(key)}
                 selected={saved}
@@ -64,7 +64,7 @@ export function SavedThemesScreen(): React.ReactElement {
                 hitSlop={8}
                 onPress={() => onToggle(key)}
               >
-                <Icon
+                <AppIcon
                   name="heart"
                   size={22}
                   color={saved ? 'primary' : 'textMuted'}
@@ -74,7 +74,7 @@ export function SavedThemesScreen(): React.ReactElement {
           );
         })}
       </View>
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }
 

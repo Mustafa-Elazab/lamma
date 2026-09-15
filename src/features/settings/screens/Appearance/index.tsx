@@ -3,10 +3,10 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Icon, type IconName } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppIcon, type IconName } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
 import { usePreferences, type AppearanceMode } from '../../core';
@@ -25,18 +25,18 @@ export function AppearanceScreen(): React.ReactElement {
   ];
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
-        <ScreenHeader
+        <AppScreenHeader
           title={t('settings.appearanceTitle')}
           onBack={() => navigation.goBack()}
         />
       }
     >
-      <Text variant="caption" color="textMuted">
+      <AppText variant="caption" color="textMuted">
         {t('settings.appearanceHint')}
-      </Text>
+      </AppText>
       <View style={styles.group}>
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
@@ -47,18 +47,18 @@ export function AppearanceScreen(): React.ReactElement {
                 update({ ...preferences, appearance: option.value })
               }
             >
-              <Icon name={option.icon} size={20} color="primary" />
-              <Text variant="body" style={styles.rowLabel}>
+              <AppIcon name={option.icon} size={20} color="primary" />
+              <AppText variant="body" style={styles.rowLabel}>
                 {option.label}
-              </Text>
+              </AppText>
               {preferences.appearance === option.value ? (
-                <Icon name="check" size={22} color="primary" />
+                <AppIcon name="check" size={22} color="primary" />
               ) : null}
             </Pressable>
           </React.Fragment>
         ))}
       </View>
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }
 

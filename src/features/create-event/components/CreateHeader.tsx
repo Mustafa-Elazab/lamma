@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
 
-import { Icon } from '../../../design-system/atoms/Icon';
-import { Text } from '../../../design-system/atoms/Text';
-import { StepIndicator } from '../../../design-system/molecules/StepIndicator';
+import { AppIcon } from '../../../design-system/atoms/Icon';
+import { AppText } from '../../../design-system/atoms/Text';
+import { AppStepIndicator } from '../../../design-system/molecules/StepIndicator';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 
@@ -27,12 +27,12 @@ export function CreateHeader({
     <View style={styles.container}>
       <View style={styles.titleRow}>
         <Pressable onPress={onBack} hitSlop={8} style={styles.back}>
-          <Icon name="back" size={24} />
+          <AppIcon name="back" size={24} />
         </Pressable>
-        <Text variant="subheading">{title}</Text>
+        <AppText variant="subheading">{title}</AppText>
         <View style={styles.back} />
       </View>
-      <StepIndicator steps={steps} currentStep={currentStep} />
+      <AppStepIndicator steps={steps} currentStep={currentStep} />
     </View>
   );
 }

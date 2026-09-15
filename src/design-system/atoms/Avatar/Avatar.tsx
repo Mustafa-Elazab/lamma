@@ -8,7 +8,7 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Text } from '../Text';
+import { AppText } from '../Text';
 
 export type AvatarProps = {
   source?: ImageSourcePropType;
@@ -25,7 +25,7 @@ function initialsFrom(name?: string): string {
   return parts.map(p => p.charAt(0).toUpperCase()).join('');
 }
 
-export function Avatar({
+function AppAvatarComponent({
   source,
   name,
   size = 44,
@@ -42,13 +42,13 @@ export function Avatar({
         <Image source={source} style={[styles.image, dimension]} />
       ) : (
         <View style={[styles.fallback, dimension]}>
-          <Text
+          <AppText
             variant="label"
             color="primary"
             style={{ fontSize: Math.max(11, size * 0.36) }}
           >
             {initialsFrom(name)}
-          </Text>
+          </AppText>
         </View>
       )}
       {showStatus ? (
@@ -88,3 +88,5 @@ function createStyles(theme: Theme) {
 }
 
 export { initialsFrom };
+
+export const AppAvatar = React.memo(AppAvatarComponent);

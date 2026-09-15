@@ -3,9 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Button } from '../../atoms/Button';
-import { Icon } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppButton } from '../../atoms/Button';
+import { AppIcon } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type ErrorStateProps = {
   title?: string;
@@ -14,7 +14,7 @@ export type ErrorStateProps = {
   onRetry?: () => void;
 };
 
-export function ErrorState({
+function AppErrorStateComponent({
   title = 'Something went wrong',
   message = 'Please try again in a moment.',
   retryLabel = 'Try again',
@@ -26,16 +26,16 @@ export function ErrorState({
   return (
     <View style={styles.container}>
       <View style={styles.iconCircle}>
-        <Icon name="close" size={30} color="error" />
+        <AppIcon name="close" size={30} color="error" />
       </View>
-      <Text variant="subheading" align="center">
+      <AppText variant="subheading" align="center">
         {title}
-      </Text>
-      <Text variant="body" color="textMuted" align="center">
+      </AppText>
+      <AppText variant="body" color="textMuted" align="center">
         {message}
-      </Text>
+      </AppText>
       {onRetry ? (
-        <Button
+        <AppButton
           label={retryLabel}
           variant="secondary"
           onPress={onRetry}
@@ -69,3 +69,5 @@ function createStyles(theme: Theme) {
     action: { marginTop: theme.spacing.md },
   });
 }
+
+export const AppErrorState = React.memo(AppErrorStateComponent);

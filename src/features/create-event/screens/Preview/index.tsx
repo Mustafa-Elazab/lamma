@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { ImageBackground, Pressable, View } from 'react-native';
 
-import { Button } from '../../../../design-system/atoms/Button';
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppButton } from '../../../../design-system/atoms/Button';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import { CreateHeader } from '../../components/CreateHeader';
 import { WIZARD_STEP } from '../steps';
@@ -17,7 +17,7 @@ export function PreviewScreen(): React.ReactElement {
   const c = usePreviewController();
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
         <CreateHeader
@@ -28,7 +28,7 @@ export function PreviewScreen(): React.ReactElement {
         />
       }
       footer={
-        <Button
+        <AppButton
           label={
             c.isPublishing ? c.t('create.publishing') : c.t('create.publish')
           }
@@ -45,39 +45,39 @@ export function PreviewScreen(): React.ReactElement {
         imageStyle={styles.heroImage}
       >
         <View style={styles.heroOverlay}>
-          <Text variant="heading" color="textInverse" numberOfLines={2}>
+          <AppText variant="heading" color="textInverse" numberOfLines={2}>
             {c.draft.title.trim() || c.t('create.eventTitle')}
-          </Text>
+          </AppText>
         </View>
       </ImageBackground>
 
       <View style={styles.card}>
         <View style={styles.detailRow}>
-          <Icon name="calendar" size={22} color="primary" />
+          <AppIcon name="calendar" size={22} color="primary" />
           <View style={styles.detailText}>
-            <Text variant="bodyStrong">{c.dateLabel}</Text>
+            <AppText variant="bodyStrong">{c.dateLabel}</AppText>
             {c.timeLabel ? (
-              <Text variant="caption" color="textMuted">
+              <AppText variant="caption" color="textMuted">
                 {c.timeLabel}
-              </Text>
+              </AppText>
             ) : null}
           </View>
         </View>
         <View style={styles.detailRow}>
-          <Icon name="location" size={22} color="primary" />
+          <AppIcon name="location" size={22} color="primary" />
           <View style={styles.detailText}>
-            <Text variant="bodyStrong">{c.locationLabel}</Text>
+            <AppText variant="bodyStrong">{c.locationLabel}</AppText>
           </View>
         </View>
         {c.draft.description.trim() ? (
-          <Text variant="body" color="textMuted">
+          <AppText variant="body" color="textMuted">
             {c.draft.description.trim()}
-          </Text>
+          </AppText>
         ) : null}
       </View>
 
       <View>
-        <Text variant="label">{c.t('create.visibility')}</Text>
+        <AppText variant="label">{c.t('create.visibility')}</AppText>
         <View style={styles.visibilityRow}>
           <Pressable
             style={[
@@ -87,11 +87,11 @@ export function PreviewScreen(): React.ReactElement {
             ]}
             onPress={() => c.setVisibility('private')}
           >
-            <Icon name="shield" size={20} color="primary" />
-            <Text variant="bodyStrong">{c.t('create.visibilityPrivate')}</Text>
-            <Text variant="caption" color="textMuted">
+            <AppIcon name="shield" size={20} color="primary" />
+            <AppText variant="bodyStrong">{c.t('create.visibilityPrivate')}</AppText>
+            <AppText variant="caption" color="textMuted">
               {c.t('create.visibilityPrivateHint')}
-            </Text>
+            </AppText>
           </Pressable>
           <Pressable
             style={[
@@ -101,14 +101,14 @@ export function PreviewScreen(): React.ReactElement {
             ]}
             onPress={() => c.setVisibility('public')}
           >
-            <Icon name="group" size={20} color="primary" />
-            <Text variant="bodyStrong">{c.t('create.visibilityPublic')}</Text>
-            <Text variant="caption" color="textMuted">
+            <AppIcon name="group" size={20} color="primary" />
+            <AppText variant="bodyStrong">{c.t('create.visibilityPublic')}</AppText>
+            <AppText variant="caption" color="textMuted">
               {c.t('create.visibilityPublicHint')}
-            </Text>
+            </AppText>
           </Pressable>
         </View>
       </View>
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }

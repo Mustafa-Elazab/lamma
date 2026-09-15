@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useLanguage, type AppLanguage } from '../../../../app/localization';
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
 
@@ -24,10 +24,10 @@ export function LanguageSettingsScreen(): React.ReactElement {
   ];
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
-        <ScreenHeader
+        <AppScreenHeader
           title={t('language.title')}
           onBack={() => navigation.goBack()}
         />
@@ -41,18 +41,18 @@ export function LanguageSettingsScreen(): React.ReactElement {
               style={styles.row}
               onPress={() => void setLanguage(option.value)}
             >
-              <Text variant="body">{option.label}</Text>
+              <AppText variant="body">{option.label}</AppText>
               {language === option.value ? (
-                <Icon name="check" size={22} color="primary" />
+                <AppIcon name="check" size={22} color="primary" />
               ) : null}
             </Pressable>
           </React.Fragment>
         ))}
       </View>
-      <Text variant="caption" color="textMuted">
+      <AppText variant="caption" color="textMuted">
         {t('language.restartHint')}
-      </Text>
-    </ScreenTemplate>
+      </AppText>
+    </AppScreenTemplate>
   );
 }
 

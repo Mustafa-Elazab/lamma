@@ -11,8 +11,8 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Icon, type IconName } from '../Icon';
-import { Text } from '../Text';
+import { AppIcon, type IconName } from '../Icon';
+import { AppText } from '../Text';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -30,7 +30,7 @@ export type ButtonProps = Omit<PressableProps, 'style' | 'children'> & {
 
 const heightForSize: Record<ButtonSize, number> = { sm: 40, md: 52, lg: 60 };
 
-export function Button({
+function AppButtonComponent({
   label,
   variant = 'primary',
   size = 'lg',
@@ -74,13 +74,13 @@ export function Button({
       ) : (
         <View style={styles.content}>
           {leftIcon ? (
-            <Icon name={leftIcon} size={20} color={contentColor} />
+            <AppIcon name={leftIcon} size={20} color={contentColor} />
           ) : null}
-          <Text variant="bodyStrong" color={contentColor}>
+          <AppText variant="bodyStrong" color={contentColor}>
             {label}
-          </Text>
+          </AppText>
           {rightIcon ? (
-            <Icon name={rightIcon} size={20} color={contentColor} />
+            <AppIcon name={rightIcon} size={20} color={contentColor} />
           ) : null}
         </View>
       )}
@@ -124,3 +124,5 @@ function createStyles(theme: Theme) {
     disabled: { opacity: 0.5 },
   });
 }
+
+export const AppButton = React.memo(AppButtonComponent);

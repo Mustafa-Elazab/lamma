@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { Button } from '../../../../design-system/atoms/Button';
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Input } from '../../../../design-system/atoms/Input';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppButton } from '../../../../design-system/atoms/Button';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppInput } from '../../../../design-system/atoms/Input';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
 import { CreateHeader } from '../../components/CreateHeader';
@@ -22,7 +22,7 @@ export function WhenWhereScreen(): React.ReactElement {
   const c = useWhenWhereController();
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
         <CreateHeader
@@ -33,7 +33,7 @@ export function WhenWhereScreen(): React.ReactElement {
         />
       }
       footer={
-        <Button
+        <AppButton
           label={c.t('common.next')}
           rightIcon="navigation"
           onPress={c.goNext}
@@ -43,10 +43,10 @@ export function WhenWhereScreen(): React.ReactElement {
     >
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text variant="subheading">{c.t('create.when')}</Text>
-          <Text variant="caption" color="textMuted">
+          <AppText variant="subheading">{c.t('create.when')}</AppText>
+          <AppText variant="caption" color="textMuted">
             {c.t('create.whenHint')}
-          </Text>
+          </AppText>
         </View>
         <View style={styles.rows}>
           <DetailRow
@@ -81,28 +81,28 @@ export function WhenWhereScreen(): React.ReactElement {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text variant="subheading">{c.t('create.where')}</Text>
-          <Text variant="caption" color="textMuted">
+          <AppText variant="subheading">{c.t('create.where')}</AppText>
+          <AppText variant="caption" color="textMuted">
             {c.t('create.whereHint')}
-          </Text>
+          </AppText>
         </View>
-        <Input
+        <AppInput
           label={c.t('create.venueName')}
           value={c.draft.venueName}
           onChangeText={c.setVenue}
           leftIcon="location"
         />
-        <Input
+        <AppInput
           label={c.t('create.areaAddress')}
           value={c.draft.areaAddress}
           onChangeText={c.setAddress}
           leftIcon="map"
         />
         <View style={local.mapPreview}>
-          <Icon name="location" size={28} color="primary" />
-          <Text variant="caption" color="textMuted">
+          <AppIcon name="location" size={28} color="primary" />
+          <AppText variant="caption" color="textMuted">
             {c.draft.areaAddress.trim() || c.t('create.locationTBD')}
-          </Text>
+          </AppText>
         </View>
         <DetailRow
           icon="navigation"
@@ -144,7 +144,7 @@ export function WhenWhereScreen(): React.ReactElement {
         onSelect={c.onSelectTimezone}
         onClose={() => c.setPicker(null)}
       />
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }
 

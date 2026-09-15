@@ -3,8 +3,8 @@ import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Icon } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppIcon } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type SectionHeaderProps = {
   title: string;
@@ -12,7 +12,7 @@ export type SectionHeaderProps = {
   onPressAction?: () => void;
 };
 
-export function SectionHeader({
+function AppSectionHeaderComponent({
   title,
   actionLabel,
   onPressAction,
@@ -22,14 +22,14 @@ export function SectionHeader({
 
   return (
     <View style={styles.row}>
-      <Text variant="subheading">{title}</Text>
+      <AppText variant="subheading">{title}</AppText>
       {actionLabel && onPressAction ? (
         <Pressable onPress={onPressAction} hitSlop={8} style={styles.action}>
-          <Text variant="label" color="primary">
+          <AppText variant="label" color="primary">
             {actionLabel}
-          </Text>
+          </AppText>
           <View style={styles.chevron}>
-            <Icon name="back" size={16} color="primary" strokeWidth={2} />
+            <AppIcon name="back" size={16} color="primary" strokeWidth={2} />
           </View>
         </Pressable>
       ) : null}
@@ -52,3 +52,5 @@ function createStyles(theme: Theme) {
     chevron: { transform: [{ scaleX: I18nManager.isRTL ? 1 : -1 }] },
   });
 }
+
+export const AppSectionHeader = React.memo(AppSectionHeaderComponent);

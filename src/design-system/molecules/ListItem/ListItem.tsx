@@ -10,8 +10,8 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { ColorToken, Theme } from '../../theme/tokens';
-import { Icon, type IconName } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppIcon, type IconName } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type ListItemProps = {
   title: string;
@@ -26,7 +26,7 @@ export type ListItemProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function ListItem({
+function AppListItemComponent({
   title,
   subtitle,
   leadingIcon,
@@ -51,21 +51,21 @@ export function ListItem({
               { backgroundColor: theme.colors[leadingIconBg] },
             ]}
           >
-            <Icon name={leadingIcon} size={20} color={leadingIconColor} />
+            <AppIcon name={leadingIcon} size={20} color={leadingIconColor} />
           </View>
         ) : null)}
       <View style={styles.text}>
-        <Text variant="bodyStrong">{title}</Text>
+        <AppText variant="bodyStrong">{title}</AppText>
         {subtitle ? (
-          <Text variant="caption" color="textMuted">
+          <AppText variant="caption" color="textMuted">
             {subtitle}
-          </Text>
+          </AppText>
         ) : null}
       </View>
       {trailing}
       {showChevron ? (
         <View style={styles.chevron}>
-          <Icon name="back" size={18} color="textMuted" strokeWidth={2} />
+          <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} />
         </View>
       ) : null}
     </>
@@ -108,3 +108,5 @@ function createStyles(theme: Theme) {
     chevron: { transform: [{ scaleX: I18nManager.isRTL ? 1 : -1 }] },
   });
 }
+
+export const AppListItem = React.memo(AppListItemComponent);

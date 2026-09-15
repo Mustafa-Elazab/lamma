@@ -7,8 +7,8 @@ import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Icon, type IconName } from '../design-system/atoms/Icon';
-import { Text } from '../design-system/atoms/Text';
+import { AppIcon, type IconName } from '../design-system/atoms/Icon';
+import { AppText } from '../design-system/atoms/Text';
 import { useTheme } from '../design-system/theme/ThemeProvider';
 import type { Theme } from '../design-system/theme/tokens';
 import { unreadCount, useNotifications } from '../features/notifications/core';
@@ -71,14 +71,14 @@ export function TabBar({
             style={styles.tab}
           >
             <View>
-              <Icon name={TAB_ICONS[routeName]} size={24} color={color} />
+              <AppIcon name={TAB_ICONS[routeName]} size={24} color={color} />
               {routeName === 'Notifications' && unreadNotifications > 0 ? (
                 <View style={styles.badge} />
               ) : null}
             </View>
-            <Text variant="caption" color={color} weight={focused ? '700' : '500'}>
+            <AppText variant="caption" color={color} weight={focused ? '700' : '500'}>
               {label}
-            </Text>
+            </AppText>
             {focused ? <View style={styles.activeDot} /> : null}
           </Pressable>
         );

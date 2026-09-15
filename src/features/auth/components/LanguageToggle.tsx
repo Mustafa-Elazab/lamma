@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useLanguage } from '../../../app/localization';
-import { Text } from '../../../design-system/atoms/Text';
+import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 
@@ -14,23 +14,23 @@ export function LanguageToggle(): React.ReactElement {
   return (
     <View style={styles.row}>
       <Pressable onPress={() => void setLanguage('en')} hitSlop={8}>
-        <Text
+        <AppText
           variant="label"
           color={language === 'en' ? 'text' : 'textMuted'}
           weight={language === 'en' ? '700' : '500'}
         >
           English
-        </Text>
+        </AppText>
       </Pressable>
       <View style={styles.dot} />
       <Pressable onPress={() => void setLanguage('ar')} hitSlop={8}>
-        <Text
+        <AppText
           variant="label"
           color={language === 'ar' ? 'text' : 'textMuted'}
           weight={language === 'ar' ? '700' : '500'}
         >
           العربية
-        </Text>
+        </AppText>
       </Pressable>
     </View>
   );

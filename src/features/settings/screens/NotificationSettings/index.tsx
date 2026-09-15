@@ -3,10 +3,10 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { Text } from '../../../../design-system/atoms/Text';
-import { Toggle } from '../../../../design-system/atoms/Toggle';
-import { ScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppToggle } from '../../../../design-system/atoms/Toggle';
+import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
 import { usePreferences, type NotificationPreferences } from '../../core';
@@ -53,10 +53,10 @@ export function NotificationSettingsScreen(): React.ReactElement {
   ];
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
-        <ScreenHeader
+        <AppScreenHeader
           title={t('settings.notificationsTitle')}
           onBack={() => navigation.goBack()}
         />
@@ -68,12 +68,12 @@ export function NotificationSettingsScreen(): React.ReactElement {
             {index > 0 ? <View style={styles.divider} /> : null}
             <View style={styles.row}>
               <View style={styles.rowText}>
-                <Text variant="bodyStrong">{item.label}</Text>
-                <Text variant="caption" color="textMuted">
+                <AppText variant="bodyStrong">{item.label}</AppText>
+                <AppText variant="caption" color="textMuted">
                   {item.hint}
-                </Text>
+                </AppText>
               </View>
-              <Toggle
+              <AppToggle
                 value={preferences.notifications[item.key]}
                 onValueChange={value => setKey(item.key, value)}
               />
@@ -81,7 +81,7 @@ export function NotificationSettingsScreen(): React.ReactElement {
           </React.Fragment>
         ))}
       </View>
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }
 

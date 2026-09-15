@@ -9,14 +9,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Skeleton } from '../../../../design-system/atoms/Skeleton';
-import { Text } from '../../../../design-system/atoms/Text';
-import { EmptyState } from '../../../../design-system/molecules/EmptyState';
-import { ErrorState } from '../../../../design-system/molecules/ErrorState';
-import { SectionHeader } from '../../../../design-system/molecules/SectionHeader';
-import { SegmentedTabs } from '../../../../design-system/molecules/SegmentedTabs';
-import { EventCard } from '../../../../design-system/organisms/EventCard';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppSkeleton } from '../../../../design-system/atoms/Skeleton';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
+import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
+import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
+import { AppSegmentedTabs } from '../../../../design-system/molecules/SegmentedTabs';
+import { AppEventCard } from '../../../../design-system/organisms/EventCard';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { LammaEvent } from '../../../events';
 import { HomeHeader } from '../../components/HomeHeader';
@@ -30,7 +30,7 @@ export function HomeScreen(): React.ReactElement {
 
   const renderItem = ({ item }: ListRenderItemInfo<LammaEvent>) => (
     <View style={styles.compactItem}>
-      <EventCard
+      <AppEventCard
         data={c.toCard(item)}
         variant="compact"
         onPress={() => c.openEvent(item.id)}
@@ -40,9 +40,9 @@ export function HomeScreen(): React.ReactElement {
 
   const header = (
     <View style={styles.body}>
-      <SegmentedTabs items={c.tabs} value={c.filter} onChange={c.setFilter} />
+      <AppSegmentedTabs items={c.tabs} value={c.filter} onChange={c.setFilter} />
       {c.featuredCard ? (
-        <EventCard
+        <AppEventCard
           data={c.featuredCard}
           variant="featured"
           onPress={() =>
@@ -51,7 +51,7 @@ export function HomeScreen(): React.ReactElement {
         />
       ) : null}
       {c.events.length > 0 ? (
-        <SectionHeader
+        <AppSectionHeader
           title={c.t('home.yourEvents')}
           actionLabel={c.t('common.seeAll')}
           onPressAction={() => undefined}
@@ -64,23 +64,23 @@ export function HomeScreen(): React.ReactElement {
     if (c.isLoading) {
       return (
         <View style={styles.body}>
-          <Skeleton height={200} radius="lg" />
-          <Skeleton height={100} radius="lg" />
-          <Skeleton height={100} radius="lg" />
+          <AppSkeleton height={200} radius="lg" />
+          <AppSkeleton height={100} radius="lg" />
+          <AppSkeleton height={100} radius="lg" />
         </View>
       );
     }
     if (c.isError) {
       return (
         <View style={styles.stateWrap}>
-          <ErrorState onRetry={() => void c.refetch()} />
+          <AppErrorState onRetry={() => void c.refetch()} />
         </View>
       );
     }
     if (!c.featuredCard) {
       return (
         <View style={styles.stateWrap}>
-          <EmptyState
+          <AppEmptyState
             title={c.emptyCopy.title}
             message={c.emptyCopy.message}
             icon="calendar"
@@ -128,11 +128,11 @@ export function HomeScreen(): React.ReactElement {
           onPress={c.openCreate}
           style={styles.fabButton}
         >
-          <Icon name="plus" size={28} color="textInverse" />
+          <AppIcon name="plus" size={28} color="textInverse" />
         </Pressable>
-        <Text variant="caption" color="primary" weight="700">
+        <AppText variant="caption" color="primary" weight="700">
           {c.t('home.createEvent')}
-        </Text>
+        </AppText>
       </View>
     </SafeAreaView>
   );

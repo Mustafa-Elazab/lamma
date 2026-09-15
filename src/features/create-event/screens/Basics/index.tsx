@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 
-import { Button } from '../../../../design-system/atoms/Button';
-import { Input } from '../../../../design-system/atoms/Input';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppButton } from '../../../../design-system/atoms/Button';
+import { AppInput } from '../../../../design-system/atoms/Input';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import {
   MAX_DESCRIPTION_LENGTH,
@@ -23,7 +23,7 @@ export function BasicsScreen(): React.ReactElement {
   const c = useBasicsController();
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
         <CreateHeader
@@ -34,7 +34,7 @@ export function BasicsScreen(): React.ReactElement {
         />
       }
       footer={
-        <Button
+        <AppButton
           label={c.t('common.next')}
           rightIcon="navigation"
           onPress={c.goNext}
@@ -43,7 +43,7 @@ export function BasicsScreen(): React.ReactElement {
       }
     >
       <View style={styles.section}>
-        <Input
+        <AppInput
           label={c.t('create.eventTitle')}
           placeholder={c.t('create.eventTitlePlaceholder')}
           value={c.draft.title}
@@ -54,15 +54,15 @@ export function BasicsScreen(): React.ReactElement {
       </View>
 
       <View style={styles.section}>
-        <Text variant="label">{c.t('create.category')}</Text>
-        <Text variant="caption" color="textMuted">
+        <AppText variant="label">{c.t('create.category')}</AppText>
+        <AppText variant="caption" color="textMuted">
           {c.t('create.categoryHint')}
-        </Text>
+        </AppText>
         <CategoryPicker value={c.draft.category} onChange={c.setCategory} />
       </View>
 
       <View style={styles.section}>
-        <Input
+        <AppInput
           label={c.t('create.description')}
           placeholder={c.t('create.descriptionPlaceholder')}
           value={c.draft.description}
@@ -75,13 +75,13 @@ export function BasicsScreen(): React.ReactElement {
 
       <View style={styles.section}>
         <View style={styles.previewHint}>
-          <Text variant="label">{c.t('create.livePreview')}</Text>
-          <Text variant="caption" color="primary">
+          <AppText variant="label">{c.t('create.livePreview')}</AppText>
+          <AppText variant="caption" color="primary">
             {c.t('create.livePreviewHint')}
-          </Text>
+          </AppText>
         </View>
         <LivePreviewCard draft={c.draft} />
       </View>
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }

@@ -1,4 +1,4 @@
-export { EventCard } from './EventCard';
+export { AppEventCard } from './EventCard';
 export type {
   EventCardProps,
   EventCardData,

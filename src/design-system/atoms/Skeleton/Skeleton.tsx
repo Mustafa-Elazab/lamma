@@ -17,7 +17,7 @@ export type SkeletonProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function Skeleton({
+function AppSkeletonComponent({
   width = '100%',
   height = 16,
   radius = 'sm',
@@ -62,3 +62,5 @@ function createStyles(theme: Theme) {
     base: { backgroundColor: theme.colors.border },
   });
 }
+
+export const AppSkeleton = React.memo(AppSkeletonComponent);

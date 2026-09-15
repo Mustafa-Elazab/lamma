@@ -2,13 +2,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useMemo } from 'react';
 import { Image, Pressable, View } from 'react-native';
 
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ErrorState } from '../../../../design-system/molecules/ErrorState';
-import { SectionHeader } from '../../../../design-system/molecules/SectionHeader';
-import { SegmentedTabs } from '../../../../design-system/molecules/SegmentedTabs';
-import { GuestRow } from '../../../../design-system/organisms/GuestRow';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
+import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
+import { AppSegmentedTabs } from '../../../../design-system/molecules/SegmentedTabs';
+import { AppGuestRow } from '../../../../design-system/organisms/GuestRow';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { AppStackParamList } from '../../../../navigation/types';
 import type { Attendee } from '../../core/entity';
@@ -24,9 +24,9 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
 
   if (c.isError || (!c.isLoading && !c.event)) {
     return (
-      <ScreenTemplate>
-        <ErrorState onRetry={() => void c.refetch()} />
-      </ScreenTemplate>
+      <AppScreenTemplate>
+        <AppErrorState onRetry={() => void c.refetch()} />
+      </AppScreenTemplate>
     );
   }
 
@@ -45,36 +45,36 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
   const header = (
     <View style={styles.header}>
       <Pressable onPress={c.goBack} hitSlop={8}>
-        <Icon name="back" size={24} />
+        <AppIcon name="back" size={24} />
       </Pressable>
       {c.cover ? <Image source={c.cover} style={styles.cover} /> : null}
       <View style={styles.headerText}>
-        <Text variant="subheading" numberOfLines={1}>
+        <AppText variant="subheading" numberOfLines={1}>
           {event?.title ?? ''}
-        </Text>
-        <Text variant="caption" color="textMuted">
+        </AppText>
+        <AppText variant="caption" color="textMuted">
           {c.dateLabel}
-        </Text>
+        </AppText>
       </View>
     </View>
   );
 
   return (
-    <ScreenTemplate edges={['top']} header={header}>
-      <SegmentedTabs items={c.tabs} value={c.tab} onChange={c.setTab} />
+    <AppScreenTemplate edges={['top']} header={header}>
+      <AppSegmentedTabs items={c.tabs} value={c.tab} onChange={c.setTab} />
 
       {event ? (
         <View style={styles.summary}>
           <View style={styles.summaryIcon}>
-            <Icon name="guests" size={22} color="primary" />
+            <AppIcon name="guests" size={22} color="primary" />
           </View>
           <View style={styles.summaryText}>
-            <Text variant="subheading">
+            <AppText variant="subheading">
               {`${event.goingCount} ${c.t('home.going')}`}
-            </Text>
-            <Text variant="caption" color="textMuted" numberOfLines={1}>
+            </AppText>
+            <AppText variant="caption" color="textMuted" numberOfLines={1}>
               {event.description}
-            </Text>
+            </AppText>
           </View>
         </View>
       ) : null}
@@ -83,12 +83,12 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
         <>
           {c.groups.hosts.length > 0 ? (
             <View style={styles.section}>
-              <SectionHeader
+              <AppSectionHeader
                 title={`${c.t('event.hosts')} (${c.groups.hosts.length})`}
               />
               <View style={styles.sectionCard}>
                 {c.groups.hosts.map(guest => (
-                  <GuestRow
+                  <AppGuestRow
                     key={guest.id}
                     name={guest.name}
                     subtitle={
@@ -105,12 +105,12 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
 
           {c.groups.family.length > 0 ? (
             <View style={styles.section}>
-              <SectionHeader
+              <AppSectionHeader
                 title={`${c.t('event.family')} (${c.groups.family.length})`}
               />
               <View style={styles.sectionCard}>
                 {c.groups.family.map(guest => (
-                  <GuestRow
+                  <AppGuestRow
                     key={guest.id}
                     name={guest.name}
                     subtitle={guestSubtitle(guest)}
@@ -123,12 +123,12 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
 
           {c.groups.friends.length > 0 ? (
             <View style={styles.section}>
-              <SectionHeader
+              <AppSectionHeader
                 title={`${c.t('event.friends')} (${c.groups.friends.length})`}
               />
               <View style={styles.sectionCard}>
                 {c.groups.friends.map(guest => (
-                  <GuestRow
+                  <AppGuestRow
                     key={guest.id}
                     name={guest.name}
                     subtitle={guestSubtitle(guest)}
@@ -140,6 +140,6 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
           ) : null}
         </>
       ) : null}
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }

@@ -9,13 +9,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Chip } from '../../../../design-system/atoms/Chip';
-import { Input } from '../../../../design-system/atoms/Input';
-import { Skeleton } from '../../../../design-system/atoms/Skeleton';
-import { Text } from '../../../../design-system/atoms/Text';
-import { EmptyState } from '../../../../design-system/molecules/EmptyState';
-import { ErrorState } from '../../../../design-system/molecules/ErrorState';
-import { EventCard } from '../../../../design-system/organisms/EventCard';
+import { AppChip } from '../../../../design-system/atoms/Chip';
+import { AppInput } from '../../../../design-system/atoms/Input';
+import { AppSkeleton } from '../../../../design-system/atoms/Skeleton';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
+import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
+import { AppEventCard } from '../../../../design-system/organisms/EventCard';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import {
   CATEGORY_ICON,
@@ -32,7 +32,7 @@ export function DiscoverScreen(): React.ReactElement {
   const c = useDiscoverController();
 
   const renderItem = ({ item }: ListRenderItemInfo<LammaEvent>) => (
-    <EventCard
+    <AppEventCard
       data={c.toCard(item)}
       variant="compact"
       onPress={() => c.openEvent(item.id)}
@@ -43,22 +43,22 @@ export function DiscoverScreen(): React.ReactElement {
     if (c.isLoading) {
       return (
         <View>
-          <Skeleton height={100} radius="lg" style={styles.sectionTitle} />
-          <Skeleton height={100} radius="lg" style={styles.sectionTitle} />
-          <Skeleton height={100} radius="lg" />
+          <AppSkeleton height={100} radius="lg" style={styles.sectionTitle} />
+          <AppSkeleton height={100} radius="lg" style={styles.sectionTitle} />
+          <AppSkeleton height={100} radius="lg" />
         </View>
       );
     }
     if (c.isError) {
       return (
         <View style={styles.stateWrap}>
-          <ErrorState onRetry={() => void c.refetch()} />
+          <AppErrorState onRetry={() => void c.refetch()} />
         </View>
       );
     }
     return (
       <View style={styles.stateWrap}>
-        <EmptyState
+        <AppEmptyState
           title={c.t('discover.emptyTitle')}
           message={c.t('discover.emptyMessage')}
           icon="search"
@@ -71,12 +71,12 @@ export function DiscoverScreen(): React.ReactElement {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.titleBlock}>
-          <Text variant="heading">{c.t('discover.title')}</Text>
-          <Text variant="body" color="textMuted">
+          <AppText variant="heading">{c.t('discover.title')}</AppText>
+          <AppText variant="body" color="textMuted">
             {c.t('discover.subtitle')}
-          </Text>
+          </AppText>
         </View>
-        <Input
+        <AppInput
           placeholder={c.t('discover.searchPlaceholder')}
           value={c.rawQuery}
           onChangeText={c.setRawQuery}
@@ -91,7 +91,7 @@ export function DiscoverScreen(): React.ReactElement {
         contentContainerStyle={styles.categoryRow}
       >
         {CATEGORY_ORDER.map(cat => (
-          <Chip
+          <AppChip
             key={cat}
             label={c.t(categoryLabelKey(cat))}
             icon={CATEGORY_ICON[cat]}
@@ -106,9 +106,9 @@ export function DiscoverScreen(): React.ReactElement {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         ListHeaderComponent={
-          <Text variant="subheading" style={styles.sectionTitle}>
+          <AppText variant="subheading" style={styles.sectionTitle}>
             {c.t('discover.nearby')}
-          </Text>
+          </AppText>
         }
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={styles.listContent}

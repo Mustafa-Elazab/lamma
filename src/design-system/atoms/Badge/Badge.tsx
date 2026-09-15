@@ -3,8 +3,8 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { ColorToken, Theme } from '../../theme/tokens';
-import { Icon, type IconName } from '../Icon';
-import { Text } from '../Text';
+import { AppIcon, type IconName } from '../Icon';
+import { AppText } from '../Text';
 
 export type BadgeTone =
   | 'primary'
@@ -31,7 +31,7 @@ const toneToColors: Record<
   neutral: { bg: 'surfaceWarm', fg: 'textMuted' },
 };
 
-export function Badge({
+function AppBadgeComponent({
   label,
   tone = 'primary',
   icon,
@@ -45,10 +45,10 @@ export function Badge({
     <View
       style={[styles.badge, { backgroundColor: theme.colors[colors.bg] }, style]}
     >
-      {icon ? <Icon name={icon} size={14} color={colors.fg} /> : null}
-      <Text variant="caption" color={colors.fg} weight="700">
+      {icon ? <AppIcon name={icon} size={14} color={colors.fg} /> : null}
+      <AppText variant="caption" color={colors.fg} weight="700">
         {label}
-      </Text>
+      </AppText>
     </View>
   );
 }
@@ -66,3 +66,5 @@ function createStyles(theme: Theme) {
     },
   });
 }
+
+export const AppBadge = React.memo(AppBadgeComponent);

@@ -1,2 +1,2 @@
-export { SegmentedTabs } from './SegmentedTabs';
+export { AppSegmentedTabs } from './SegmentedTabs';
 export type { SegmentedTabsProps, SegmentedTabItem } from './SegmentedTabs';

@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
 
-import { Icon, type IconName } from '../../../design-system/atoms/Icon';
-import { Text } from '../../../design-system/atoms/Text';
+import { AppIcon, type IconName } from '../../../design-system/atoms/Icon';
+import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 
@@ -30,18 +30,18 @@ export function DetailRow({
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
       <View style={styles.iconWrap}>
-        <Icon name={icon} size={22} color="primary" />
+        <AppIcon name={icon} size={22} color="primary" />
       </View>
       <View style={styles.text}>
-        <Text variant="caption" color="textMuted">
+        <AppText variant="caption" color="textMuted">
           {label}
-        </Text>
-        <Text variant="bodyStrong" color={placeholder ? 'textMuted' : 'text'}>
+        </AppText>
+        <AppText variant="bodyStrong" color={placeholder ? 'textMuted' : 'text'}>
           {value}
-        </Text>
+        </AppText>
       </View>
       <View style={styles.chevron}>
-        <Icon name="back" size={18} color="textMuted" strokeWidth={2} />
+        <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} />
       </View>
     </Pressable>
   );

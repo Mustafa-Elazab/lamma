@@ -1,2 +1,2 @@
-export { ScreenHeader } from './ScreenHeader';
+export { AppScreenHeader } from './ScreenHeader';
 export type { ScreenHeaderProps } from './ScreenHeader';

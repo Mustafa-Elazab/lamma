@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Avatar } from '../../../../design-system/atoms/Avatar';
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ListItem } from '../../../../design-system/molecules/ListItem';
+import { AppAvatar } from '../../../../design-system/atoms/Avatar';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppListItem } from '../../../../design-system/molecules/ListItem';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import { createStyles } from './styles';
 import { useProfileController } from './useController';
@@ -22,39 +22,39 @@ export function ProfileScreen(): React.ReactElement {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text variant="heading">{c.t('profile.title')}</Text>
-          <Text variant="body" color="textMuted">
+          <AppText variant="heading">{c.t('profile.title')}</AppText>
+          <AppText variant="body" color="textMuted">
             {c.t('profile.subtitle')}
-          </Text>
+          </AppText>
         </View>
 
         <View style={styles.group}>
           <View style={[styles.profileCard, cardPad]}>
-            <Avatar source={c.avatar} name={c.name} size={64} showStatus />
+            <AppAvatar source={c.avatar} name={c.name} size={64} showStatus />
             <View style={styles.profileText}>
-              <Text variant="subheading">{c.name}</Text>
-              <Text variant="caption" color="textMuted">
+              <AppText variant="subheading">{c.name}</AppText>
+              <AppText variant="caption" color="textMuted">
                 {c.isGuest
                   ? c.t('profile.upgradePrompt')
                   : `${c.t('profile.hostedEvents', {
                       count: c.hostedCount,
                     })}  ·  ${c.t('profile.joined', { count: 37 })}`}
-              </Text>
-              <Text variant="caption" color="primary">
+              </AppText>
+              <AppText variant="caption" color="primary">
                 {c.email ?? c.t('settings.defaultBio')}
-              </Text>
+              </AppText>
             </View>
             <Pressable style={styles.editButton}>
-              <Icon name="edit" size={16} color="primary" />
-              <Text variant="label" color="primary">
+              <AppIcon name="edit" size={16} color="primary" />
+              <AppText variant="label" color="primary">
                 {c.t('common.edit')}
-              </Text>
+              </AppText>
             </Pressable>
           </View>
         </View>
 
         <View style={styles.group}>
-          <ListItem
+          <AppListItem
             title={c.t('profile.language')}
             subtitle={c.languageLabel}
             leadingIcon="language"
@@ -62,7 +62,7 @@ export function ProfileScreen(): React.ReactElement {
             onPress={c.goLanguage}
           />
           <View style={styles.divider} />
-          <ListItem
+          <AppListItem
             title={c.t('profile.notifications')}
             subtitle={c.t('profile.notificationsHint')}
             leadingIcon="bell"
@@ -71,7 +71,7 @@ export function ProfileScreen(): React.ReactElement {
             onPress={c.goNotifications}
           />
           <View style={styles.divider} />
-          <ListItem
+          <AppListItem
             title={c.t('profile.appearance')}
             subtitle={c.appearanceLabel}
             leadingIcon="sun"
@@ -82,7 +82,7 @@ export function ProfileScreen(): React.ReactElement {
         </View>
 
         <View style={styles.group}>
-          <ListItem
+          <AppListItem
             title={c.t('profile.myDrafts')}
             subtitle={c.t('profile.myDraftsHint')}
             leadingIcon="draft"
@@ -91,7 +91,7 @@ export function ProfileScreen(): React.ReactElement {
             onPress={c.goDrafts}
           />
           <View style={styles.divider} />
-          <ListItem
+          <AppListItem
             title={c.t('profile.savedThemes')}
             subtitle={c.t('profile.savedThemesHint')}
             leadingIcon="heart"
@@ -101,7 +101,7 @@ export function ProfileScreen(): React.ReactElement {
         </View>
 
         <View style={styles.group}>
-          <ListItem
+          <AppListItem
             title={c.t('profile.help')}
             subtitle={c.t('profile.helpHint')}
             leadingIcon="help"
@@ -109,7 +109,7 @@ export function ProfileScreen(): React.ReactElement {
             onPress={c.goHelp}
           />
           <View style={styles.divider} />
-          <ListItem
+          <AppListItem
             title={c.t('profile.signOut')}
             subtitle={c.t('profile.signOutHint')}
             leadingIcon="logout"

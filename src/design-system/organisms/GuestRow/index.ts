@@ -1,2 +1,2 @@
-export { GuestRow } from './GuestRow';
+export { AppGuestRow } from './GuestRow';
 export type { GuestRowProps } from './GuestRow';

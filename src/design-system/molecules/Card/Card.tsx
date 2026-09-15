@@ -18,7 +18,7 @@ export type CardProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function Card({
+function AppCardComponent({
   children,
   onPress,
   padded = true,
@@ -60,3 +60,5 @@ function createStyles(theme: Theme) {
     pressed: { opacity: 0.9 },
   });
 }
+
+export const AppCard = React.memo(AppCardComponent);

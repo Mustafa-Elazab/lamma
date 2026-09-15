@@ -8,8 +8,8 @@ import {
   type ListRenderItemInfo,
 } from 'react-native';
 
-import { Icon } from '../../../design-system/atoms/Icon';
-import { Text } from '../../../design-system/atoms/Text';
+import { AppIcon } from '../../../design-system/atoms/Icon';
+import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 
@@ -48,10 +48,10 @@ export function OptionPickerModal({
           onClose();
         }}
       >
-        <Text variant="body" color={selected ? 'primary' : 'text'}>
+        <AppText variant="body" color={selected ? 'primary' : 'text'}>
           {item.label}
-        </Text>
-        {selected ? <Icon name="check" size={20} color="primary" /> : null}
+        </AppText>
+        {selected ? <AppIcon name="check" size={20} color="primary" /> : null}
       </Pressable>
     );
   };
@@ -67,9 +67,9 @@ export function OptionPickerModal({
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <View style={styles.header}>
-          <Text variant="subheading">{title}</Text>
+          <AppText variant="subheading">{title}</AppText>
           <Pressable onPress={onClose} hitSlop={8}>
-            <Icon name="close" size={22} color="textMuted" />
+            <AppIcon name="close" size={22} color="textMuted" />
           </Pressable>
         </View>
         <FlatList

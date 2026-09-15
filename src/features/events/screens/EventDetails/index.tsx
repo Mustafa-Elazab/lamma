@@ -3,13 +3,13 @@ import React, { useMemo } from 'react';
 import { ImageBackground, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Avatar } from '../../../../design-system/atoms/Avatar';
-import { Badge } from '../../../../design-system/atoms/Badge';
-import { Icon, type IconName } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { ErrorState } from '../../../../design-system/molecules/ErrorState';
-import { SectionHeader } from '../../../../design-system/molecules/SectionHeader';
-import { AvatarStack } from '../../../../design-system/organisms/AvatarStack';
+import { AppAvatar } from '../../../../design-system/atoms/Avatar';
+import { AppBadge } from '../../../../design-system/atoms/Badge';
+import { AppIcon, type IconName } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
+import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
+import { AppAvatarStack } from '../../../../design-system/organisms/AvatarStack';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { AppStackParamList } from '../../../../navigation/types';
 import { formatDateShort } from '../../../../utils/format';
@@ -26,7 +26,7 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
   if (c.isError || (!c.isLoading && !c.event)) {
     return (
       <SafeAreaView style={styles.safe}>
-        <ErrorState onRetry={() => void c.refetch()} />
+        <AppErrorState onRetry={() => void c.refetch()} />
       </SafeAreaView>
     );
   }
@@ -40,14 +40,14 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
           <SafeAreaView edges={['top']}>
             <View style={styles.heroButtons}>
               <Pressable style={styles.circleButton} onPress={c.goBack}>
-                <Icon name="back" size={22} color="textInverse" />
+                <AppIcon name="back" size={22} color="textInverse" />
               </Pressable>
               <View style={styles.heroActions}>
                 <Pressable style={styles.circleButton} onPress={c.openShare}>
-                  <Icon name="share" size={20} color="textInverse" />
+                  <AppIcon name="share" size={20} color="textInverse" />
                 </Pressable>
                 <Pressable style={styles.circleButton}>
-                  <Icon name="more" size={20} color="textInverse" />
+                  <AppIcon name="more" size={20} color="textInverse" />
                 </Pressable>
               </View>
             </View>
@@ -58,54 +58,54 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
           <View style={styles.sheet}>
             <View style={styles.titleBlock}>
               {event.viewerRsvp === 'going' ? (
-                <Badge
+                <AppBadge
                   label={c.t('home.youreGoing')}
                   tone="primary"
                   icon="check"
                 />
               ) : null}
-              <Text variant="heading">{event.title}</Text>
-              <Text variant="body" color="textMuted">
+              <AppText variant="heading">{event.title}</AppText>
+              <AppText variant="body" color="textMuted">
                 {event.description}
-              </Text>
+              </AppText>
             </View>
 
             <View style={styles.hostRow}>
-              <Avatar name={event.hostName} size={44} />
+              <AppAvatar name={event.hostName} size={44} />
               <View style={styles.hostText}>
-                <Text variant="caption" color="textMuted">
+                <AppText variant="caption" color="textMuted">
                   {c.t('event.hostedBy')}
-                </Text>
-                <Text variant="bodyStrong">{event.hostName}</Text>
+                </AppText>
+                <AppText variant="bodyStrong">{event.hostName}</AppText>
               </View>
               <Pressable>
-                <Text variant="label" color="primary">
+                <AppText variant="label" color="primary">
                   {c.t('event.contactHost')}
-                </Text>
+                </AppText>
               </Pressable>
             </View>
 
             <View style={styles.infoCard}>
-              <Icon name="calendar" size={22} color="primary" />
+              <AppIcon name="calendar" size={22} color="primary" />
               <View style={styles.infoText}>
-                <Text variant="bodyStrong">{c.dateLabel}</Text>
-                <Text variant="caption" color="textMuted">
+                <AppText variant="bodyStrong">{c.dateLabel}</AppText>
+                <AppText variant="caption" color="textMuted">
                   {c.timeRange}
-                </Text>
+                </AppText>
               </View>
             </View>
 
             <View style={styles.infoCard}>
-              <Icon name="location" size={22} color="primary" />
+              <AppIcon name="location" size={22} color="primary" />
               <View style={styles.infoText}>
-                <Text variant="bodyStrong">{event.venueName}</Text>
-                <Text variant="caption" color="textMuted">
+                <AppText variant="bodyStrong">{event.venueName}</AppText>
+                <AppText variant="caption" color="textMuted">
                   {event.areaAddress}
-                </Text>
+                </AppText>
               </View>
-              <Text variant="label" color="primary">
+              <AppText variant="label" color="primary">
                 {c.t('event.openInMaps')}
-              </Text>
+              </AppText>
             </View>
 
             <View style={styles.rsvpRow}>
@@ -131,14 +131,14 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
 
             <View style={styles.goingCard}>
               <View style={styles.goingHeader}>
-                <Text variant="bodyStrong">{c.goingLabel}</Text>
+                <AppText variant="bodyStrong">{c.goingLabel}</AppText>
                 <Pressable onPress={c.openGuests}>
-                  <Text variant="label" color="primary">
+                  <AppText variant="label" color="primary">
                     {c.t('common.seeAll')}
-                  </Text>
+                  </AppText>
                 </Pressable>
               </View>
-              <AvatarStack
+              <AppAvatarStack
                 avatars={c.goingStack.map(a => ({ id: a.id, name: a.name }))}
                 total={event.goingCount}
                 size={40}
@@ -148,29 +148,29 @@ export function EventDetailsScreen({ route }: Props): React.ReactElement {
 
             {event.updates.length > 0 ? (
               <View>
-                <SectionHeader
+                <AppSectionHeader
                   title={c.t('event.eventUpdates')}
                   actionLabel={c.t('common.seeAll')}
                   onPressAction={() => undefined}
                 />
                 {event.updates.map(update => (
                   <View key={update.id} style={styles.updateItem}>
-                    <Avatar name={update.authorName} size={40} />
+                    <AppAvatar name={update.authorName} size={40} />
                     <View style={styles.updateBody}>
                       <View style={styles.updateMetaRow}>
-                        <Text variant="bodyStrong">{update.authorName}</Text>
+                        <AppText variant="bodyStrong">{update.authorName}</AppText>
                         {update.pinned ? (
-                          <Badge
+                          <AppBadge
                             label={c.t('event.pinned')}
                             tone="neutral"
                             icon="location"
                           />
                         ) : null}
                       </View>
-                      <Text variant="caption" color="textMuted">
+                      <AppText variant="caption" color="textMuted">
                         {formatDateShort(update.createdAt)}
-                      </Text>
-                      <Text variant="body">{update.message}</Text>
+                      </AppText>
+                      <AppText variant="body">{update.message}</AppText>
                     </View>
                   </View>
                 ))}
@@ -203,10 +203,10 @@ function RsvpButton({
       onPress={onPress}
       style={[styles.rsvpButton, active && styles.rsvpButtonActive]}
     >
-      <Icon name={icon} size={18} color={active ? 'textInverse' : 'text'} />
-      <Text variant="label" color={active ? 'textInverse' : 'text'}>
+      <AppIcon name={icon} size={18} color={active ? 'textInverse' : 'text'} />
+      <AppText variant="label" color={active ? 'textInverse' : 'text'}>
         {label}
-      </Text>
+      </AppText>
     </Pressable>
   );
 }
