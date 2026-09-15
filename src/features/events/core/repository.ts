@@ -22,7 +22,6 @@ export type CreateEventInput = {
   themeKey: LammaEvent['themeKey'];
   startAt: number;
   endAt: number;
-  timezone: string;
   venueName: string;
   areaAddress: string;
   latitude?: number | null;

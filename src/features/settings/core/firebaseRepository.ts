@@ -10,7 +10,11 @@ import { DEFAULT_PREFERENCES, type Preferences } from './entity';
 import type { PreferencesRepository } from './repository';
 
 function uid(): string {
-  return getAuth().currentUser?.uid ?? 'anonymous';
+  const current = getAuth().currentUser;
+  if (!current) {
+    throw new Error('settings/auth-required: no authenticated Firebase user');
+  }
+  return current.uid;
 }
 
 function ref() {

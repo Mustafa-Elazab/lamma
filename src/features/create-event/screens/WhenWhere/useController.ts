@@ -9,22 +9,18 @@ import { useLanguage } from '../../../../app/localization';
 import type { CreateEventStackParamList } from '../../../../navigation/types';
 import { formatDateShort, formatTime } from '../../../../utils/format';
 import { useCreateEventContext } from '../../CreateEventProvider';
-import type { GeoPlace } from '../../core/geocoding';
+import type { EventLocation } from '../../components/LocationPickerModal';
 import {
   combineDateAndMinutes,
   MS_PER_DAY,
   minutesOfDay,
   startOfDay,
-  timezoneLabel,
-  TIMEZONE_OPTIONS,
 } from '../../components/dateTime';
-import { wizardSteps } from '../steps';
 
 export type ActivePicker =
   | 'date'
   | 'start'
   | 'end'
-  | 'timezone'
   | 'location'
   | null;
 
@@ -39,8 +35,6 @@ export function useWhenWhereController() {
   const { draft, update, whenWhere } = useCreateEventContext();
   const [picker, setPicker] = useState<ActivePicker>(null);
 
-  const steps = useMemo(() => wizardSteps(t), [t]);
-
   const dateLabel = draft.startAt
     ? formatDateShort(draft.startAt, language)
     : undefined;
@@ -50,8 +44,6 @@ export function useWhenWhereController() {
   const endLabel = draft.endAt
     ? formatTime(draft.endAt, language)
     : undefined;
-  const tzLabel = timezoneLabel(draft.timezone);
-
   const dateValue = useMemo(
     () => (draft.startAt ? new Date(draft.startAt) : new Date()),
     [draft.startAt],
@@ -112,27 +104,13 @@ export function useWhenWhereController() {
     [draft.startAt, update],
   );
 
-  const onSelectTimezone = useCallback(
-    (value: string) => update({ timezone: value }),
-    [update],
-  );
-
-  const setVenue = useCallback(
-    (venueName: string) => update({ venueName }),
-    [update],
-  );
-  const setAddress = useCallback(
-    (areaAddress: string) => update({ areaAddress }),
-    [update],
-  );
-
-  const onSelectPlace = useCallback(
-    (place: GeoPlace) => {
+  const onConfirmLocation = useCallback(
+    (location: EventLocation) => {
       update({
-        venueName: draft.venueName.trim() || place.name,
-        areaAddress: place.displayName,
-        latitude: place.latitude,
-        longitude: place.longitude,
+        venueName: draft.venueName.trim() || location.label,
+        areaAddress: location.address,
+        latitude: location.lat,
+        longitude: location.lng,
       });
     },
     [draft.venueName, update],
@@ -148,15 +126,12 @@ export function useWhenWhereController() {
   return {
     t,
     draft,
-    steps,
     whenWhere,
     picker,
     setPicker,
-    timezoneOptions: TIMEZONE_OPTIONS,
     dateLabel,
     startLabel,
     endLabel,
-    tzLabel,
     dateValue,
     startValue: dateValue,
     endValue,
@@ -164,10 +139,7 @@ export function useWhenWhereController() {
     onPickDate,
     onPickStart,
     onPickEnd,
-    onSelectTimezone,
-    onSelectPlace,
-    setVenue,
-    setAddress,
+    onConfirmLocation,
     goBack,
     goNext,
   };

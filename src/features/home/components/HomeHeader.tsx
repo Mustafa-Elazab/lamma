@@ -69,7 +69,7 @@ function createStyles(theme: Theme) {
       justifyContent: 'space-between',
     },
     logoBlock: { gap: theme.spacing.xs },
-    logo: { width: 118, height: 40, resizeMode: 'contain' },
+    logo: { width: 130, height: 52, resizeMode: 'contain' },
     // A small motif band under the logo as a branded accent divider.
     motifBand: { width: 96, height: 12, opacity: 0.9 },
     userBlock: {
@@ -78,6 +78,10 @@ function createStyles(theme: Theme) {
       gap: theme.spacing.sm,
     },
     greeting: { alignItems: 'flex-end' },
-    tagline: { letterSpacing: 1.2, marginTop: theme.spacing.sm },
+    tagline: {
+      letterSpacing: 2,
+      fontSize: 9,
+      marginTop: theme.spacing.xs,
+    },
   });
 }

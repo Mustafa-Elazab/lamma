@@ -8,6 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { I18nManager } from 'react-native';
+import RNRestart from 'react-native-restart';
 
 import {
   createI18n,
@@ -69,17 +70,21 @@ export function LanguageProvider({
     };
   }, []);
 
-  const setLanguage = useCallback(async (next: AppLanguage) => {
-    await AsyncStorage.setItem(STORAGE_KEY, next);
-    const { i18n } = await import('./i18n');
-    await i18n.changeLanguage(next);
-    setLanguageState(next);
-    const shouldBeRTL = isRTLLanguage(next);
-    if (I18nManager.isRTL !== shouldBeRTL) {
+  const setLanguage = useCallback(
+    async (next: AppLanguage) => {
+      if (next === language) {
+        return;
+      }
+      await AsyncStorage.setItem(STORAGE_KEY, next);
+      const shouldBeRTL = isRTLLanguage(next);
       I18nManager.allowRTL(shouldBeRTL);
       I18nManager.forceRTL(shouldBeRTL);
-    }
-  }, []);
+      // Yoga and native navigation only rebuild every mounted screen in the
+      // new direction after a full process-level React Native restart.
+      RNRestart.Restart(`language:${next}`);
+    },
+    [language],
+  );
 
   const value = useMemo<LanguageContextValue>(
     () => ({

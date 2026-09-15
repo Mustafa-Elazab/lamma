@@ -21,7 +21,15 @@ export function usePreviewController() {
   const { language } = useLanguage();
   const navigation =
     useNavigation<NavigationProp<CreateEventStackParamList>>();
-  const { draft, update, publish, publishable, isPublishing, reset } =
+  const {
+    draft,
+    update,
+    publish,
+    publishable,
+    isPublishing,
+    publishError,
+    reset,
+  } =
     useCreateEventContext();
 
   const steps = useMemo(() => wizardSteps(t), [t]);
@@ -76,6 +84,7 @@ export function usePreviewController() {
     locationLabel,
     publishable,
     isPublishing,
+    publishError,
     setVisibility,
     goBack,
     onPublish,

@@ -10,7 +10,9 @@ coming — with first‑class Arabic + English (RTL) support and a warm, Egypt�
 ## Highlights
 
 - **Design system first** — tokens (`src/design-system/theme/tokens.ts`) drive every screen;
-  no hardcoded colors in screens. Atoms → molecules → organisms → templates, all typed.
+  no hardcoded colors in screens. Light and dark token sets propagate live through the
+  theme context; system mode follows the native color scheme. Atoms → molecules →
+  organisms → templates, all typed.
 - **Bottom tab bar is the root navigator** — Home / Discover / Create / Notifications / Profile.
 - **Feature modules** — each feature has `core/{entity,repository,hooks,queryKeys}` with a
   **local + Firebase repository split** selected at runtime, and screens as
@@ -26,7 +28,7 @@ coming — with first‑class Arabic + English (RTL) support and a warm, Egypt�
 Onboarding (always shown to first-time users) · Auth (guest/Google/Apple) ·
 Home (Upcoming/Hosting/Past, featured card — no floating FAB, the Create tab is used) ·
 Create Event wizard (Basics → When & Where → Choose Theme → Preview, with **native date/time
-pickers**, an **OpenStreetMap** location picker, and draft autosave/resume) ·
+pickers**, a **Google Maps + OpenStreetMap search** location picker, and draft autosave/resume) ·
 Event Details · Guest List · Share Invite · Discover · Notifications feed ·
 Profile & Settings (Edit profile, Language, Notifications, Appearance, My drafts, Saved
 themes, Help, Sign out).
@@ -114,6 +116,44 @@ Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid
 `users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
 `users/{uid}/meta/preferences`.
 
+The repository includes `firestore.rules` and `firebase.json`. Deploy the reviewed rules
+with `firebase deploy --only firestore:rules`. Event creation requires both `hostId` and
+`ownerId` to equal the fresh Firebase ID token's `uid`; user subcollections are restricted
+to that same uid.
+
+The prior event-write failure had two concrete client/rules contract problems: no Firestore
+rules were versioned with the app, and the event repository silently substituted the string
+`anonymous` when Firebase Auth had no current user. A protected write could therefore carry
+`hostId: "anonymous"` while the rules evaluated an absent or different `request.auth.uid`,
+resulting in `permission-denied`. Event creation now rejects missing auth, force-refreshes
+and validates the ID token immediately before writing, writes matching `hostId` and
+`ownerId`, awaits both the write and read-back, and retains the draft on any failure. The
+repository logs the exact payload and sanitized Firestore result/error at the write
+boundary (never the token itself).
+
+### Cloud Functions decision
+
+Basic event creation remains a direct, awaited client Firestore write protected by security
+rules; a callable function adds no trust or consistency benefit for that operation.
+
+One server-side function is required by the current data model:
+`updateEventRsvpCounters` in `functions/src/index.ts` recalculates `goingCount` and
+`attendeeCount` from the RSVP map after event writes. Rules prevent clients from changing
+those aggregate fields directly. Deploy it with:
+
+```sh
+npm --prefix functions install
+npm --prefix functions run build
+firebase deploy --only functions:updateEventRsvpCounters
+```
+
+No invite-slug function is added because invite links currently use Firestore's unique
+event document ID, not a user-facing slug. No notification fan-out function is added
+because the current publish model has no invitee uid list or publish-state transition to
+fan out; adding one now would invent a production data contract. When either feature is
+introduced, unique slug allocation, invite notification fan-out, and any client-untrusted
+publish validation belong in callable functions/triggers rather than client code.
+
 To develop **without** native Firebase config, set `firebaseEnabled` to `false` — the app
 falls back to the empty in-memory dev repositories described above.
 
@@ -134,18 +174,48 @@ npx react-native-bootsplash generate src/assets/branding/lamma_logo_exact_transp
   --platforms=android,ios --background=FFF8F4 --logo-width=180
 ```
 
-## Maps & location (OpenStreetMap)
+## Launcher icons
 
-The Create Event wizard resolves **real** places — there are no hardcoded locations. The
-location picker (`src/features/create-event/components/LocationPickerModal.tsx`) searches the
-free [OpenStreetMap Nominatim](https://nominatim.org/) API and stores the selected place's
-name and latitude/longitude on the draft (`src/features/create-event/core/geocoding.ts`
-exposes `searchPlaces` and `reverseGeocode`). Event Details' **Open in maps** opens the
-device's Apple/Google Maps at those coordinates. Nominatim's usage policy asks for a
-descriptive `User-Agent` (set for you) and low request volume (search input is debounced).
+The launcher uses `src/assets/branding/app_icon_source_1024.png`. Regenerate every Android
+legacy/round/adaptive density and every iPhone/iPad/App Store icon with:
+
+```sh
+npm run icons
+```
+
+The script uses `sharp`, writes adaptive icon XML plus mipmap foregrounds on Android, and
+updates the image files referenced by the iOS `AppIcon.appiconset`.
+
+## Maps & location (Google Maps + OpenStreetMap)
+
+The Create Event location picker renders Google Maps and uses the free
+[OpenStreetMap Nominatim](https://nominatim.org/) API for debounced place search and reverse
+geocoding. Tapping the map, dragging the marker, or choosing a search result changes the
+coordinate. Confirming stores the resolved label, full address, latitude, and longitude.
+The Google Maps API key is consumed only by native configuration and is never embedded in
+JavaScript.
+
+Configure a key with both **Maps SDK for Android** and **Maps SDK for iOS** enabled:
+
+- **Android:** open the untracked `android/local.properties` file and add this exact line:
+  `GOOGLE_MAPS_API_KEY=your_real_key`. Gradle injects it into the
+  `com.google.android.geo.API_KEY` manifest metadata. CI may instead set the
+  `GOOGLE_MAPS_API_KEY` environment variable.
+- **iOS:** in Xcode, select the **Lamma target → Build Settings → All**, click **+ → Add
+  User-Defined Setting**, name it `GOOGLE_MAPS_API_KEY`, and paste the key as its value for
+  Debug and Release. `Info.plist` expands that build setting and `AppDelegate.swift`
+  supplies it to `GMSServices`.
+
+Restrict production keys by Android package/signing certificate and iOS bundle identifier.
+Nominatim requests use an identifying User-Agent and search is debounced to respect its
+public usage policy. Event Details' **Open in maps** opens the selected coordinates in the
+device's mapping app.
 
 Dates and times use native pickers via `@react-native-community/datetimepicker`, formatted as
-the product copy (e.g. `Fri, 18 Dec · 8:00 PM`).
+the product copy (e.g. `Fri, 18 Dec · 8:00 PM`). The picker interprets values in the
+device's local time, stores the resulting UTC epoch milliseconds, and Home/Event Details
+render those timestamps in the viewer's device-local time. There is intentionally no
+event-timezone field or picker.
 
 ## Deep links & Android App Links
 
@@ -177,5 +247,7 @@ For iOS universal links, host `https://lamma.app/.well-known/apple-app-site-asso
 ## Localization & RTL
 
 Strings live in `src/app/localization/resources/{en,ar}.ts` behind a typed schema. Switching
-to Arabic flips layout direction via `I18nManager`. A parity test guarantees `en` and `ar`
-never drift apart.
+between English and Arabic persists the choice, calls `I18nManager.allowRTL/forceRTL`, and
+performs a full native restart with `react-native-restart` so every mounted native and React
+Navigation view adopts the new direction. A parity test guarantees `en` and `ar` never
+drift apart.

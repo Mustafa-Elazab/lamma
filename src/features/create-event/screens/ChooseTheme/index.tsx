@@ -4,12 +4,11 @@ import { ImageBackground, ScrollView, View } from 'react-native';
 import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
+import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
 import { AppThemeSwatch } from '../../../../design-system/organisms/ThemeSwatch';
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
-import { CreateHeader } from '../../components/CreateHeader';
-import { WIZARD_STEP } from '../steps';
 import { createStyles } from './styles';
 import { useChooseThemeController } from './useController';
 
@@ -22,10 +21,8 @@ export function ChooseThemeScreen(): React.ReactElement {
     <AppScreenTemplate
       edges={['top']}
       header={
-        <CreateHeader
+        <AppScreenHeader
           title={c.t('create.chooseTheme')}
-          steps={c.steps}
-          currentStep={WIZARD_STEP.theme}
           onBack={c.goBack}
         />
       }
@@ -43,21 +40,21 @@ export function ChooseThemeScreen(): React.ReactElement {
         imageStyle={styles.heroImage}
       >
         <View style={styles.heroOverlay}>
-          <AppText variant="heading" color="textInverse" numberOfLines={2}>
+          <AppText variant="heading" numberOfLines={2} align="center">
             {c.draft.title.trim() || c.t('create.eventTitle')}
           </AppText>
           {c.dateLabel ? (
             <View style={styles.metaRow}>
-              <AppIcon name="calendar" size={16} color="textInverse" />
-              <AppText variant="caption" color="textInverse">
+              <AppIcon name="calendar" size={16} color="text" />
+              <AppText variant="caption">
                 {c.dateLabel}
               </AppText>
             </View>
           ) : null}
           {c.locationLabel ? (
             <View style={styles.metaRow}>
-              <AppIcon name="location" size={16} color="textInverse" />
-              <AppText variant="caption" color="textInverse">
+              <AppIcon name="location" size={16} color="text" />
+              <AppText variant="caption">
                 {c.locationLabel}
               </AppText>
             </View>

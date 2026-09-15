@@ -16,6 +16,8 @@ end
 
 target 'Lamma' do
   config = use_native_modules!
+  maps_path = '../node_modules/react-native-maps'
+  pod 'react-native-maps/Google', :path => maps_path
 
   use_react_native!(
     :path => config[:reactNativePath],

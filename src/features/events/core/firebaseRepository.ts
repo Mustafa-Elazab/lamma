@@ -35,7 +35,11 @@ type SnapshotLike = { id: string; data: () => unknown };
 const COLLECTION = 'events';
 
 function currentUid(): string {
-  return getAuth().currentUser?.uid ?? 'anonymous';
+  const uid = getAuth().currentUser?.uid;
+  if (!uid) {
+    throw new Error('events/auth-required: no authenticated Firebase user');
+  }
+  return uid;
 }
 
 function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
@@ -50,7 +54,6 @@ function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
     themeKey: (data.themeKey as LammaEvent['themeKey']) ?? 'generic',
     startAt: (data.startAt as number) ?? 0,
     endAt: (data.endAt as number) ?? 0,
-    timezone: (data.timezone as string) ?? 'Africa/Cairo',
     venueName: (data.venueName as string) ?? '',
     areaAddress: (data.areaAddress as string) ?? '',
     latitude: (data.latitude as number | null) ?? null,
@@ -160,8 +163,24 @@ export class FirebaseEventRepository implements EventRepository {
   }
 
   async createEvent(input: CreateEventInput): Promise<LammaEvent> {
-    const uid = currentUid();
     const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error(
+        'events/auth-required: sign in before creating an event',
+      );
+    }
+
+    // Force-refresh immediately before the protected write. This catches
+    // revoked/expired sessions here instead of surfacing an opaque Firestore
+    // permission-denied caused by a stale token.
+    const tokenResult = await user.getIdTokenResult(true);
+    const expiresAt = Date.parse(tokenResult.expirationTime);
+    if (!tokenResult.token || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+      throw new Error('events/invalid-token: Firebase ID token is not valid');
+    }
+
+    const uid = user.uid;
     const payload = {
       title: input.title,
       description: input.description,
@@ -170,14 +189,14 @@ export class FirebaseEventRepository implements EventRepository {
       themeKey: input.themeKey,
       startAt: input.startAt,
       endAt: input.endAt,
-      timezone: input.timezone,
       venueName: input.venueName,
       areaAddress: input.areaAddress,
       latitude: input.latitude ?? null,
       longitude: input.longitude ?? null,
       hostId: uid,
-      hostName: auth.currentUser?.displayName ?? 'Host',
-      hostPhoto: auth.currentUser?.photoURL ?? null,
+      ownerId: uid,
+      hostName: user.displayName ?? 'Host',
+      hostPhoto: user.photoURL ?? null,
       attendees: [],
       attendeeCount: 1,
       goingCount: 1,
@@ -186,8 +205,38 @@ export class FirebaseEventRepository implements EventRepository {
       updates: [],
       createdAt: Date.now(),
     };
-    const ref = await addDoc(collection(this.db, COLLECTION), payload);
-    const snapshot = await getDoc(ref);
-    return mapDoc(snapshot, uid);
+
+    // Keep these diagnostics at the actual network boundary. They intentionally
+    // exclude the token while recording the uid, expiry, exact payload, and
+    // Firestore response/error needed to diagnose security-rule failures.
+    console.info('[events.create] Firestore write request', {
+      uid,
+      tokenExpirationTime: tokenResult.expirationTime,
+      payload,
+    });
+
+    try {
+      const ref = await addDoc(collection(this.db, COLLECTION), payload);
+      console.info('[events.create] Firestore write response', {
+        id: ref.id,
+        path: ref.path,
+      });
+      const snapshot = await getDoc(ref);
+      if (!snapshot.exists()) {
+        throw new Error(
+          `events/write-not-readable: ${ref.path} was created but cannot be read`,
+        );
+      }
+      return mapDoc(snapshot, uid);
+    } catch (error) {
+      const details = error as { code?: string; message?: string };
+      console.error('[events.create] Firestore write failed', {
+        uid,
+        payload,
+        code: details.code ?? 'unknown',
+        message: details.message ?? String(error),
+      });
+      throw error;
+    }
   }
 }

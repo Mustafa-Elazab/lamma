@@ -30,6 +30,7 @@ export function CategoryPicker({
           icon={CATEGORY_ICON[category]}
           selected={value === category}
           onPress={() => onChange(category)}
+          style={styles.item}
         />
       ))}
     </View>
@@ -42,6 +43,11 @@ function createStyles(theme: Theme) {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: theme.spacing.sm,
+    },
+    item: {
+      width: '31.5%',
+      justifyContent: 'center',
+      paddingHorizontal: theme.spacing.sm,
     },
   });
 }

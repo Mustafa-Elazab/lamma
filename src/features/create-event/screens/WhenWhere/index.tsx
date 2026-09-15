@@ -2,20 +2,25 @@ import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import React, { useCallback, useMemo } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import {
+  Image,
+  ImageBackground,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
+import { branding, headerImages } from '../../../../assets';
 import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppIcon } from '../../../../design-system/atoms/Icon';
-import { AppInput } from '../../../../design-system/atoms/Input';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
-import { CreateHeader } from '../../components/CreateHeader';
 import { DetailRow } from '../../components/DetailRow';
 import { LocationPickerModal } from '../../components/LocationPickerModal';
-import { OptionPickerModal } from '../../components/OptionPickerModal';
-import { WIZARD_STEP } from '../steps';
 import { createStyles } from './styles';
 import { useWhenWhereController, type ActivePicker } from './useController';
 
@@ -28,7 +33,7 @@ export function WhenWhereScreen(): React.ReactElement {
   const { picker, setPicker, onPickDate, onPickStart, onPickEnd } = c;
 
   const handleNativeChange = useCallback(
-    (mode: Exclude<ActivePicker, 'timezone' | 'location' | null>) =>
+    (mode: Exclude<ActivePicker, 'location' | null>) =>
       (event: DateTimePickerEvent, selected?: Date) => {
         // Android renders a dialog and fires once; close it either way.
         if (Platform.OS !== 'ios') {
@@ -52,12 +57,25 @@ export function WhenWhereScreen(): React.ReactElement {
     <AppScreenTemplate
       edges={['top']}
       header={
-        <CreateHeader
-          title={c.t('create.whenWhere')}
-          steps={c.steps}
-          currentStep={WIZARD_STEP.whenWhere}
-          onBack={c.goBack}
-        />
+        <ImageBackground
+          source={headerImages.egyptMotif}
+          resizeMode="contain"
+          imageStyle={local.headerMotif}
+          style={local.brandedHeader}
+        >
+          <View style={local.headerTitleRow}>
+            <Pressable onPress={c.goBack} hitSlop={8} style={local.backButton}>
+              <AppIcon name="back" size={28} color="textMuted" />
+            </Pressable>
+            <View>
+              <AppText variant="heading">{c.t('create.whenWhere')}</AppText>
+              <AppText variant="caption" color="textMuted" style={local.eyebrow}>
+                {c.t('create.title').toUpperCase()}
+              </AppText>
+            </View>
+          </View>
+          <Image source={branding.logo} style={local.headerLogo} />
+        </ImageBackground>
       }
       footer={
         <AppButton
@@ -97,12 +115,6 @@ export function WhenWhereScreen(): React.ReactElement {
             placeholder={!c.endLabel}
             onPress={() => setPicker('end')}
           />
-          <DetailRow
-            icon="language"
-            label={c.t('create.timezone')}
-            value={c.tzLabel}
-            onPress={() => setPicker('timezone')}
-          />
         </View>
       </View>
 
@@ -113,31 +125,54 @@ export function WhenWhereScreen(): React.ReactElement {
             {c.t('create.whereHint')}
           </AppText>
         </View>
-        <AppInput
+        <DetailRow
+          icon="location"
           label={c.t('create.venueName')}
-          value={c.draft.venueName}
-          onChangeText={c.setVenue}
-          leftIcon="location"
-        />
-        <AppInput
-          label={c.t('create.areaAddress')}
-          value={c.draft.areaAddress}
-          onChangeText={c.setAddress}
-          leftIcon="map"
+          value={c.draft.venueName || c.t('create.pickOnMap')}
+          placeholder={!c.draft.venueName}
+          onPress={() => setPicker('location')}
         />
         <DetailRow
           icon="map"
-          label={c.t('create.where')}
-          value={c.t('create.pickOnMap')}
+          label={c.t('create.areaAddress')}
+          value={c.draft.areaAddress || c.t('create.pickOnMap')}
+          placeholder={!c.draft.areaAddress}
           onPress={() => setPicker('location')}
         />
         {c.hasCoordinates ? (
-          <View style={local.mapPreview}>
-            <AppIcon name="navigation" size={22} color="primary" />
-            <AppText variant="caption" color="textMuted">
-              {c.draft.latitude?.toFixed(5)}, {c.draft.longitude?.toFixed(5)}
-            </AppText>
-          </View>
+          <Pressable
+            style={local.mapPreview}
+            onPress={() => setPicker('location')}
+          >
+            <MapView
+              key={`${c.draft.latitude},${c.draft.longitude}`}
+              provider={PROVIDER_GOOGLE}
+              pointerEvents="none"
+              style={StyleSheet.absoluteFill}
+              initialRegion={{
+                latitude: c.draft.latitude!,
+                longitude: c.draft.longitude!,
+                latitudeDelta: 0.02,
+                longitudeDelta: 0.02,
+              }}
+              toolbarEnabled={false}
+            >
+              <Marker
+                coordinate={{
+                  latitude: c.draft.latitude!,
+                  longitude: c.draft.longitude!,
+                }}
+              />
+            </MapView>
+            <View style={local.mapLabel}>
+              <AppText variant="bodyStrong" numberOfLines={1}>
+                {c.draft.venueName}
+              </AppText>
+              <AppText variant="caption" color="textMuted" numberOfLines={1}>
+                {c.draft.areaAddress}
+              </AppText>
+            </View>
+          </Pressable>
         ) : null}
       </View>
 
@@ -167,19 +202,20 @@ export function WhenWhereScreen(): React.ReactElement {
         />
       ) : null}
 
-      <OptionPickerModal
-        visible={picker === 'timezone'}
-        title={c.t('create.selectTimezone')}
-        options={c.timezoneOptions}
-        selectedValue={c.draft.timezone}
-        onSelect={c.onSelectTimezone}
-        onClose={() => setPicker(null)}
-      />
-
       <LocationPickerModal
         visible={picker === 'location'}
         initialQuery={c.draft.areaAddress || c.draft.venueName}
-        onSelect={c.onSelectPlace}
+        initialLocation={
+          c.hasCoordinates
+            ? {
+                label: c.draft.venueName,
+                address: c.draft.areaAddress,
+                lat: c.draft.latitude!,
+                lng: c.draft.longitude!,
+              }
+            : undefined
+        }
+        onConfirm={c.onConfirmLocation}
         onClose={() => setPicker(null)}
       />
     </AppScreenTemplate>
@@ -189,15 +225,50 @@ export function WhenWhereScreen(): React.ReactElement {
 function createLocalStyles(theme: Theme) {
   return StyleSheet.create({
     mapPreview: {
+      height: 136,
+      borderRadius: theme.radius.md,
+      overflow: 'hidden',
+    },
+    mapLabel: {
+      position: 'absolute',
+      top: theme.spacing.lg,
+      right: theme.spacing.lg,
+      maxWidth: '56%',
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.surface,
+      ...theme.shadows.soft,
+    },
+    brandedHeader: {
+      minHeight: 108,
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      paddingHorizontal: theme.spacing.lg,
+      paddingTop: theme.spacing.md,
+      paddingBottom: theme.spacing.lg,
+    },
+    headerMotif: {
+      opacity: 0.18,
+      left: 120,
+      width: '72%',
+    },
+    headerTitleRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: theme.spacing.sm,
-      height: 56,
-      paddingHorizontal: theme.spacing.lg,
-      borderRadius: theme.radius.md,
-      backgroundColor: theme.colors.surfaceWarm,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
+    },
+    backButton: {
+      width: 36,
+      height: 44,
+      justifyContent: 'center',
+    },
+    eyebrow: { letterSpacing: 2.5, fontSize: 10 },
+    headerLogo: {
+      width: 90,
+      height: 48,
+      resizeMode: 'contain',
     },
   });
 }

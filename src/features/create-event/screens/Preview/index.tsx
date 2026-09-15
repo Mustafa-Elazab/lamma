@@ -109,6 +109,11 @@ export function PreviewScreen(): React.ReactElement {
           </Pressable>
         </View>
       </View>
+      {c.publishError ? (
+        <AppText variant="caption" color="error" align="center">
+          {c.t('create.publishError')}
+        </AppText>
+      ) : null}
     </AppScreenTemplate>
   );
 }

@@ -26,5 +26,22 @@ export function createStyles(theme: Theme) {
       marginHorizontal: theme.spacing.lg,
     },
     footerLoader: { paddingVertical: theme.spacing.lg },
+    createAction: {
+      position: 'absolute',
+      right: theme.spacing.lg,
+      bottom: theme.spacing.lg,
+      alignItems: 'center',
+      gap: theme.spacing.xs,
+    },
+    createButton: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.primary,
+      ...theme.shadows.floating,
+    },
+    createButtonPressed: { backgroundColor: theme.colors.primaryPressed },
   });
 }

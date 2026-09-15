@@ -76,6 +76,12 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
                 </AppText>
                 <AppText variant="bodyStrong">{event.hostName}</AppText>
               </View>
+              <View style={styles.contactHost}>
+                <AppText variant="label" color="textMuted">
+                  {c.t('event.contactHost')}
+                </AppText>
+                <AppIcon name="back" size={16} color="textMuted" />
+              </View>
             </View>
 
             <View style={styles.infoCard}>

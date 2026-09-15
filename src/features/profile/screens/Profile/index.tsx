@@ -7,6 +7,7 @@ import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { AppListItem } from '../../../../design-system/molecules/ListItem';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
+import { HomeHeader } from '../../../home/components/HomeHeader';
 import { createStyles } from './styles';
 import type {} from './types';
 import { useProfileController } from './useController';
@@ -18,6 +19,7 @@ export function ProfileScreen(): React.ReactElement {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      <HomeHeader greetingName={c.name.split(' ')[0]} avatar={c.avatar} />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
