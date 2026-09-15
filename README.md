@@ -60,7 +60,7 @@ Requires Node >= 22.11 and a working React Native environment
 
 ```sh
 # 1. Install JS dependencies
-npm install --legacy-peer-deps
+yarn install --frozen-lockfile
 
 # 2. iOS only: install pods
 bundle install
@@ -89,9 +89,20 @@ exclusively by Jest and never bundled into the app.
 
 ```sh
 npm test           # Jest unit tests (repositories, hooks helpers, validators, i18n parity)
-npx tsc --noEmit   # TypeScript type-check (no `any`)
+yarn typecheck     # TypeScript type-check (no `any`)
 npm run lint       # ESLint
 ```
+
+## Development observability
+
+Development builds connect to Reactotron before the app is registered. Start Reactotron on
+the development machine to inspect structured application logs, errors, Firestore writes,
+analytics events, push notifications, and map startup. The import and connection are guarded
+by `__DEV__`; Reactotron is a development dependency and is removed from release bundles.
+
+The navigation root is wrapped in a global error boundary. Its branded fallback keeps the
+app usable with a **Try again** action, while non-fatal errors are sent to Firebase
+Crashlytics when the native Firebase app is available.
 
 ## Firebase (default backend)
 
@@ -112,6 +123,21 @@ npm run lint       # ESLint
 Guest → provider **account linking** preserves a guest's data when they upgrade, and
 `updateProfile` backs the Edit Profile screen.
 
+The committed Android config is valid for application id `com.lamma` and is processed by the
+Google Services Gradle plugin. The iOS plist is not committed, so iOS Firebase builds still
+require that file. Analytics records navigation screen views plus `sign_in_method`,
+`event_created`, `event_published`, `rsvp_submitted`, and `invite_shared`.
+
+Messaging requests notification permission, stores the current FCM token in AsyncStorage,
+refreshes it when Firebase rotates it, and registers foreground/background/open handlers.
+Notification data should contain `eventId` (or `event_id`); tapping it opens
+`https://lamma.app/e/{id}` through the existing navigation deep-link configuration. For iOS,
+enable **Push Notifications** and **Background Modes → Remote notifications** for the Lamma
+target and upload an APNs authentication key to Firebase.
+
+Remote Config fetches and activates at startup with safe in-code defaults for
+`event_discovery_enabled`, `messaging_enabled`, and `max_event_guest_count`.
+
 Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid),
 `users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
 `users/{uid}/meta/preferences`.
@@ -130,6 +156,26 @@ and validates the ID token immediately before writing, writes matching `hostId` 
 `ownerId`, awaits both the write and read-back, and retains the draft on any failure. The
 repository logs the exact payload and sanitized Firestore result/error at the write
 boundary (never the token itself).
+
+## GitHub Actions and release secrets
+
+Pull requests to `main` run dependency installation, ESLint, TypeScript, Jest, and an Android
+debug assembly. Pushes to `main` assemble and upload a release APK.
+
+Configure these GitHub Actions secrets for a signed, map-enabled release:
+
+- `ANDROID_KEYSTORE_BASE64` — base64-encoded release keystore
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+- `GOOGLE_MAPS_API_KEY` — restricted Android Maps SDK key
+
+If any signing secret is absent, CI deliberately produces an **unsigned** release APK and
+prints a warning; it never falls back to the debug key. If the Maps key is absent, the build
+continues and the location picker shows a visible configuration error. Android Firebase does
+not need a CI secret while the repository's `google-services.json` remains committed. If that
+policy changes, provision the file as a secret before the Gradle step rather than inventing
+credentials.
 
 ### Cloud Functions decision
 
