@@ -1,97 +1,114 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Lamma — لمة
 
-# Getting Started
+**Plan, invite and celebrate together.** Lamma is a standalone React Native (CLI, RN 0.87
++ TypeScript) app for creating beautiful gatherings, inviting people, and knowing who's
+coming — with first‑class Arabic + English (RTL) support and a warm, Egypt‑inspired brand.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+> Authentication is **Google, Apple and Anonymous (guest) only**. There is intentionally
+> **no phone number / OTP** anywhere in the app.
 
-## Step 1: Start Metro
+## Highlights
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **Design system first** — tokens (`src/design-system/theme/tokens.ts`) drive every screen;
+  no hardcoded colors in screens. Atoms → molecules → organisms → templates, all typed.
+- **Bottom tab bar is the root navigator** — Home / Discover / Create / Notifications / Profile.
+- **Feature modules** — each feature has `core/{entity,repository,hooks,queryKeys}` with a
+  **local + Firebase repository split** selected at runtime, and screens as
+  `screens/<Name>/{index,styles,types,useController}`.
+- **i18n + RTL from the start** — `en` and `ar` resource bundles with a typed schema and
+  parity tests; language toggle everywhere.
+- **Deep links** — invite links use `lamma.app/e/{id}` (`lamma://`, `https://lamma.app`).
+- **Real assets** — onboarding art, event covers, theme art, share chrome and SVG icons all
+  live in `src/assets` (no placeholder gradients for theme art).
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Screens
+
+Onboarding · Auth (guest/Google/Apple) · Home (Upcoming/Hosting/Past, featured card, FAB) ·
+Create Event wizard (Basics → When & Where → Choose Theme → Preview, with draft autosave) ·
+Event Details · Guest List · Share Invite · Discover · Notifications feed ·
+Profile & Settings (Language, Notifications, Appearance, My drafts, Saved themes, Help,
+Sign out).
+
+## Project structure
+
+```
+src/
+  app/                  # providers, localization (i18n + LanguageProvider), query client, splash
+  assets/               # branding, onboarding, event covers/themes, share, icons (+ index)
+  config/               # env flags (firebaseEnabled, googleWebClientId, deepLinkHost)
+  design-system/        # theme, atoms, molecules, organisms, templates (barrel exports)
+  features/
+    auth/               # Google/Apple/Anonymous + account linking, onboarding
+    events/             # events entity/repos/hooks + presenters (home, details, guests, share)
+    create-event/       # draft entity/validators/repos + wizard provider & screens
+    discover/           # public browse/search
+    notifications/      # inbox feed
+    profile/            # profile & settings entry
+    settings/           # preferences (notifications/appearance/saved themes) + sub-screens
+  navigation/           # root/tab/stack navigators, deep-link config
+  utils/                # pure helpers (date/time formatting) + tests
+```
+
+## Getting started
+
+Requires Node >= 22.11 and a working React Native environment
+([set up your environment](https://reactnative.dev/docs/set-up-your-environment)).
 
 ```sh
-# Using npm
+# 1. Install JS dependencies
+npm install --legacy-peer-deps
+
+# 2. iOS only: install pods
+bundle install
+bundle exec pod install --project-directory=ios
+
+# 3. Start Metro
 npm start
 
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+# 4. Run the app (in another terminal)
 npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# or
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+The app boots straight into the tab bar and is **fully usable without any backend**: when
+`firebaseEnabled` is `false` (the default in `src/config/env.ts`), local repositories with
+realistic seed data back every feature (auth, events, drafts, notifications, preferences).
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Quality checks
 
-## Step 3: Modify your app
+```sh
+npm test           # Jest unit tests (repositories, hooks helpers, validators, i18n parity)
+npx tsc --noEmit   # TypeScript type-check (no `any`)
+npm run lint       # ESLint
+```
 
-Now that you have successfully run the app, let's make changes!
+## Enabling Firebase
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Firebase is integrated behind a flag so development/CI never require native config files.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+1. Create a Firebase project and enable **Authentication** providers: Google, Apple, and
+   Anonymous. (Do **not** enable Phone — the app never uses it.)
+2. Enable **Cloud Firestore**.
+3. Add the platform apps and config files:
+   - Android: `android/app/google-services.json`
+   - iOS: `ios/GoogleService-Info.plist` (add to the Xcode project)
+4. Google Sign-In: copy your **Web client ID** (OAuth 2.0) into
+   `googleWebClientId` in `src/config/env.ts`.
+5. Apple Sign-In: enable the *Sign in with Apple* capability in Xcode (iOS only).
+6. Flip `firebaseEnabled` to `true` in `src/config/env.ts`.
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Once enabled, the `FirebaseAuthRepository`, `FirebaseEventRepository`,
+`FirebaseDraftRepository`, `FirebaseNotificationRepository` and
+`FirebasePreferencesRepository` are used automatically. Guest → provider **account linking**
+is handled so a guest's data is preserved when they upgrade.
 
-## Congratulations! :tada:
+Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid),
+`users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
+`users/{uid}/meta/preferences`.
 
-You've successfully run and modified your React Native App. :partying_face:
+## Localization & RTL
 
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Strings live in `src/app/localization/resources/{en,ar}.ts` behind a typed schema. Switching
+to Arabic flips layout direction via `I18nManager`. A parity test guarantees `en` and `ar`
+never drift apart.

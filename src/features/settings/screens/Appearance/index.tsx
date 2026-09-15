@@ -3,24 +3,25 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { useLanguage, type AppLanguage } from '../../../../app/localization';
-import { Icon } from '../../../../design-system/atoms/Icon';
+import { Icon, type IconName } from '../../../../design-system/atoms/Icon';
 import { Text } from '../../../../design-system/atoms/Text';
 import { ScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
 import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
+import { usePreferences, type AppearanceMode } from '../../core';
 
-export function LanguageSettingsScreen(): React.ReactElement {
+export function AppearanceScreen(): React.ReactElement {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { language, setLanguage } = useLanguage();
+  const { preferences, update } = usePreferences();
 
-  const options: { value: AppLanguage; label: string }[] = [
-    { value: 'en', label: t('language.english') },
-    { value: 'ar', label: t('language.arabic') },
+  const options: { value: AppearanceMode; label: string; icon: IconName }[] = [
+    { value: 'light', label: t('settings.light'), icon: 'sun' },
+    { value: 'dark', label: t('settings.dark'), icon: 'sun' },
+    { value: 'system', label: t('settings.system'), icon: 'settings' },
   ];
 
   return (
@@ -28,30 +29,35 @@ export function LanguageSettingsScreen(): React.ReactElement {
       edges={['top']}
       header={
         <ScreenHeader
-          title={t('language.title')}
+          title={t('settings.appearanceTitle')}
           onBack={() => navigation.goBack()}
         />
       }
     >
+      <Text variant="caption" color="textMuted">
+        {t('settings.appearanceHint')}
+      </Text>
       <View style={styles.group}>
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
             {index > 0 ? <View style={styles.divider} /> : null}
             <Pressable
               style={styles.row}
-              onPress={() => void setLanguage(option.value)}
+              onPress={() =>
+                update({ ...preferences, appearance: option.value })
+              }
             >
-              <Text variant="body">{option.label}</Text>
-              {language === option.value ? (
+              <Icon name={option.icon} size={20} color="primary" />
+              <Text variant="body" style={styles.rowLabel}>
+                {option.label}
+              </Text>
+              {preferences.appearance === option.value ? (
                 <Icon name="check" size={22} color="primary" />
               ) : null}
             </Pressable>
           </React.Fragment>
         ))}
       </View>
-      <Text variant="caption" color="textMuted">
-        {t('language.restartHint')}
-      </Text>
     </ScreenTemplate>
   );
 }
@@ -68,9 +74,10 @@ function createStyles(theme: Theme) {
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      gap: theme.spacing.md,
       paddingVertical: theme.spacing.lg,
     },
+    rowLabel: { flex: 1 },
     divider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: theme.colors.border,

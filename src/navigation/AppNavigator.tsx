@@ -4,6 +4,7 @@ import React from 'react';
 import { EventDetailsScreen } from '../features/events/screens/EventDetails';
 import { GuestListScreen } from '../features/events/screens/GuestList';
 import { ShareInviteScreen } from '../features/events/screens/ShareInvite';
+import { AppearanceScreen } from '../features/settings/screens/Appearance';
 import { HelpSupportScreen } from '../features/settings/screens/HelpSupport';
 import { LanguageSettingsScreen } from '../features/settings/screens/LanguageSettings';
 import { MyDraftsScreen } from '../features/settings/screens/MyDrafts';
@@ -39,6 +40,7 @@ export function AppNavigator(): React.ReactElement {
         name="NotificationSettings"
         component={NotificationSettingsScreen}
       />
+      <Stack.Screen name="Appearance" component={AppearanceScreen} />
       <Stack.Screen name="MyDrafts" component={MyDraftsScreen} />
       <Stack.Screen name="SavedThemes" component={SavedThemesScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />

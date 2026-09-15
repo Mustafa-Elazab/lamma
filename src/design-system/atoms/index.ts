@@ -6,3 +6,4 @@ export * from './Icon';
 export * from './Input';
 export * from './Skeleton';
 export * from './Text';
+export * from './Toggle';

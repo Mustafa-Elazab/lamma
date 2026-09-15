@@ -23,6 +23,7 @@ export type AppStackParamList = {
   ShareInvite: { eventId: string };
   LanguageSettings: undefined;
   NotificationSettings: undefined;
+  Appearance: undefined;
   MyDrafts: undefined;
   SavedThemes: undefined;
   HelpSupport: undefined;

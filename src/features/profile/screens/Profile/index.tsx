@@ -1,12 +1,126 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { Avatar } from '../../../../design-system/atoms/Avatar';
+import { Icon } from '../../../../design-system/atoms/Icon';
 import { Text } from '../../../../design-system/atoms/Text';
+import { ListItem } from '../../../../design-system/molecules/ListItem';
+import { useTheme } from '../../../../design-system/theme/ThemeProvider';
+import { createStyles } from './styles';
+import { useProfileController } from './useController';
 
 export function ProfileScreen(): React.ReactElement {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const c = useProfileController();
+
   return (
-    <ScreenTemplate>
-      <Text variant="heading">Profile</Text>
-    </ScreenTemplate>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScrollView
+        contentContainerStyle={contentStyle}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text variant="heading">{c.t('profile.title')}</Text>
+          <Text variant="body" color="textMuted">
+            {c.t('profile.subtitle')}
+          </Text>
+        </View>
+
+        <View style={styles.group}>
+          <View style={[styles.profileCard, cardPad]}>
+            <Avatar source={c.avatar} name={c.name} size={64} showStatus />
+            <View style={styles.profileText}>
+              <Text variant="subheading">{c.name}</Text>
+              <Text variant="caption" color="textMuted">
+                {c.isGuest
+                  ? c.t('profile.upgradePrompt')
+                  : `${c.t('profile.hostedEvents', {
+                      count: c.hostedCount,
+                    })}  ·  ${c.t('profile.joined', { count: 37 })}`}
+              </Text>
+              <Text variant="caption" color="primary">
+                {c.email ?? c.t('settings.defaultBio')}
+              </Text>
+            </View>
+            <Pressable style={styles.editButton}>
+              <Icon name="edit" size={16} color="primary" />
+              <Text variant="label" color="primary">
+                {c.t('common.edit')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.group}>
+          <ListItem
+            title={c.t('profile.language')}
+            subtitle={c.languageLabel}
+            leadingIcon="language"
+            showChevron
+            onPress={c.goLanguage}
+          />
+          <View style={styles.divider} />
+          <ListItem
+            title={c.t('profile.notifications')}
+            subtitle={c.t('profile.notificationsHint')}
+            leadingIcon="bell"
+            leadingIconColor="warning"
+            showChevron
+            onPress={c.goNotifications}
+          />
+          <View style={styles.divider} />
+          <ListItem
+            title={c.t('profile.appearance')}
+            subtitle={c.appearanceLabel}
+            leadingIcon="sun"
+            leadingIconColor="warning"
+            showChevron
+            onPress={c.goAppearance}
+          />
+        </View>
+
+        <View style={styles.group}>
+          <ListItem
+            title={c.t('profile.myDrafts')}
+            subtitle={c.t('profile.myDraftsHint')}
+            leadingIcon="draft"
+            leadingIconColor="success"
+            showChevron
+            onPress={c.goDrafts}
+          />
+          <View style={styles.divider} />
+          <ListItem
+            title={c.t('profile.savedThemes')}
+            subtitle={c.t('profile.savedThemesHint')}
+            leadingIcon="heart"
+            showChevron
+            onPress={c.goSavedThemes}
+          />
+        </View>
+
+        <View style={styles.group}>
+          <ListItem
+            title={c.t('profile.help')}
+            subtitle={c.t('profile.helpHint')}
+            leadingIcon="help"
+            showChevron
+            onPress={c.goHelp}
+          />
+          <View style={styles.divider} />
+          <ListItem
+            title={c.t('profile.signOut')}
+            subtitle={c.t('profile.signOutHint')}
+            leadingIcon="logout"
+            leadingIconColor="error"
+            onPress={() => void c.signOut()}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const contentStyle = { paddingBottom: 120, gap: 16 } as const;
+const cardPad = { paddingVertical: 16 } as const;
