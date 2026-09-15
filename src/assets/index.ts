@@ -59,6 +59,24 @@ export const backgroundImages = {
 export const headerImages = {
   events: require('./headers/header_events.png') as ImageSourcePropType,
   celebrate: require('./headers/header_celebrate.png') as ImageSourcePropType,
+  /** Small tileable Egypt-inspired motif used as a header pattern. */
+  egyptMotif: require('./headers/header_egypt_motif_exact.png') as ImageSourcePropType,
+  egyptMotif2x: require('./headers/header_egypt_motif_exact_2x.png') as ImageSourcePropType,
+  /** Wide banner chrome for the Share Invite screen. */
+  share: require('./headers/share_header.png') as ImageSourcePropType,
+} as const;
+
+export const footerImages = {
+  share: require('./footers/share_footer.png') as ImageSourcePropType,
+  shareExact: require('./footers/share_footer_exact.png') as ImageSourcePropType,
+  shareExact2x: require('./footers/share_footer_exact_2x.png') as ImageSourcePropType,
+} as const;
+
+export const decorationImages = {
+  egyptMotif: require('./decorations/header_egypt_motif_exact.png') as ImageSourcePropType,
+  egyptMotif2x: require('./decorations/header_egypt_motif_exact_2x.png') as ImageSourcePropType,
+  shareFooter: require('./decorations/share_footer_exact.png') as ImageSourcePropType,
+  shareFooter2x: require('./decorations/share_footer_exact_2x.png') as ImageSourcePropType,
 } as const;
 
 export const miscImages = {

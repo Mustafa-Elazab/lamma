@@ -14,6 +14,17 @@ export function createStyles(theme: Theme) {
     headerCenter: { flex: 1, alignItems: 'center', gap: 2 },
     spacer: { width: 24 },
     tagline: { letterSpacing: 1.2 },
+    banner: {
+      width: '100%',
+      aspectRatio: 1456 / 656,
+      borderRadius: theme.radius.lg,
+    },
+    footerArt: {
+      width: '100%',
+      aspectRatio: 680 / 205,
+      marginTop: theme.spacing.sm,
+      opacity: 0.95,
+    },
     inviteCard: {
       alignSelf: 'center',
       width: '72%',

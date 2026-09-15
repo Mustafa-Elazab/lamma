@@ -2,6 +2,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useMemo } from 'react';
 import { Image, Pressable, View } from 'react-native';
 
+import { footerImages, headerImages } from '../../../../assets';
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
@@ -43,6 +44,12 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
 
   return (
     <AppScreenTemplate edges={['top']} header={header}>
+      <Image
+        source={headerImages.share}
+        style={styles.banner}
+        resizeMode="cover"
+      />
+
       {c.heroImage ? (
         <View style={styles.inviteCard}>
           <Image source={c.heroImage} style={styles.inviteImage} />
@@ -106,6 +113,12 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
           {c.event ? `${c.dateLabel} · ${c.event.venueName}` : ''}
         </AppText>
       </View>
+
+      <Image
+        source={footerImages.shareExact}
+        style={styles.footerArt}
+        resizeMode="contain"
+      />
     </AppScreenTemplate>
   );
 }
