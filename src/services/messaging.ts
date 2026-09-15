@@ -1,4 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAuth } from '@react-native-firebase/auth';
+import {
+  deleteDoc,
+  doc,
+  getFirestore,
+  setDoc,
+} from '@react-native-firebase/firestore';
 import {
   AuthorizationStatus,
   getInitialNotification,
@@ -13,7 +20,7 @@ import {
   setBackgroundMessageHandler,
   type RemoteMessage,
 } from '@react-native-firebase/messaging';
-import { Linking, PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 import { buildEventDeepLink } from '../navigation/linking';
 import { reportError } from './crashReporting';
@@ -21,6 +28,9 @@ import { appLogger } from './logger';
 
 const TOKEN_STORAGE_KEY = '@lamma/messaging/fcm-token';
 const BACKGROUND_MESSAGE_KEY = '@lamma/messaging/last-background-message';
+type NotificationOpenHandler = (link: string) => void | Promise<void>;
+let notificationOpenHandler: NotificationOpenHandler | null = null;
+let pendingNotificationLink: string | null = null;
 
 function eventIdFromMessage(
   message: RemoteMessage,
@@ -36,11 +46,73 @@ export function eventLinkFromMessage(
   return eventId ? buildEventDeepLink(eventId) : null;
 }
 
-async function storeToken(token: string): Promise<void> {
-  await AsyncStorage.setItem(TOKEN_STORAGE_KEY, token);
-  appLogger.log('[messaging] FCM token stored', {
-    tokenSuffix: token.slice(-6),
+function tokenDocument(uid: string, token: string) {
+  return doc(
+    getFirestore(),
+    'users',
+    uid,
+    'devices',
+    encodeURIComponent(token),
+  );
+}
+
+async function syncTokenForCurrentUser(token: string): Promise<boolean> {
+  const uid = getAuth().currentUser?.uid;
+  if (!uid) {
+    return false;
+  }
+  await setDoc(tokenDocument(uid, token), {
+    token,
+    platform: Platform.OS,
+    updatedAt: Date.now(),
   });
+  return true;
+}
+
+async function storeToken(token: string): Promise<void> {
+  const previousToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
+  const uid = getAuth().currentUser?.uid;
+  if (uid && previousToken && previousToken !== token) {
+    await deleteDoc(tokenDocument(uid, previousToken));
+  }
+  await AsyncStorage.setItem(TOKEN_STORAGE_KEY, token);
+  const synced = await syncTokenForCurrentUser(token);
+  appLogger.log('[messaging] FCM token stored', {
+    syncedToUser: synced,
+  });
+}
+
+export async function syncStoredMessagingToken(): Promise<void> {
+  const token = await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
+  if (token) {
+    await syncTokenForCurrentUser(token);
+  }
+}
+
+export async function detachStoredMessagingToken(): Promise<void> {
+  const token = await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
+  const uid = getAuth().currentUser?.uid;
+  if (token && uid) {
+    await deleteDoc(tokenDocument(uid, token));
+  }
+}
+
+export function setNotificationOpenHandler(
+  handler: NotificationOpenHandler,
+): () => void {
+  notificationOpenHandler = handler;
+  const pendingLink = pendingNotificationLink;
+  pendingNotificationLink = null;
+  if (pendingLink) {
+    Promise.resolve(handler(pendingLink)).catch(error => {
+      reportError(error, 'messaging.open-pending-notification');
+    });
+  }
+  return () => {
+    if (notificationOpenHandler === handler) {
+      notificationOpenHandler = null;
+    }
+  };
 }
 
 async function requestNotificationPermission(): Promise<boolean> {
@@ -76,7 +148,12 @@ async function openMessageEvent(
     messageId: message.messageId,
     link,
   });
-  await Linking.openURL(link);
+  if (notificationOpenHandler) {
+    await notificationOpenHandler(link);
+  } else {
+    pendingNotificationLink = link;
+    appLogger.log('[messaging] Event navigation queued until app is ready');
+  }
 }
 
 export function registerBackgroundMessagingHandler(): void {

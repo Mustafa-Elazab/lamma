@@ -61,10 +61,18 @@ service cloud.firestore {
       }
 
       match /notifications/{notificationId} {
-        allow read, create, update, delete: if signedInAs(uid);
+        allow read: if signedInAs(uid);
+        allow update: if signedInAs(uid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['read']);
+        allow create, delete: if false;
       }
 
       match /meta/{documentId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      match /devices/{deviceId} {
         allow read, create, update, delete: if signedInAs(uid);
       }
     }

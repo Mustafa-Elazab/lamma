@@ -10,6 +10,10 @@ import React, {
 
 import { trackEvent } from '../../services/analytics';
 import { reportError } from '../../services/crashReporting';
+import {
+  detachStoredMessagingToken,
+  syncStoredMessagingToken,
+} from '../../services/messaging';
 import { getAuthRepository } from './core/authRepository';
 import type { AuthStatus, AuthUser } from './core/entity';
 
@@ -67,6 +71,11 @@ export function AuthProvider({
       setError(null);
       try {
         await action();
+        try {
+          await syncStoredMessagingToken();
+        } catch (tokenError) {
+          reportError(tokenError, 'messaging.sync-after-sign-in', { provider });
+        }
         await trackEvent('sign_in_method', { method: provider });
       } catch (err) {
         const message =
@@ -104,7 +113,13 @@ export function AuthProvider({
     [repository],
   );
   const signOut = useCallback(async () => {
-    await repository.signOut();
+    try {
+      await detachStoredMessagingToken();
+    } catch (error) {
+      reportError(error, 'messaging.detach-on-sign-out');
+    } finally {
+      await repository.signOut();
+    }
   }, [repository]);
 
   const value = useMemo<AuthContextValue>(

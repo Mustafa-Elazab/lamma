@@ -5,6 +5,7 @@ import {
   type Theme as NavTheme,
 } from '@react-navigation/native';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { Linking } from 'react-native';
 import BootSplash from 'react-native-bootsplash';
 
 import { SplashScreen } from '../app/SplashScreen';
@@ -13,6 +14,7 @@ import { useAuth, useOnboardingContext } from '../features/auth';
 import { OnboardingScreen } from '../features/auth/screens/Onboarding';
 import { trackScreen } from '../services/analytics';
 import { reportError } from '../services/crashReporting';
+import { setNotificationOpenHandler } from '../services/messaging';
 import { AppNavigator } from './AppNavigator';
 import { AuthNavigator } from './AuthNavigator';
 import { linking } from './linking';
@@ -50,6 +52,8 @@ function RootContent(): React.ReactElement {
 
 export function RootNavigator(): React.ReactElement {
   const theme = useTheme();
+  const { status } = useAuth();
+  const { checked, completed } = useOnboardingContext();
   const routeNameRef = useRef<string | undefined>(undefined);
   const navTheme = useMemo<NavTheme>(
     () => ({
@@ -67,6 +71,13 @@ export function RootNavigator(): React.ReactElement {
     }),
     [theme],
   );
+  useEffect(() => {
+    if (status !== 'authenticated' || !checked || !completed) {
+      return;
+    }
+    return setNotificationOpenHandler(link => Linking.openURL(link));
+  }, [checked, completed, status]);
+
   return (
     <NavigationContainer
       ref={navigationRef}

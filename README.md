@@ -99,6 +99,8 @@ Development builds connect to Reactotron before the app is registered. Start Rea
 the development machine to inspect structured application logs, errors, Firestore writes,
 analytics events, push notifications, and map startup. The import and connection are guarded
 by `__DEV__`; Reactotron is a development dependency and is removed from release bundles.
+Reactotron listens on port `9090`; for a USB-connected Android device, run
+`adb reverse tcp:9090 tcp:9090` if the app cannot reach the desktop client.
 
 The navigation root is wrapped in a global error boundary. Its branded fallback keeps the
 app usable with a **Try again** action, while non-fatal errors are sent to Firebase
@@ -113,7 +115,8 @@ Crashlytics when the native Firebase app is available.
 2. Enable **Cloud Firestore**.
 3. Add the platform apps and config files:
    - Android: `android/app/google-services.json`
-   - iOS: `ios/GoogleService-Info.plist` (add to the Xcode project)
+   - iOS: `ios/GoogleService-Info.plist` for bundle id `com.lamma.app` (the
+     Xcode project already includes this path in the app resources)
 4. Google Sign-In: copy your **Web client ID** (OAuth 2.0) into `googleWebClientId` in
    `src/config/env.ts` (this id is passed to `GoogleSignin.configure`).
 5. Apple Sign-In: enable the *Sign in with Apple* capability in Xcode (iOS only).
@@ -128,19 +131,23 @@ Google Services Gradle plugin. The iOS plist is not committed, so iOS Firebase b
 require that file. Analytics records navigation screen views plus `sign_in_method`,
 `event_created`, `event_published`, `rsvp_submitted`, and `invite_shared`.
 
-Messaging requests notification permission, stores the current FCM token in AsyncStorage,
-refreshes it when Firebase rotates it, and registers foreground/background/open handlers.
+Messaging requests notification permission, stores the current FCM token in AsyncStorage
+and `/users/{uid}/devices/{tokenId}`, refreshes it when Firebase rotates it, detaches it on
+sign-out, and registers foreground/background/open handlers. Cold-start notification links
+are queued until authentication and onboarding have resolved.
 Notification data should contain `eventId` (or `event_id`); tapping it opens
 `https://lamma.app/e/{id}` through the existing navigation deep-link configuration. For iOS,
 enable **Push Notifications** and **Background Modes → Remote notifications** for the Lamma
-target and upload an APNs authentication key to Firebase.
+target and upload an APNs authentication key to Firebase. The project includes the required
+entitlements and Crashlytics dSYM upload phase; a matching Apple provisioning profile is
+still required.
 
 Remote Config fetches and activates at startup with safe in-code defaults for
 `event_discovery_enabled`, `messaging_enabled`, and `max_event_guest_count`.
 
 Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid),
 `users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
-`users/{uid}/meta/preferences`.
+`users/{uid}/meta/preferences`, `users/{uid}/devices/{tokenId}`.
 
 The repository includes `firestore.rules` and `firebase.json`. Deploy the reviewed rules
 with `firebase deploy --only firestore:rules`. Event creation requires both `hostId` and
