@@ -11,7 +11,7 @@ describe('LocalDraftRepository', () => {
   it('saves and lists drafts newest first', async () => {
     const repo = new LocalDraftRepository();
     await repo.save({ ...createEmptyDraft('a'), title: 'First' });
-    await new Promise(resolve => setTimeout(resolve, 5));
+    await new Promise<void>(resolve => setTimeout(resolve, 5));
     await repo.save({ ...createEmptyDraft('b'), title: 'Second' });
     const list = await repo.list();
     expect(list).toHaveLength(2);
