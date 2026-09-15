@@ -1,5 +1,5 @@
 import { groupNotifications, unreadCount } from '../entity';
-import { buildSeedNotifications } from '../seed';
+import { buildSeedNotifications } from '../../testFixtures';
 
 describe('notification entity helpers', () => {
   const noon = new Date();

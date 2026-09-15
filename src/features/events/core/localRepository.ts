@@ -10,13 +10,18 @@ import type {
   EventRepository,
   HomeFeed,
 } from './repository';
-import { buildSeedEvents, VIEWER } from './seed';
+
+/**
+ * Local viewer identity used by the `__DEV__` in-memory repository (only active
+ * when `env.firebaseEnabled` is false). Production uses the real Firebase uid.
+ */
+const LOCAL_VIEWER = { id: 'local_viewer', name: 'You' };
 
 let store: LammaEvent[] | null = null;
 
 function getStore(): LammaEvent[] {
   if (!store) {
-    store = buildSeedEvents();
+    store = [];
   }
   return store;
 }
@@ -35,7 +40,11 @@ function paginate(
   };
 }
 
-/** In-memory event repository seeded with realistic Egyptian gatherings. */
+/**
+ * `__DEV__`-only in-memory event repository. Starts empty (no seeded data) and
+ * is only used when `env.firebaseEnabled` is false. Events the user creates in
+ * a dev session persist in memory for the lifetime of the process.
+ */
 export class LocalEventRepository implements EventRepository {
   async getHomeFeed(params: {
     filter: EventListFilter;
@@ -141,8 +150,8 @@ export class LocalEventRepository implements EventRepository {
       areaAddress: input.areaAddress,
       latitude: null,
       longitude: null,
-      hostId: VIEWER.id,
-      hostName: VIEWER.name,
+      hostId: LOCAL_VIEWER.id,
+      hostName: LOCAL_VIEWER.name,
       hostPhoto: null,
       attendees: [],
       attendeeCount: 1,
@@ -161,4 +170,9 @@ export class LocalEventRepository implements EventRepository {
 /** Test helper to reset the in-memory store. */
 export function __resetEventStore(): void {
   store = null;
+}
+
+/** Test/dev helper to seed the in-memory store with fixtures. */
+export function __seedEventStore(events: LammaEvent[]): void {
+  store = [...events];
 }

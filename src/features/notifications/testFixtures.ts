@@ -1,4 +1,8 @@
-import type { AppNotification } from './entity';
+/**
+ * Test-only fixtures. Imported exclusively by Jest specs — never by production
+ * UI code, so no seeded notifications ship in the default app path.
+ */
+import type { AppNotification } from './core/entity';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;

@@ -10,5 +10,5 @@ export {
 export {
   LocalEventRepository,
   __resetEventStore,
+  __seedEventStore,
 } from './localRepository';
-export { buildSeedEvents, VIEWER } from './seed';

@@ -1,11 +1,26 @@
-import { LocalEventRepository, __resetEventStore } from '../localRepository';
+import { buildSeedEvents } from '../../testFixtures';
+import {
+  LocalEventRepository,
+  __resetEventStore,
+  __seedEventStore,
+} from '../localRepository';
 
 describe('LocalEventRepository', () => {
   beforeEach(() => {
     __resetEventStore();
   });
 
+  it('starts empty with no seeded data', async () => {
+    const repo = new LocalEventRepository();
+    const feed = await repo.getHomeFeed({ filter: 'upcoming' });
+    expect(feed.featured).toBeNull();
+    expect(feed.page.events).toHaveLength(0);
+    const discover = await repo.listPublicEvents({});
+    expect(discover.events).toHaveLength(0);
+  });
+
   it('returns a featured event and a list for the upcoming feed', async () => {
+    __seedEventStore(buildSeedEvents());
     const repo = new LocalEventRepository();
     const feed = await repo.getHomeFeed({ filter: 'upcoming' });
     expect(feed.featured).not.toBeNull();
@@ -14,6 +29,7 @@ describe('LocalEventRepository', () => {
   });
 
   it('only returns hosted events for the hosting feed', async () => {
+    __seedEventStore(buildSeedEvents());
     const repo = new LocalEventRepository();
     const feed = await repo.getHomeFeed({ filter: 'hosting' });
     const all = [
@@ -25,6 +41,7 @@ describe('LocalEventRepository', () => {
   });
 
   it('updates goingCount when RSVP changes', async () => {
+    __seedEventStore(buildSeedEvents());
     const repo = new LocalEventRepository();
     const before = await repo.getEvent('evt_wedding_mohamed_sara');
     const startCount = before?.goingCount ?? 0;
@@ -55,6 +72,7 @@ describe('LocalEventRepository', () => {
   });
 
   it('filters public events by query in discover', async () => {
+    __seedEventStore(buildSeedEvents());
     const repo = new LocalEventRepository();
     const page = await repo.listPublicEvents({ query: 'sinai' });
     expect(page.events.length).toBe(1);
@@ -62,6 +80,7 @@ describe('LocalEventRepository', () => {
   });
 
   it('excludes private events from discover', async () => {
+    __seedEventStore(buildSeedEvents());
     const repo = new LocalEventRepository();
     const page = await repo.listPublicEvents({});
     expect(page.events.every(e => e.visibility === 'public')).toBe(true);
