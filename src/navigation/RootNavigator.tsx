@@ -3,29 +3,16 @@ import {
   NavigationContainer,
   type Theme as NavTheme,
 } from '@react-navigation/native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import BootSplash from 'react-native-bootsplash';
 
 import { SplashScreen } from '../app/SplashScreen';
-import { lammaColors } from '../design-system/theme/tokens';
+import { useTheme } from '../design-system/theme/ThemeProvider';
 import { useAuth, useOnboardingContext } from '../features/auth';
 import { OnboardingScreen } from '../features/auth/screens/Onboarding';
 import { AppNavigator } from './AppNavigator';
 import { AuthNavigator } from './AuthNavigator';
 import { linking } from './linking';
-
-const navTheme: NavTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: lammaColors.primary,
-    background: lammaColors.background,
-    card: lammaColors.surface,
-    text: lammaColors.text,
-    border: lammaColors.border,
-    notification: lammaColors.primary,
-  },
-};
 
 function RootContent(): React.ReactElement {
   const { status } = useAuth();
@@ -54,6 +41,23 @@ function RootContent(): React.ReactElement {
 }
 
 export function RootNavigator(): React.ReactElement {
+  const theme = useTheme();
+  const navTheme = useMemo<NavTheme>(
+    () => ({
+      ...DefaultTheme,
+      dark: theme.colors.background === '#12131A',
+      colors: {
+        ...DefaultTheme.colors,
+        primary: theme.colors.primary,
+        background: theme.colors.background,
+        card: theme.colors.surface,
+        text: theme.colors.text,
+        border: theme.colors.border,
+        notification: theme.colors.primary,
+      },
+    }),
+    [theme],
+  );
   return (
     <NavigationContainer theme={navTheme} linking={linking}>
       <RootContent />
