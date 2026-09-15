@@ -10,7 +10,7 @@ import type {
   AppStackParamList,
   CreateEventStackParamList,
 } from '../../../../navigation/types';
-import { formatDateLong, formatTime } from '../../../../utils/format';
+import { formatDateTime, formatTime } from '../../../../utils/format';
 import { themeSource, type EventVisibility } from '../../../events';
 import { useCreateEventContext } from '../../CreateEventProvider';
 import { resolveDraftTheme } from '../../core/draftEntity';
@@ -26,8 +26,9 @@ export function usePreviewController() {
 
   const steps = useMemo(() => wizardSteps(t), [t]);
 
+  // Product copy: "Fri, 18 Dec · 8:00 PM".
   const dateLabel = draft.startAt
-    ? formatDateLong(draft.startAt, language)
+    ? formatDateTime(draft.startAt, language)
     : t('create.dateTBD');
   const timeLabel =
     draft.startAt && draft.endAt

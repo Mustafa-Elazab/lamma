@@ -128,6 +128,14 @@ export function formatTime(
   return `${displayHour}:${mm} ${period}`;
 }
 
+/** "Fri, 18 Dec · 8:00 PM" — the product's combined date + time copy. */
+export function formatDateTime(
+  input: Date | number | string,
+  locale: SupportedLocale = 'en',
+): string {
+  return `${formatDateShort(input, locale)} · ${formatTime(input, locale)}`;
+}
+
 /**
  * Compresses a guest count for avatar stacks: values above `max` become
  * "+N" overflow labels.

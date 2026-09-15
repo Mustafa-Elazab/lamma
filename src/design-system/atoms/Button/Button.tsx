@@ -96,7 +96,9 @@ function createStyles(theme: Theme) {
       borderRadius: theme.radius.pill,
       paddingHorizontal: theme.spacing.xl,
     },
-    fullWidth: { alignSelf: 'stretch' },
+    // width: '100%' guarantees a non-zero hit area even when a parent container
+    // does not stretch its children (fixes CTAs reporting 0×0 accessible bounds).
+    fullWidth: { alignSelf: 'stretch', width: '100%' },
     content: {
       flexDirection: 'row',
       alignItems: 'center',
