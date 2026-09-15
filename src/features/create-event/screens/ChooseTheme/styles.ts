@@ -6,7 +6,7 @@ export function createStyles(theme: Theme) {
   return StyleSheet.create({
     hero: {
       width: '100%',
-      aspectRatio: 0.76,
+      aspectRatio: 1.15,
       borderRadius: theme.radius.lg,
       overflow: 'hidden',
     },

@@ -4,7 +4,6 @@ import {
   FlatList,
   Modal,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   View,
   type ListRenderItemInfo,
@@ -22,8 +21,12 @@ import { AppButton } from '../../../design-system/atoms/Button';
 import { AppIcon } from '../../../design-system/atoms/Icon';
 import { AppInput } from '../../../design-system/atoms/Input';
 import { AppText } from '../../../design-system/atoms/Text';
+import { AppScreenHeader } from '../../../design-system/molecules/ScreenHeader';
+import { AppScreenTemplate } from '../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
+import { reportError } from '../../../services/crashReporting';
+import { appLogger } from '../../../services/logger';
 import {
   reverseGeocode,
   searchPlaces,
@@ -67,6 +70,8 @@ export function LocationPickerModal({
   const [results, setResults] = useState<GeoPlace[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapFailed, setMapFailed] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [coordinate, setCoordinate] = useState<LatLng>(
     initialLocation
@@ -85,6 +90,8 @@ export function LocationPickerModal({
     setQuery(initialQuery ?? '');
     setResults([]);
     setError(false);
+    setMapLoaded(false);
+    setMapFailed(false);
     if (initialLocation) {
       setCoordinate({
         latitude: initialLocation.lat,
@@ -92,6 +99,21 @@ export function LocationPickerModal({
       });
     }
   }, [initialLocation, initialQuery, visible]);
+
+  useEffect(() => {
+    if (!visible || mapLoaded) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setMapFailed(true);
+      appLogger.error(
+        '[maps] Google map tiles did not load',
+        new Error('maps/load-timeout'),
+        { provider: 'google' },
+      );
+    }, 8_000);
+    return () => clearTimeout(timeout);
+  }, [mapLoaded, visible]);
 
   useEffect(() => {
     if (!visible) {
@@ -117,10 +139,11 @@ export function LocationPickerModal({
             setResults(places);
           }
         })
-        .catch(() => {
+        .catch(searchError => {
           if (!cancelled) {
             setError(true);
             setResults([]);
+            reportError(searchError, 'maps.place-search', { query: trimmed });
           }
         })
         .finally(() => {
@@ -181,8 +204,12 @@ export function LocationPickerModal({
         lng: coordinate.longitude,
       });
       onClose();
-    } catch {
+    } catch (reverseGeocodeError) {
       setError(true);
+      reportError(reverseGeocodeError, 'maps.reverse-geocode', {
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+      });
     } finally {
       setConfirming(false);
     }
@@ -226,20 +253,26 @@ export function LocationPickerModal({
       presentationStyle="fullScreen"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.screen}>
-        <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}
-            style={styles.headerButton}
-            onPress={onClose}
-          >
-            <AppIcon name="back" size={24} color="text" />
-          </Pressable>
-          <AppText variant="subheading">{t('create.chooseLocation')}</AppText>
-          <View style={styles.headerButton} />
-        </View>
-
+      <AppScreenTemplate
+        edges={['top', 'bottom']}
+        scroll={false}
+        header={
+          <AppScreenHeader
+            title={t('create.chooseLocation')}
+            onBack={onClose}
+          />
+        }
+        footer={
+          <AppButton
+            label={t('create.confirmLocation')}
+            rightIcon="navigation"
+            loading={confirming}
+            disabled={mapFailed}
+            onPress={() => void handleConfirm()}
+          />
+        }
+        contentStyle={styles.content}
+      >
         <View style={styles.mapContainer}>
           <MapView
             ref={mapRef}
@@ -247,6 +280,15 @@ export function LocationPickerModal({
             style={StyleSheet.absoluteFill}
             initialRegion={initialRegion}
             onPress={handleMapPress}
+            onMapReady={() => {
+              appLogger.log('[maps] Google MapView ready', {
+                provider: 'google',
+              });
+            }}
+            onMapLoaded={() => {
+              setMapLoaded(true);
+              setMapFailed(false);
+            }}
             showsCompass
             showsMyLocationButton
             toolbarEnabled={false}
@@ -283,6 +325,15 @@ export function LocationPickerModal({
             ) : null}
           </View>
 
+          {mapFailed ? (
+            <View style={styles.mapError}>
+              <AppIcon name="close" size={28} color="error" />
+              <AppText variant="bodyStrong" align="center">
+                {t('create.mapUnavailable')}
+              </AppText>
+            </View>
+          ) : null}
+
           <View style={styles.coordinateCard}>
             <AppIcon name="location" size={20} color="primary" />
             <AppText variant="caption" color="textMuted">
@@ -301,31 +352,25 @@ export function LocationPickerModal({
             {t('create.locationError')}
           </AppText>
         ) : null}
-        <View style={styles.footer}>
-          <AppButton
-            label={t('create.confirmLocation')}
-            rightIcon="navigation"
-            loading={confirming}
-            onPress={() => void handleConfirm()}
-          />
-        </View>
-      </SafeAreaView>
+      </AppScreenTemplate>
     </Modal>
   );
 }
 
 function createStyles(theme: Theme) {
   return StyleSheet.create({
-    screen: { flex: 1, backgroundColor: theme.colors.background },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      height: 60,
-      paddingHorizontal: theme.spacing.lg,
+    content: {
+      gap: theme.spacing.sm,
+      paddingBottom: 0,
     },
-    headerButton: { width: 40, alignItems: 'center' },
-    mapContainer: { flex: 1, overflow: 'hidden' },
+    mapContainer: {
+      flex: 1,
+      overflow: 'hidden',
+      borderRadius: theme.radius.lg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.surface,
+    },
     search: {
       position: 'absolute',
       top: theme.spacing.lg,
@@ -368,13 +413,20 @@ function createStyles(theme: Theme) {
       backgroundColor: theme.colors.surface,
       ...theme.shadows.soft,
     },
-    error: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing.sm,
+    mapError: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: theme.spacing.md,
+      padding: theme.spacing.xl,
+      backgroundColor: theme.colors.surface,
     },
-    footer: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.md,
+    error: {
+      paddingTop: theme.spacing.sm,
     },
   });
 }

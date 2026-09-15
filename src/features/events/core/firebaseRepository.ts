@@ -11,9 +11,11 @@ import {
   query,
   updateDoc,
   where,
-  type FirebaseFirestoreTypes,
+  type DocumentData,
 } from '@react-native-firebase/firestore';
 
+import { reportError } from '../../../services/crashReporting';
+import { appLogger } from '../../../services/logger';
 import {
   CATEGORY_TO_COVER,
   type EventListFilter,
@@ -27,7 +29,7 @@ import type {
   HomeFeed,
 } from './repository';
 
-type DocData = FirebaseFirestoreTypes.DocumentData;
+type DocData = DocumentData;
 
 /** Minimal structural shape shared by document and query snapshots. */
 type SnapshotLike = { id: string; data: () => unknown };
@@ -166,9 +168,11 @@ export class FirebaseEventRepository implements EventRepository {
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) {
-      throw new Error(
+      const error = new Error(
         'events/auth-required: sign in before creating an event',
       );
+      reportError(error, 'events.create-auth', { uid: null });
+      throw error;
     }
 
     // Force-refresh immediately before the protected write. This catches
@@ -177,7 +181,14 @@ export class FirebaseEventRepository implements EventRepository {
     const tokenResult = await user.getIdTokenResult(true);
     const expiresAt = Date.parse(tokenResult.expirationTime);
     if (!tokenResult.token || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
-      throw new Error('events/invalid-token: Firebase ID token is not valid');
+      const error = new Error(
+        'events/invalid-token: Firebase ID token is not valid',
+      );
+      reportError(error, 'events.create-auth', {
+        uid: user.uid,
+        tokenExpirationTime: tokenResult.expirationTime,
+      });
+      throw error;
     }
 
     const uid = user.uid;
@@ -209,15 +220,21 @@ export class FirebaseEventRepository implements EventRepository {
     // Keep these diagnostics at the actual network boundary. They intentionally
     // exclude the token while recording the uid, expiry, exact payload, and
     // Firestore response/error needed to diagnose security-rule failures.
-    console.info('[events.create] Firestore write request', {
+    const requestDetails = {
       uid,
       tokenExpirationTime: tokenResult.expirationTime,
       payload,
-    });
+    };
+    appLogger.log('[events.create] Firestore write request', requestDetails);
+    appLogger.display(
+      'Firestore event create',
+      requestDetails,
+      `${uid}: ${input.title}`,
+    );
 
     try {
       const ref = await addDoc(collection(this.db, COLLECTION), payload);
-      console.info('[events.create] Firestore write response', {
+      appLogger.log('[events.create] Firestore write response', {
         id: ref.id,
         path: ref.path,
       });
@@ -230,11 +247,20 @@ export class FirebaseEventRepository implements EventRepository {
       return mapDoc(snapshot, uid);
     } catch (error) {
       const details = error as { code?: string; message?: string };
-      console.error('[events.create] Firestore write failed', {
+      const failureDetails = {
         uid,
         payload,
         code: details.code ?? 'unknown',
         message: details.message ?? String(error),
+      };
+      appLogger.error(
+        '[events.create] Firestore write failed',
+        error,
+        failureDetails,
+      );
+      reportError(error, 'events.firestore-create', {
+        uid,
+        code: failureDetails.code,
       });
       throw error;
     }

@@ -4,11 +4,12 @@ import { ImageBackground, ScrollView, View } from 'react-native';
 import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
-import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
 import { AppThemeSwatch } from '../../../../design-system/organisms/ThemeSwatch';
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
+import { CreateHeader } from '../../components/CreateHeader';
+import { WIZARD_STEP } from '../steps';
 import { createStyles } from './styles';
 import { useChooseThemeController } from './useController';
 
@@ -21,8 +22,10 @@ export function ChooseThemeScreen(): React.ReactElement {
     <AppScreenTemplate
       edges={['top']}
       header={
-        <AppScreenHeader
+        <CreateHeader
           title={c.t('create.chooseTheme')}
+          steps={c.steps}
+          currentStep={WIZARD_STEP.theme}
           onBack={c.goBack}
         />
       }
