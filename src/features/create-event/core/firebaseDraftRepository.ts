@@ -7,7 +7,7 @@ import {
   getDocs,
   getFirestore,
   setDoc,
-  type FirebaseFirestoreTypes,
+  type CollectionReference,
 } from '@react-native-firebase/firestore';
 
 import type { EventDraft } from './draftEntity';
@@ -19,7 +19,7 @@ function uid(): string {
   return getAuth().currentUser?.uid ?? 'anonymous';
 }
 
-function draftsCollection(): FirebaseFirestoreTypes.CollectionReference {
+function draftsCollection(): CollectionReference {
   return collection(getFirestore(), 'users', uid(), 'drafts');
 }
 

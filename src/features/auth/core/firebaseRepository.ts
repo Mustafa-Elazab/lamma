@@ -14,17 +14,16 @@ import {
   signInWithCredential,
   signOut,
   updateProfile,
-  type FirebaseAuthTypes,
+  type AuthCredential,
+  type User,
 } from '@react-native-firebase/auth';
 import { Platform } from 'react-native';
 
 import { AuthError, type AuthProviderId, type AuthUser } from './entity';
 import type { AuthRepository } from './repository';
 
-type AuthCredential = FirebaseAuthTypes.AuthCredential;
-
 function mapProviders(
-  user: FirebaseAuthTypes.User,
+  user: User,
 ): AuthProviderId[] {
   if (user.isAnonymous) {
     return ['anonymous'];
@@ -41,7 +40,7 @@ function mapProviders(
   return providers.filter((p): p is AuthProviderId => p !== null);
 }
 
-function mapUser(user: FirebaseAuthTypes.User | null): AuthUser | null {
+function mapUser(user: User | null): AuthUser | null {
   if (!user) {
     return null;
   }
