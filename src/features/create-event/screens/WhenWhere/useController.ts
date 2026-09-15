@@ -16,7 +16,6 @@ import {
   minutesOfDay,
   startOfDay,
 } from '../../components/dateTime';
-import { wizardSteps } from '../steps';
 
 export type ActivePicker =
   | 'date'
@@ -35,8 +34,6 @@ export function useWhenWhereController() {
     useNavigation<NavigationProp<CreateEventStackParamList>>();
   const { draft, update, whenWhere } = useCreateEventContext();
   const [picker, setPicker] = useState<ActivePicker>(null);
-
-  const steps = useMemo(() => wizardSteps(t), [t]);
 
   const dateLabel = draft.startAt
     ? formatDateShort(draft.startAt, language)
@@ -107,15 +104,6 @@ export function useWhenWhereController() {
     [draft.startAt, update],
   );
 
-  const setVenue = useCallback(
-    (venueName: string) => update({ venueName }),
-    [update],
-  );
-  const setAddress = useCallback(
-    (areaAddress: string) => update({ areaAddress }),
-    [update],
-  );
-
   const onConfirmLocation = useCallback(
     (location: EventLocation) => {
       update({
@@ -138,7 +126,6 @@ export function useWhenWhereController() {
   return {
     t,
     draft,
-    steps,
     whenWhere,
     picker,
     setPicker,
@@ -153,8 +140,6 @@ export function useWhenWhereController() {
     onPickStart,
     onPickEnd,
     onConfirmLocation,
-    setVenue,
-    setAddress,
     goBack,
     goNext,
   };

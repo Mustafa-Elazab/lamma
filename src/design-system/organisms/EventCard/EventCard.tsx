@@ -174,7 +174,7 @@ function createStyles(theme: Theme) {
     featured: {
       flexDirection: 'row',
       alignItems: 'stretch',
-      minHeight: 176,
+      minHeight: 304,
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       borderWidth: 1,
@@ -184,7 +184,7 @@ function createStyles(theme: Theme) {
     },
     // No percentage height (its parent has no fixed height, which collapsed the
     // cover to 0). alignSelf:'stretch' fills the row's cross-axis instead.
-    featuredCover: { width: 150, alignSelf: 'stretch', resizeMode: 'cover' },
+    featuredCover: { width: '43%', alignSelf: 'stretch', resizeMode: 'cover' },
     featuredBody: {
       flex: 1,
       padding: theme.spacing.lg,
@@ -198,20 +198,26 @@ function createStyles(theme: Theme) {
     compact: {
       flexDirection: 'row',
       gap: theme.spacing.md,
+      minHeight: 132,
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       borderWidth: 1,
       borderColor: theme.colors.border,
-      padding: theme.spacing.md,
+      overflow: 'hidden',
       ...theme.shadows.soft,
     },
     compactCover: {
-      width: 84,
-      height: 84,
-      borderRadius: theme.radius.md,
+      width: 120,
+      alignSelf: 'stretch',
       resizeMode: 'cover',
     },
-    compactBody: { flex: 1, gap: theme.spacing.xs, justifyContent: 'center' },
+    compactBody: {
+      flex: 1,
+      gap: theme.spacing.xs,
+      justifyContent: 'center',
+      paddingVertical: theme.spacing.md,
+      paddingRight: theme.spacing.md,
+    },
     compactTopRow: {
       flexDirection: 'row',
       alignItems: 'center',

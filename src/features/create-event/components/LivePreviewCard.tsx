@@ -85,8 +85,18 @@ function createStyles(theme: Theme) {
       overflow: 'hidden',
       ...theme.shadows.soft,
     },
-    cover: { width: 120, height: '100%', minHeight: 150, resizeMode: 'cover' },
-    body: { flex: 1, padding: theme.spacing.md, gap: theme.spacing.xs },
+    cover: {
+      width: '43%',
+      alignSelf: 'stretch',
+      minHeight: 258,
+      resizeMode: 'cover',
+    },
+    body: {
+      flex: 1,
+      padding: theme.spacing.lg,
+      gap: theme.spacing.sm,
+      justifyContent: 'center',
+    },
     metaRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs },
     metaText: { flex: 1 },
   });

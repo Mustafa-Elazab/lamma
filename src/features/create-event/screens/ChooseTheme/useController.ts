@@ -11,7 +11,6 @@ import { formatDateLong, formatTime } from '../../../../utils/format';
 import { themeSource, type EventThemeKey } from '../../../events';
 import { useCreateEventContext } from '../../CreateEventProvider';
 import { resolveDraftTheme } from '../../core/draftEntity';
-import { wizardSteps } from '../steps';
 
 const THEME_KEYS: EventThemeKey[] = [
   'wedding',
@@ -28,7 +27,6 @@ export function useChooseThemeController() {
     useNavigation<NavigationProp<CreateEventStackParamList>>();
   const { draft, update } = useCreateEventContext();
 
-  const steps = useMemo(() => wizardSteps(t), [t]);
   const selected = resolveDraftTheme(draft);
 
   const themes = useMemo(
@@ -65,7 +63,6 @@ export function useChooseThemeController() {
   return {
     t,
     draft,
-    steps,
     themes,
     selected,
     dateLabel,

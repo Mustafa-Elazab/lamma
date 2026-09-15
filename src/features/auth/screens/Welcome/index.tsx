@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { branding } from '../../../../assets';
 import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { GoogleMark, AppleMark } from '../../../../design-system/atoms/ProviderMarks';
@@ -29,12 +28,22 @@ export function WelcomeScreen(): React.ReactElement {
           <View style={styles.heroCircleOne} />
           <View style={styles.heroCircleTwo} />
           <View style={styles.heroBadge}>
-            <Image source={branding.logoTransparent} style={styles.heroLogo} />
+            <View style={styles.heroMonogram}>
+              <AppText
+                variant="heading"
+                color="textInverse"
+                style={styles.heroLetter}
+              >
+                L
+              </AppText>
+            </View>
           </View>
         </View>
 
         <View style={styles.titleBlock}>
-          <AppText variant="heading">{t('auth.welcomeTitle')}</AppText>
+          <AppText variant="heading" style={styles.welcomeTitle}>
+            {t('auth.welcomeTitle')}
+          </AppText>
           <AppText variant="body" color="textMuted">
             {t('auth.welcomeSubtitle')}
           </AppText>
@@ -42,6 +51,7 @@ export function WelcomeScreen(): React.ReactElement {
 
         <AppButton
           label={t('auth.continueAsGuest')}
+          style={styles.guestButton}
           onPress={() => void c.continueAsGuest()}
           loading={c.activeProvider === 'guest'}
           disabled={c.isSigningIn}

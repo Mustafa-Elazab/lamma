@@ -29,11 +29,11 @@ export function createStyles(theme: Theme) {
     },
     statsRow: { flexDirection: 'row', gap: theme.spacing.sm },
     group: {
+      marginHorizontal: theme.spacing.lg,
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
       paddingHorizontal: theme.spacing.lg,
+      ...theme.shadows.soft,
     },
     divider: {
       height: StyleSheet.hairlineWidth,

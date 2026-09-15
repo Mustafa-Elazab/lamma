@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   View,
   type ListRenderItemInfo,
@@ -9,6 +10,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppSkeleton } from '../../../../design-system/atoms/Skeleton';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
 import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
@@ -123,6 +126,22 @@ export function HomeScreen(): React.ReactElement {
           ) : undefined
         }
       />
+      <View style={styles.createAction}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={c.t('home.createEvent')}
+          onPress={c.openCreate}
+          style={({ pressed }) => [
+            styles.createButton,
+            pressed && styles.createButtonPressed,
+          ]}
+        >
+          <AppIcon name="plus" size={30} color="textInverse" />
+        </Pressable>
+        <AppText variant="caption" color="primary">
+          {c.t('home.createEvent')}
+        </AppText>
+      </View>
     </SafeAreaView>
   );
 }

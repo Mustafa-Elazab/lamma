@@ -14,6 +14,8 @@ export const lammaColors = {
   primary: '#F34F68',
   primaryPressed: '#D83F58',
   primarySoft: '#FFD6DE',
+  accentPeach: '#FFC6AD',
+  accentLavender: '#EDE5FF',
   text: '#182235',
   textMuted: '#6D7280',
   textInverse: '#FFFFFF',
