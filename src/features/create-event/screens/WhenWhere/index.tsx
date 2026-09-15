@@ -179,7 +179,17 @@ export function WhenWhereScreen(): React.ReactElement {
       <LocationPickerModal
         visible={picker === 'location'}
         initialQuery={c.draft.areaAddress || c.draft.venueName}
-        onSelect={c.onSelectPlace}
+        initialLocation={
+          c.hasCoordinates
+            ? {
+                label: c.draft.venueName,
+                address: c.draft.areaAddress,
+                lat: c.draft.latitude!,
+                lng: c.draft.longitude!,
+              }
+            : undefined
+        }
+        onConfirm={c.onConfirmLocation}
         onClose={() => setPicker(null)}
       />
     </AppScreenTemplate>

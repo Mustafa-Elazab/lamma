@@ -111,6 +111,7 @@ export const ar: TranslationSchema = {
     useCurrentLocation: 'استخدم موقعي الحالي',
     pickOnMap: 'اختر الموقع على الخريطة',
     chooseLocation: 'اختر موقعًا',
+    confirmLocation: 'تأكيد الموقع',
     searchLocation: 'ابحث عن مكان أو عنوان',
     locationHint: 'اكتب 3 أحرف على الأقل للبحث في OpenStreetMap',
     locationNoResults: 'لم يتم العثور على أماكن. جرّب بحثًا مختلفًا.',

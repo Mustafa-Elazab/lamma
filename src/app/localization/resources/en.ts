@@ -109,6 +109,7 @@ export const en = {
     useCurrentLocation: 'Use my current location',
     pickOnMap: 'Pick location on the map',
     chooseLocation: 'Choose a location',
+    confirmLocation: 'Confirm location',
     searchLocation: 'Search for a place or address',
     locationHint: 'Type at least 3 characters to search OpenStreetMap',
     locationNoResults: 'No places found. Try a different search.',

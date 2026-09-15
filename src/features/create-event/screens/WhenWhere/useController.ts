@@ -9,7 +9,7 @@ import { useLanguage } from '../../../../app/localization';
 import type { CreateEventStackParamList } from '../../../../navigation/types';
 import { formatDateShort, formatTime } from '../../../../utils/format';
 import { useCreateEventContext } from '../../CreateEventProvider';
-import type { GeoPlace } from '../../core/geocoding';
+import type { EventLocation } from '../../components/LocationPickerModal';
 import {
   combineDateAndMinutes,
   MS_PER_DAY,
@@ -126,13 +126,13 @@ export function useWhenWhereController() {
     [update],
   );
 
-  const onSelectPlace = useCallback(
-    (place: GeoPlace) => {
+  const onConfirmLocation = useCallback(
+    (location: EventLocation) => {
       update({
-        venueName: draft.venueName.trim() || place.name,
-        areaAddress: place.displayName,
-        latitude: place.latitude,
-        longitude: place.longitude,
+        venueName: draft.venueName.trim() || location.label,
+        areaAddress: location.address,
+        latitude: location.lat,
+        longitude: location.lng,
       });
     },
     [draft.venueName, update],
@@ -165,7 +165,7 @@ export function useWhenWhereController() {
     onPickStart,
     onPickEnd,
     onSelectTimezone,
-    onSelectPlace,
+    onConfirmLocation,
     setVenue,
     setAddress,
     goBack,

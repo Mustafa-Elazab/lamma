@@ -26,7 +26,7 @@ coming — with first‑class Arabic + English (RTL) support and a warm, Egypt�
 Onboarding (always shown to first-time users) · Auth (guest/Google/Apple) ·
 Home (Upcoming/Hosting/Past, featured card — no floating FAB, the Create tab is used) ·
 Create Event wizard (Basics → When & Where → Choose Theme → Preview, with **native date/time
-pickers**, an **OpenStreetMap** location picker, and draft autosave/resume) ·
+pickers**, a **Google Maps + OpenStreetMap search** location picker, and draft autosave/resume) ·
 Event Details · Guest List · Share Invite · Discover · Notifications feed ·
 Profile & Settings (Edit profile, Language, Notifications, Appearance, My drafts, Saved
 themes, Help, Sign out).
@@ -134,15 +134,30 @@ npx react-native-bootsplash generate src/assets/branding/lamma_logo_exact_transp
   --platforms=android,ios --background=FFF8F4 --logo-width=180
 ```
 
-## Maps & location (OpenStreetMap)
+## Maps & location (Google Maps + OpenStreetMap)
 
-The Create Event wizard resolves **real** places — there are no hardcoded locations. The
-location picker (`src/features/create-event/components/LocationPickerModal.tsx`) searches the
-free [OpenStreetMap Nominatim](https://nominatim.org/) API and stores the selected place's
-name and latitude/longitude on the draft (`src/features/create-event/core/geocoding.ts`
-exposes `searchPlaces` and `reverseGeocode`). Event Details' **Open in maps** opens the
-device's Apple/Google Maps at those coordinates. Nominatim's usage policy asks for a
-descriptive `User-Agent` (set for you) and low request volume (search input is debounced).
+The Create Event location picker renders Google Maps and uses the free
+[OpenStreetMap Nominatim](https://nominatim.org/) API for debounced place search and reverse
+geocoding. Tapping the map, dragging the marker, or choosing a search result changes the
+coordinate. Confirming stores the resolved label, full address, latitude, and longitude.
+The Google Maps API key is consumed only by native configuration and is never embedded in
+JavaScript.
+
+Configure a key with both **Maps SDK for Android** and **Maps SDK for iOS** enabled:
+
+- **Android:** open the untracked `android/local.properties` file and add this exact line:
+  `GOOGLE_MAPS_API_KEY=your_real_key`. Gradle injects it into the
+  `com.google.android.geo.API_KEY` manifest metadata. CI may instead set the
+  `GOOGLE_MAPS_API_KEY` environment variable.
+- **iOS:** in Xcode, select the **Lamma target → Build Settings → All**, click **+ → Add
+  User-Defined Setting**, name it `GOOGLE_MAPS_API_KEY`, and paste the key as its value for
+  Debug and Release. `Info.plist` expands that build setting and `AppDelegate.swift`
+  supplies it to `GMSServices`.
+
+Restrict production keys by Android package/signing certificate and iOS bundle identifier.
+Nominatim requests use an identifying User-Agent and search is debounced to respect its
+public usage policy. Event Details' **Open in maps** opens the selected coordinates in the
+device's mapping app.
 
 Dates and times use native pickers via `@react-native-community/datetimepicker`, formatted as
 the product copy (e.g. `Fri, 18 Dec · 8:00 PM`).
