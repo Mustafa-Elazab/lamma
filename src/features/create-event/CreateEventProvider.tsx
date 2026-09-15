@@ -46,16 +46,32 @@ function newDraftId(): string {
 
 export function CreateEventProvider({
   children,
+  initialDraftId,
 }: {
   children: React.ReactNode;
+  /** When set, the wizard resumes this existing draft instead of a blank one. */
+  initialDraftId?: string;
 }): React.ReactElement {
   const repository = useMemo(() => getDraftRepository(), []);
   const queryClient = useQueryClient();
   const createEvent = useCreateEvent();
   const [draft, setDraft] = useState<EventDraft>(() =>
-    createEmptyDraft(newDraftId()),
+    createEmptyDraft(initialDraftId ?? newDraftId()),
   );
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydrated = useRef(false);
+
+  useEffect(() => {
+    if (!initialDraftId || hydrated.current) {
+      return;
+    }
+    hydrated.current = true;
+    void repository.get(initialDraftId).then(loaded => {
+      if (loaded) {
+        setDraft(loaded);
+      }
+    });
+  }, [initialDraftId, repository]);
 
   const update = useCallback((patch: Partial<EventDraft>) => {
     setDraft(prev => ({ ...prev, ...patch, updatedAt: Date.now() }));

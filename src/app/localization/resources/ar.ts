@@ -224,6 +224,12 @@ export const ar: TranslationSchema = {
     signOutHint: 'إلى اللقاء!',
     guest: 'ضيف',
     upgradePrompt: 'سجّل الدخول لحفظ مناسباتك',
+    editProfileTitle: 'تعديل الملف الشخصي',
+    displayNameLabel: 'الاسم الظاهر',
+    displayNamePlaceholder: 'اسمك',
+    profileSaved: 'تم تحديث الملف الشخصي',
+    upgradeTitle: 'سجّل الدخول إلى لمّة',
+    upgradeSubtitle: 'احتفظ بمناسباتك ومسوداتك وردودك على جميع أجهزتك.',
   },
   language: {
     title: 'اللغة',

@@ -222,6 +222,12 @@ export const en = {
     signOutHint: 'See you soon!',
     guest: 'Guest',
     upgradePrompt: 'Sign in to save your events',
+    editProfileTitle: 'Edit profile',
+    displayNameLabel: 'Display name',
+    displayNamePlaceholder: 'Your name',
+    profileSaved: 'Profile updated',
+    upgradeTitle: 'Sign in to Lamma',
+    upgradeSubtitle: 'Keep your events, drafts and RSVPs across your devices.',
   },
   language: {
     title: 'Language',

@@ -56,6 +56,7 @@ export function useProfileController() {
     goDrafts: () => go('MyDrafts'),
     goSavedThemes: () => go('SavedThemes'),
     goHelp: () => go('HelpSupport'),
+    goEditProfile: () => go('EditProfile'),
     signOut,
   };
 }

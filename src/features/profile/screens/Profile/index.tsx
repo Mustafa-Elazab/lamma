@@ -44,10 +44,22 @@ export function ProfileScreen(): React.ReactElement {
                 {c.email ?? c.t('settings.defaultBio')}
               </AppText>
             </View>
-            <Pressable style={styles.editButton}>
-              <AppIcon name="edit" size={16} color="primary" />
+            <Pressable
+              style={styles.editButton}
+              accessibilityRole="button"
+              accessibilityLabel={
+                c.isGuest ? c.t('common.signIn') : c.t('settings.editProfile')
+              }
+              hitSlop={8}
+              onPress={c.goEditProfile}
+            >
+              <AppIcon
+                name={c.isGuest ? 'user-check' : 'edit'}
+                size={16}
+                color="primary"
+              />
               <AppText variant="label" color="primary">
-                {c.t('common.edit')}
+                {c.isGuest ? c.t('common.signIn') : c.t('common.edit')}
               </AppText>
             </Pressable>
           </View>

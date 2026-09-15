@@ -109,6 +109,16 @@ export class LocalAuthRepository implements AuthRepository {
     });
   }
 
+  async updateProfile(patch: { displayName: string }): Promise<AuthUser> {
+    await this.hydrate();
+    if (!this.user) {
+      throw new Error('No signed-in user to update.');
+    }
+    const updated: AuthUser = { ...this.user, displayName: patch.displayName };
+    await this.persist(updated);
+    return updated;
+  }
+
   async signOut(): Promise<void> {
     await this.persist(null);
   }

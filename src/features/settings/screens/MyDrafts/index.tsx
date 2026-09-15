@@ -53,7 +53,9 @@ export function MyDraftsScreen(): React.ReactElement {
           <Pressable
             key={draft.id}
             style={styles.row}
-            onPress={() => navigation.navigate('CreateEvent')}
+            onPress={() =>
+              navigation.navigate('CreateEvent', { draftId: draft.id })
+            }
           >
             <Image
               source={themeSource(resolveDraftTheme(draft))}

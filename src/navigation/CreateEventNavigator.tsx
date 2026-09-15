@@ -1,3 +1,4 @@
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 
@@ -8,13 +9,15 @@ import {
   PreviewScreen,
   WhenWhereScreen,
 } from '../features/create-event';
-import type { CreateEventStackParamList } from './types';
+import type { AppStackParamList, CreateEventStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<CreateEventStackParamList>();
 
-export function CreateEventNavigator(): React.ReactElement {
+type Props = NativeStackScreenProps<AppStackParamList, 'CreateEvent'>;
+
+export function CreateEventNavigator({ route }: Props): React.ReactElement {
   return (
-    <CreateEventProvider>
+    <CreateEventProvider initialDraftId={route.params?.draftId}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Basics" component={BasicsScreen} />
         <Stack.Screen name="WhenWhere" component={WhenWhereScreen} />

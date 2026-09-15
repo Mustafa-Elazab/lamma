@@ -17,6 +17,8 @@ export interface AuthRepository {
   signInWithGoogle(): Promise<AuthUser>;
   /** Same linking behaviour as {@link signInWithGoogle} for Apple. */
   signInWithApple(): Promise<AuthUser>;
+  /** Updates the signed-in user's editable profile fields (e.g. display name). */
+  updateProfile(patch: { displayName: string }): Promise<AuthUser>;
   signOut(): Promise<void>;
   /** Whether Apple sign-in is available on the current platform. */
   isAppleSupported(): boolean;

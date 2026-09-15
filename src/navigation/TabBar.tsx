@@ -73,7 +73,16 @@ export function TabBar({
             <View>
               <AppIcon name={TAB_ICONS[routeName]} size={24} color={color} />
               {routeName === 'Notifications' && unreadNotifications > 0 ? (
-                <View style={styles.badge} />
+                <View style={styles.badge}>
+                  <AppText
+                    variant="caption"
+                    color="textInverse"
+                    allowFontScaling={false}
+                    style={styles.badgeText}
+                  >
+                    {unreadNotifications > 9 ? '9+' : String(unreadNotifications)}
+                  </AppText>
+                </View>
               ) : null}
             </View>
             <AppText
@@ -121,14 +130,18 @@ function createStyles(theme: Theme) {
     },
     badge: {
       position: 'absolute',
-      top: -2,
-      right: -4,
-      width: 9,
-      height: 9,
-      borderRadius: 5,
+      top: -6,
+      right: -10,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      paddingHorizontal: 4,
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: theme.colors.primary,
       borderWidth: 1.5,
       borderColor: theme.colors.surface,
     },
+    badgeText: { fontSize: 9, lineHeight: 12, fontWeight: '700' },
   });
 }
