@@ -9,7 +9,7 @@ import {
   type SupportedLocale,
 } from '../../utils/format';
 import { goingAttendees, type LammaEvent } from './core/entity';
-import { coverSource } from './core/media';
+import { eventCover } from './core/media';
 
 type PresenterContext = {
   locale: SupportedLocale;
@@ -75,7 +75,7 @@ export function toFeaturedCard(
   return {
     id: event.id,
     title: event.title,
-    coverImage: coverSource(event.coverKey),
+    coverImage: eventCover(event),
     dateLabel,
     timeLabel,
     locationLabel: `${event.venueName}, ${event.areaAddress.split(',')[0]}`,
@@ -95,7 +95,7 @@ export function toCompactCard(
   return {
     id: event.id,
     title: event.title,
-    coverImage: coverSource(event.coverKey),
+    coverImage: eventCover(event),
     dateLabel,
     timeLabel,
     locationLabel: `${event.venueName}, ${event.areaAddress.split(',')[0]}`,

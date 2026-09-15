@@ -1,2 +1,2 @@
-export { Toggle } from './Toggle';
+export { AppToggle } from './Toggle';
 export type { ToggleProps } from './Toggle';

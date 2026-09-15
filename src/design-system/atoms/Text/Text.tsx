@@ -17,7 +17,7 @@ export type TextProps = RNTextProps & {
   weight?: TextStyle['fontWeight'];
 };
 
-export function Text({
+function AppTextComponent({
   variant = 'body',
   color = 'text',
   align,
@@ -45,3 +45,5 @@ export function Text({
     </RNText>
   );
 }
+
+export const AppText = React.memo(AppTextComponent);

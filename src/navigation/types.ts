@@ -17,10 +17,11 @@ export type CreateEventStackParamList = {
 
 export type AppStackParamList = {
   MainTabs: NavigatorScreenParams<TabParamList>;
-  CreateEvent: NavigatorScreenParams<CreateEventStackParamList> | undefined;
+  CreateEvent: { draftId?: string } | undefined;
   EventDetails: { eventId: string };
   GuestList: { eventId: string };
   ShareInvite: { eventId: string };
+  EditProfile: undefined;
   LanguageSettings: undefined;
   NotificationSettings: undefined;
   Appearance: undefined;
@@ -30,7 +31,6 @@ export type AppStackParamList = {
 };
 
 export type AuthStackParamList = {
-  Onboarding: undefined;
   Welcome: undefined;
 };
 

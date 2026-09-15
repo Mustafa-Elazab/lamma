@@ -4,8 +4,8 @@ import { Image, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { branding } from '../../../../assets';
-import { Button } from '../../../../design-system/atoms/Button';
-import { Text } from '../../../../design-system/atoms/Text';
+import { AppButton } from '../../../../design-system/atoms/Button';
+import { AppText } from '../../../../design-system/atoms/Text';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import { useAuth } from '../../AuthProvider';
 import { GoogleMark, AppleMark } from '../../components/ProviderMarks';
@@ -42,13 +42,13 @@ export function WelcomeScreen(): React.ReactElement {
         </View>
 
         <View style={styles.titleBlock}>
-          <Text variant="heading">{t('auth.welcomeTitle')}</Text>
-          <Text variant="body" color="textMuted">
+          <AppText variant="heading">{t('auth.welcomeTitle')}</AppText>
+          <AppText variant="body" color="textMuted">
             {t('auth.welcomeSubtitle')}
-          </Text>
+          </AppText>
         </View>
 
-        <Button
+        <AppButton
           label={t('auth.continueAsGuest')}
           onPress={() => void continueAsGuest()}
           loading={activeProvider === 'guest'}
@@ -57,9 +57,9 @@ export function WelcomeScreen(): React.ReactElement {
 
         <View style={styles.dividerRow}>
           <View style={styles.dividerLine} />
-          <Text variant="caption" color="textMuted">
+          <AppText variant="caption" color="textMuted">
             {t('auth.or')}
-          </Text>
+          </AppText>
           <View style={styles.dividerLine} />
         </View>
 
@@ -85,16 +85,16 @@ export function WelcomeScreen(): React.ReactElement {
         </View>
 
         <View style={styles.noPhoneBlock}>
-          <Text variant="subheading" color="primary">
+          <AppText variant="subheading" color="primary">
             {t('auth.noPhoneTitle')}
-          </Text>
-          <Text variant="caption" color="textMuted">
+          </AppText>
+          <AppText variant="caption" color="textMuted">
             {t('auth.noPhoneSubtitle')}
-          </Text>
+          </AppText>
           {error ? (
-            <Text variant="caption" color="error">
+            <AppText variant="caption" color="error">
               {t('auth.errorGeneric')}
-            </Text>
+            </AppText>
           ) : null}
         </View>
 

@@ -2,14 +2,22 @@
  * App-wide runtime configuration flags.
  *
  * `firebaseEnabled` controls whether the real Firebase repositories are used.
- * It defaults to `false` so the app boots and is fully usable in development
- * and CI without native Firebase config files. Set it to `true` (and add the
- * platform config files described in the README) to switch to Firebase.
+ * It defaults to `true`: production runs on Firebase Auth + Firestore only,
+ * with no mock/seed data anywhere in the default app path. The Android config
+ * lives at `android/app/google-services.json` (and, for iOS,
+ * `ios/GoogleService-Info.plist`).
+ *
+ * Set it to `false` locally to fall back to the `__DEV__`-only in-memory
+ * repositories (which start empty) when you don't have native Firebase config
+ * on hand. Jest never touches Firebase because the unit tests exercise the
+ * local repositories and pure helpers directly.
  */
 export const env = {
-  firebaseEnabled: false,
+  firebaseEnabled: true,
   deepLinkHost: 'lamma.app',
-  /** Populate with your Firebase OAuth web client id to enable Google sign-in. */
+  /**
+   * Firebase OAuth **web client id** used to enable Google sign-in.
+   */
   googleWebClientId: '937768660160-22qau4s57qb7fg5cve0tgvgb3bs16b3k.apps.googleusercontent.com',
 } as const;
 

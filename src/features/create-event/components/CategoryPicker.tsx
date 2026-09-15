@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { Chip } from '../../../design-system/atoms/Chip';
+import { AppChip } from '../../../design-system/atoms/Chip';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 import type { EventCategory } from '../../events';
@@ -24,7 +24,7 @@ export function CategoryPicker({
   return (
     <View style={styles.grid}>
       {CATEGORY_ORDER.map(category => (
-        <Chip
+        <AppChip
           key={category}
           label={t(categoryLabelKey(category))}
           icon={CATEGORY_ICON[category]}

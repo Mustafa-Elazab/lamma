@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 
 import { branding, headerImages } from '../../../assets';
-import { Avatar } from '../../../design-system/atoms/Avatar';
-import { Text } from '../../../design-system/atoms/Text';
+import { AppAvatar } from '../../../design-system/atoms/Avatar';
+import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 
@@ -23,29 +23,33 @@ export function HomeHeader({
 
   return (
     <ImageBackground
-      source={headerImages.events}
+      source={headerImages.egyptMotif}
       style={styles.container}
       imageStyle={styles.bg}
-      resizeMode="cover"
+      resizeMode="repeat"
     >
       <View style={styles.row}>
         <View style={styles.logoBlock}>
           <Image source={branding.logo} style={styles.logo} />
-          <View style={styles.underline} />
+          <Image
+            source={headerImages.egyptMotif}
+            style={styles.motifBand}
+            resizeMode="repeat"
+          />
         </View>
         <View style={styles.userBlock}>
           <View style={styles.greeting}>
-            <Text variant="caption" color="textMuted">
+            <AppText variant="caption" color="textMuted">
               {t('home.greeting')}
-            </Text>
-            <Text variant="bodyStrong">{greetingName}</Text>
+            </AppText>
+            <AppText variant="bodyStrong">{greetingName}</AppText>
           </View>
-          <Avatar source={avatar} name={greetingName} size={44} showStatus />
+          <AppAvatar source={avatar} name={greetingName} size={44} showStatus />
         </View>
       </View>
-      <Text variant="caption" color="textMuted" style={styles.tagline}>
+      <AppText variant="caption" color="textMuted" style={styles.tagline}>
         {t('onboarding.tagline')}
-      </Text>
+      </AppText>
     </ImageBackground>
   );
 }
@@ -57,7 +61,8 @@ function createStyles(theme: Theme) {
       paddingTop: theme.spacing.sm,
       paddingBottom: theme.spacing.md,
     },
-    bg: { opacity: 0.35 },
+    // Subtle Egypt motif tile repeated behind the header content.
+    bg: { opacity: 0.08 },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -65,12 +70,8 @@ function createStyles(theme: Theme) {
     },
     logoBlock: { gap: theme.spacing.xs },
     logo: { width: 118, height: 40, resizeMode: 'contain' },
-    underline: {
-      width: 46,
-      height: 3,
-      borderRadius: 2,
-      backgroundColor: theme.colors.primary,
-    },
+    // A small motif band under the logo as a branded accent divider.
+    motifBand: { width: 96, height: 12, opacity: 0.9 },
     userBlock: {
       flexDirection: 'row',
       alignItems: 'center',

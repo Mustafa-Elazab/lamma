@@ -95,18 +95,28 @@ export class LocalAuthRepository implements AuthRepository {
 
   signInWithGoogle(): Promise<AuthUser> {
     return this.signInWithProvider('google', {
-      displayName: 'Mostafa Elazab',
-      email: 'mostafa@lamma.app',
+      displayName: 'Google User',
+      email: 'dev.google@example.com',
       photoURL: null,
     });
   }
 
   signInWithApple(): Promise<AuthUser> {
     return this.signInWithProvider('apple', {
-      displayName: 'Mostafa Elazab',
-      email: 'mostafa@privaterelay.appleid.com',
+      displayName: 'Apple User',
+      email: 'dev.apple@example.com',
       photoURL: null,
     });
+  }
+
+  async updateProfile(patch: { displayName: string }): Promise<AuthUser> {
+    await this.hydrate();
+    if (!this.user) {
+      throw new Error('No signed-in user to update.');
+    }
+    const updated: AuthUser = { ...this.user, displayName: patch.displayName };
+    await this.persist(updated);
+    return updated;
   }
 
   async signOut(): Promise<void> {

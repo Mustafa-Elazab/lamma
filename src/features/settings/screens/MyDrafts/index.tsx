@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { useLanguage } from '../../../../app/localization';
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { EmptyState } from '../../../../design-system/molecules/EmptyState';
-import { ScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
+import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
 import type { AppStackParamList } from '../../../../navigation/types';
@@ -30,10 +30,10 @@ export function MyDraftsScreen(): React.ReactElement {
   const deleteDraft = useDeleteDraft();
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
-        <ScreenHeader
+        <AppScreenHeader
           title={t('drafts.title')}
           subtitle={t('drafts.subtitle')}
           onBack={() => navigation.goBack()}
@@ -41,7 +41,7 @@ export function MyDraftsScreen(): React.ReactElement {
       }
     >
       {drafts.length === 0 ? (
-        <EmptyState
+        <AppEmptyState
           title={t('drafts.emptyTitle')}
           message={t('drafts.emptyMessage')}
           icon="draft"
@@ -53,32 +53,34 @@ export function MyDraftsScreen(): React.ReactElement {
           <Pressable
             key={draft.id}
             style={styles.row}
-            onPress={() => navigation.navigate('CreateEvent')}
+            onPress={() =>
+              navigation.navigate('CreateEvent', { draftId: draft.id })
+            }
           >
             <Image
               source={themeSource(resolveDraftTheme(draft))}
               style={styles.cover}
             />
             <View style={styles.text}>
-              <Text variant="bodyStrong" numberOfLines={1}>
+              <AppText variant="bodyStrong" numberOfLines={1}>
                 {draft.title.trim() || t('drafts.untitled')}
-              </Text>
-              <Text variant="caption" color="textMuted">
+              </AppText>
+              <AppText variant="caption" color="textMuted">
                 {t('drafts.lastEdited', {
                   when: formatDateShort(draft.updatedAt, language),
                 })}
-              </Text>
+              </AppText>
             </View>
             <Pressable
               hitSlop={8}
               onPress={() => deleteDraft.mutate(draft.id)}
             >
-              <Icon name="close" size={20} color="error" />
+              <AppIcon name="close" size={20} color="error" />
             </Pressable>
           </Pressable>
         ))
       )}
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }
 

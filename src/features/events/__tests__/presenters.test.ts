@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 
-import { buildSeedEvents } from '../core/seed';
+import { buildSeedEvents } from '../testFixtures';
 import { toCompactCard, toFeaturedCard } from '../presenters';
 
 const t = ((key: string) => key) as unknown as TFunction;

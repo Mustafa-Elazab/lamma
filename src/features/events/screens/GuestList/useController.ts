@@ -6,7 +6,7 @@ import { useLanguage } from '../../../../app/localization';
 import { formatDateShort } from '../../../../utils/format';
 import type { RSVPStatus } from '../../core/entity';
 import { useEvent } from '../../core/hooks';
-import { coverSource } from '../../core/media';
+import { eventCover } from '../../core/media';
 import { groupGuests } from '../../guestPresenter';
 
 type GuestTab = Extract<RSVPStatus, 'going' | 'maybe' | 'declined'>;
@@ -34,7 +34,7 @@ export function useGuestListController(eventId: string) {
   );
 
   const dateLabel = event ? formatDateShort(event.startAt, language) : '';
-  const cover = event ? coverSource(event.coverKey) : undefined;
+  const cover = event ? eventCover(event) : undefined;
 
   const goBack = useCallback(() => navigation.goBack(), [navigation]);
 

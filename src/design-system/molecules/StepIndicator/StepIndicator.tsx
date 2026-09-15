@@ -3,8 +3,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Icon } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppIcon } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type StepIndicatorProps = {
   steps: string[];
@@ -12,7 +12,7 @@ export type StepIndicatorProps = {
   currentStep: number;
 };
 
-export function StepIndicator({
+function AppStepIndicatorComponent({
   steps,
   currentStep,
 }: StepIndicatorProps): React.ReactElement {
@@ -38,24 +38,24 @@ export function StepIndicator({
             <View style={styles.stepItem}>
               <View style={circleStyle}>
                 {isDone ? (
-                  <Icon name="check" size={16} color="textInverse" />
+                  <AppIcon name="check" size={16} color="textInverse" />
                 ) : (
-                  <Text
+                  <AppText
                     variant="label"
                     color={isActive ? 'textInverse' : 'textMuted'}
                   >
                     {String(index + 1)}
-                  </Text>
+                  </AppText>
                 )}
               </View>
-              <Text
+              <AppText
                 variant="caption"
                 color={isActive || isDone ? 'primary' : 'textMuted'}
                 weight={isActive ? '700' : '500'}
                 style={styles.label}
               >
                 {step}
-              </Text>
+              </AppText>
             </View>
           </Fragment>
         );
@@ -96,3 +96,5 @@ function createStyles(theme: Theme) {
     lineActive: { backgroundColor: theme.colors.primary },
   });
 }
+
+export const AppStepIndicator = React.memo(AppStepIndicatorComponent);

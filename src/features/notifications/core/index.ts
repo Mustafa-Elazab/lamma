@@ -6,5 +6,7 @@ export {
   getNotificationRepository,
   __resetNotificationRepository,
 } from './notificationRepository';
-export { LocalNotificationRepository } from './localRepository';
-export { buildSeedNotifications } from './seed';
+export {
+  LocalNotificationRepository,
+  __seedLocalNotifications,
+} from './localRepository';

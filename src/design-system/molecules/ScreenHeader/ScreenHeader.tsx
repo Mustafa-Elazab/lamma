@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Icon } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppIcon } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type ScreenHeaderProps = {
   title: string;
@@ -13,7 +13,7 @@ export type ScreenHeaderProps = {
   right?: React.ReactNode;
 };
 
-export function ScreenHeader({
+function AppScreenHeaderComponent({
   title,
   subtitle,
   onBack,
@@ -26,19 +26,19 @@ export function ScreenHeader({
     <View style={styles.container}>
       {onBack ? (
         <Pressable onPress={onBack} hitSlop={8} style={styles.side}>
-          <Icon name="back" size={24} />
+          <AppIcon name="back" size={24} />
         </Pressable>
       ) : (
         <View style={styles.side} />
       )}
       <View style={styles.center}>
-        <Text variant="subheading" numberOfLines={1}>
+        <AppText variant="subheading" numberOfLines={1}>
           {title}
-        </Text>
+        </AppText>
         {subtitle ? (
-          <Text variant="caption" color="textMuted" numberOfLines={1}>
+          <AppText variant="caption" color="textMuted" numberOfLines={1}>
             {subtitle}
-          </Text>
+          </AppText>
         ) : null}
       </View>
       <View style={styles.side}>{right}</View>
@@ -59,3 +59,5 @@ function createStyles(theme: Theme) {
     center: { flex: 1, alignItems: 'center', gap: 2 },
   });
 }
+
+export const AppScreenHeader = React.memo(AppScreenHeaderComponent);

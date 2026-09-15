@@ -2,9 +2,9 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, View } from 'react-native';
 
-import { Badge } from '../../../design-system/atoms/Badge';
-import { Icon } from '../../../design-system/atoms/Icon';
-import { Text } from '../../../design-system/atoms/Text';
+import { AppBadge } from '../../../design-system/atoms/Badge';
+import { AppIcon } from '../../../design-system/atoms/Icon';
+import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 import { themeSource } from '../../events';
@@ -34,40 +34,40 @@ export function LivePreviewCard({
       />
       <View style={styles.body}>
         {draft.category ? (
-          <Badge
+          <AppBadge
             label={t(categoryLabelKey(draft.category)).toUpperCase()}
             tone="primary"
           />
         ) : null}
-        <Text variant="subheading" numberOfLines={2}>
+        <AppText variant="subheading" numberOfLines={2}>
           {draft.title.trim() || t('create.eventTitle')}
-        </Text>
+        </AppText>
         <View style={styles.metaRow}>
-          <Icon name="calendar" size={14} color="textMuted" />
-          <Text
+          <AppIcon name="calendar" size={14} color="textMuted" />
+          <AppText
             variant="caption"
             color="textMuted"
             numberOfLines={1}
             style={styles.metaText}
           >
             {dateLabel ?? t('create.dateTBD')}
-          </Text>
+          </AppText>
         </View>
         <View style={styles.metaRow}>
-          <Icon name="location" size={14} color="textMuted" />
-          <Text
+          <AppIcon name="location" size={14} color="textMuted" />
+          <AppText
             variant="caption"
             color="textMuted"
             numberOfLines={1}
             style={styles.metaText}
           >
             {locationLabel ?? t('create.locationTBD')}
-          </Text>
+          </AppText>
         </View>
         {draft.description.trim() ? (
-          <Text variant="caption" color="textMuted" numberOfLines={2}>
+          <AppText variant="caption" color="textMuted" numberOfLines={2}>
             {draft.description.trim()}
-          </Text>
+          </AppText>
         ) : null}
       </View>
     </View>

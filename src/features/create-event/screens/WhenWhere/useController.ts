@@ -7,12 +7,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useLanguage } from '../../../../app/localization';
 import type { CreateEventStackParamList } from '../../../../navigation/types';
-import { formatDateLong, formatTime } from '../../../../utils/format';
+import { formatDateShort, formatTime } from '../../../../utils/format';
 import { useCreateEventContext } from '../../CreateEventProvider';
+import type { GeoPlace } from '../../core/geocoding';
 import {
   combineDateAndMinutes,
-  generateDateOptions,
-  generateTimeOptions,
   MS_PER_DAY,
   minutesOfDay,
   startOfDay,
@@ -21,7 +20,13 @@ import {
 } from '../../components/dateTime';
 import { wizardSteps } from '../steps';
 
-export type ActivePicker = 'date' | 'start' | 'end' | 'timezone' | null;
+export type ActivePicker =
+  | 'date'
+  | 'start'
+  | 'end'
+  | 'timezone'
+  | 'location'
+  | null;
 
 const DEFAULT_START_MINUTES = 20 * 60;
 const DEFAULT_END_MINUTES = 23 * 60;
@@ -35,17 +40,9 @@ export function useWhenWhereController() {
   const [picker, setPicker] = useState<ActivePicker>(null);
 
   const steps = useMemo(() => wizardSteps(t), [t]);
-  const dateOptions = useMemo(
-    () => generateDateOptions(language),
-    [language],
-  );
-  const timeOptions = useMemo(
-    () => generateTimeOptions(language),
-    [language],
-  );
 
   const dateLabel = draft.startAt
-    ? formatDateLong(draft.startAt, language)
+    ? formatDateShort(draft.startAt, language)
     : undefined;
   const startLabel = draft.startAt
     ? formatTime(draft.startAt, language)
@@ -55,17 +52,26 @@ export function useWhenWhereController() {
     : undefined;
   const tzLabel = timezoneLabel(draft.timezone);
 
-  const onSelectDate = useCallback(
-    (value: string) => {
-      const dateTs = Number(value);
+  const dateValue = useMemo(
+    () => (draft.startAt ? new Date(draft.startAt) : new Date()),
+    [draft.startAt],
+  );
+  const endValue = useMemo(
+    () => (draft.endAt ? new Date(draft.endAt) : new Date()),
+    [draft.endAt],
+  );
+
+  const onPickDate = useCallback(
+    (picked: Date) => {
+      const dayTs = startOfDay(picked.getTime());
       const startMinutes = draft.startAt
         ? minutesOfDay(draft.startAt)
         : DEFAULT_START_MINUTES;
       const endMinutes = draft.endAt
         ? minutesOfDay(draft.endAt)
         : DEFAULT_END_MINUTES;
-      const startAt = combineDateAndMinutes(dateTs, startMinutes);
-      let endAt = combineDateAndMinutes(dateTs, endMinutes);
+      const startAt = combineDateAndMinutes(dayTs, startMinutes);
+      let endAt = combineDateAndMinutes(dayTs, endMinutes);
       if (endAt <= startAt) {
         endAt += MS_PER_DAY;
       }
@@ -74,12 +80,15 @@ export function useWhenWhereController() {
     [draft.endAt, draft.startAt, update],
   );
 
-  const onSelectStart = useCallback(
-    (value: string) => {
-      const minutes = Number(value);
-      const dateTs = draft.startAt ? startOfDay(draft.startAt) : startOfDay(Date.now());
-      const startAt = combineDateAndMinutes(dateTs, minutes);
-      let endAt = draft.endAt ?? combineDateAndMinutes(dateTs, DEFAULT_END_MINUTES);
+  const onPickStart = useCallback(
+    (picked: Date) => {
+      const minutes = picked.getHours() * 60 + picked.getMinutes();
+      const dayTs = draft.startAt
+        ? startOfDay(draft.startAt)
+        : startOfDay(Date.now());
+      const startAt = combineDateAndMinutes(dayTs, minutes);
+      let endAt =
+        draft.endAt ?? combineDateAndMinutes(dayTs, DEFAULT_END_MINUTES);
       if (endAt <= startAt) {
         endAt = startAt + 3 * 60 * 60 * 1000;
       }
@@ -88,11 +97,13 @@ export function useWhenWhereController() {
     [draft.endAt, draft.startAt, update],
   );
 
-  const onSelectEnd = useCallback(
-    (value: string) => {
-      const minutes = Number(value);
-      const dateTs = draft.startAt ? startOfDay(draft.startAt) : startOfDay(Date.now());
-      let endAt = combineDateAndMinutes(dateTs, minutes);
+  const onPickEnd = useCallback(
+    (picked: Date) => {
+      const minutes = picked.getHours() * 60 + picked.getMinutes();
+      const dayTs = draft.startAt
+        ? startOfDay(draft.startAt)
+        : startOfDay(Date.now());
+      let endAt = combineDateAndMinutes(dayTs, minutes);
       if (draft.startAt && endAt <= draft.startAt) {
         endAt += MS_PER_DAY;
       }
@@ -115,12 +126,17 @@ export function useWhenWhereController() {
     [update],
   );
 
-  const useCurrentLocation = useCallback(() => {
-    update({
-      venueName: draft.venueName || t('create.useCurrentLocation'),
-      areaAddress: draft.areaAddress || 'Cairo, Egypt',
-    });
-  }, [draft.areaAddress, draft.venueName, t, update]);
+  const onSelectPlace = useCallback(
+    (place: GeoPlace) => {
+      update({
+        venueName: draft.venueName.trim() || place.name,
+        areaAddress: place.displayName,
+        latitude: place.latitude,
+        longitude: place.longitude,
+      });
+    },
+    [draft.venueName, update],
+  );
 
   const goBack = useCallback(() => navigation.goBack(), [navigation]);
   const goNext = useCallback(() => {
@@ -136,20 +152,22 @@ export function useWhenWhereController() {
     whenWhere,
     picker,
     setPicker,
-    dateOptions,
-    timeOptions,
     timezoneOptions: TIMEZONE_OPTIONS,
     dateLabel,
     startLabel,
     endLabel,
     tzLabel,
-    onSelectDate,
-    onSelectStart,
-    onSelectEnd,
+    dateValue,
+    startValue: dateValue,
+    endValue,
+    hasCoordinates: draft.latitude !== null && draft.longitude !== null,
+    onPickDate,
+    onPickStart,
+    onPickEnd,
     onSelectTimezone,
+    onSelectPlace,
     setVenue,
     setAddress,
-    useCurrentLocation,
     goBack,
     goNext,
   };

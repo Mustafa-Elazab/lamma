@@ -25,6 +25,8 @@ export type CreateEventInput = {
   timezone: string;
   venueName: string;
   areaAddress: string;
+  latitude?: number | null;
+  longitude?: number | null;
   visibility: LammaEvent['visibility'];
 };
 

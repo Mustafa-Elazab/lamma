@@ -23,6 +23,7 @@ type AuthContextValue = {
   continueAsGuest: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithApple: () => Promise<void>;
+  updateProfile: (patch: { displayName: string }) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
 };
@@ -89,6 +90,15 @@ export function AuthProvider({
     () => run('apple', () => repository.signInWithApple()),
     [repository, run],
   );
+  const updateProfile = useCallback(
+    async (patch: { displayName: string }) => {
+      const updated = await repository.updateProfile(patch);
+      if (mounted.current) {
+        setUser(updated);
+      }
+    },
+    [repository],
+  );
   const signOut = useCallback(async () => {
     await repository.signOut();
   }, [repository]);
@@ -104,6 +114,7 @@ export function AuthProvider({
       continueAsGuest,
       signInWithGoogle,
       signInWithApple,
+      updateProfile,
       signOut,
       clearError: () => setError(null),
     }),
@@ -116,6 +127,7 @@ export function AuthProvider({
       continueAsGuest,
       signInWithGoogle,
       signInWithApple,
+      updateProfile,
       signOut,
     ],
   );

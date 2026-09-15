@@ -1,8 +1,3 @@
-import {
-  formatDateLong,
-  formatTime,
-  type SupportedLocale,
-} from '../../../utils/format';
 import type { PickerOption } from './OptionPickerModal';
 
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -21,29 +16,6 @@ export function minutesOfDay(ts: number): number {
 
 export function combineDateAndMinutes(dateTs: number, minutes: number): number {
   return startOfDay(dateTs) + minutes * MS_PER_MINUTE;
-}
-
-export function generateDateOptions(
-  locale: SupportedLocale,
-  count = 90,
-): PickerOption[] {
-  const today = startOfDay(Date.now());
-  return Array.from({ length: count }, (_, i) => {
-    const ts = today + i * MS_PER_DAY;
-    return { label: formatDateLong(ts, locale), value: String(ts) };
-  });
-}
-
-export function generateTimeOptions(
-  locale: SupportedLocale,
-  stepMinutes = 30,
-): PickerOption[] {
-  const options: PickerOption[] = [];
-  for (let minutes = 0; minutes < 24 * 60; minutes += stepMinutes) {
-    const ts = combineDateAndMinutes(startOfDay(Date.now()), minutes);
-    options.push({ label: formatTime(ts, locale), value: String(minutes) });
-  }
-  return options;
 }
 
 export const TIMEZONE_OPTIONS: PickerOption[] = [

@@ -10,8 +10,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { branding } from '../../../../assets';
-import { Button } from '../../../../design-system/atoms/Button';
-import { Text } from '../../../../design-system/atoms/Text';
+import { AppButton } from '../../../../design-system/atoms/Button';
+import { AppText } from '../../../../design-system/atoms/Text';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import { LanguageToggle } from '../../components/LanguageToggle';
 import { createStyles } from './styles';
@@ -30,12 +30,12 @@ export function OnboardingScreen(): React.ReactElement {
     <View style={styles.slide}>
       <Image source={item.image} style={styles.heroImage} />
       <View style={styles.textBlock}>
-        <Text variant="heading" align="center">
+        <AppText variant="heading" align="center">
           {item.title}
-        </Text>
-        <Text variant="body" color="textMuted" align="center">
+        </AppText>
+        <AppText variant="body" color="textMuted" align="center">
           {item.subtitle}
-        </Text>
+        </AppText>
       </View>
     </View>
   );
@@ -44,9 +44,9 @@ export function OnboardingScreen(): React.ReactElement {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Image source={branding.logo} style={styles.logo} />
-        <Text variant="caption" color="textMuted" style={styles.tagline}>
+        <AppText variant="caption" color="textMuted" style={styles.tagline}>
           {t('onboarding.tagline')}
-        </Text>
+        </AppText>
       </View>
 
       <FlatList
@@ -75,12 +75,12 @@ export function OnboardingScreen(): React.ReactElement {
       </View>
 
       <View style={styles.footer}>
-        <Button
+        <AppButton
           label={isLast ? t('onboarding.getStarted') : t('common.continue')}
           rightIcon="navigation"
           onPress={goNext}
         />
-        <Button
+        <AppButton
           label={t('common.signIn')}
           variant="secondary"
           onPress={skipToSignIn}

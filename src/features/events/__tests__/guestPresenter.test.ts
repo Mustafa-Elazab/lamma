@@ -1,4 +1,4 @@
-import { buildSeedEvents } from '../core/seed';
+import { buildSeedEvents } from '../testFixtures';
 import { countByRsvp, groupGuests } from '../guestPresenter';
 
 describe('guest presenter', () => {

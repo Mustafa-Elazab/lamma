@@ -9,7 +9,7 @@ export type ToggleProps = {
   disabled?: boolean;
 };
 
-export function Toggle({
+function AppToggleComponent({
   value,
   onValueChange,
   disabled = false,
@@ -29,3 +29,5 @@ export function Toggle({
     />
   );
 }
+
+export const AppToggle = React.memo(AppToggleComponent);

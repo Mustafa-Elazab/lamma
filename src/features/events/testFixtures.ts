@@ -1,4 +1,9 @@
-import type { Attendee, GuestRelation, LammaEvent } from './entity';
+/**
+ * Test-only fixtures. This module is imported exclusively by Jest specs and the
+ * `__DEV__` local repositories' optional seed helpers — it is never imported by
+ * production UI code, so no seeded data ships in the default app path.
+ */
+import type { Attendee, GuestRelation, LammaEvent } from './core/entity';
 
 const VIEWER_ID = 'user_me';
 

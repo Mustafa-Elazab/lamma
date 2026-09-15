@@ -3,8 +3,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Avatar } from '../../atoms/Avatar';
-import { Text } from '../../atoms/Text';
+import { AppAvatar } from '../../atoms/Avatar';
+import { AppText } from '../../atoms/Text';
 import { overflowLabel } from '../../../utils/format';
 import type { ImageSourcePropType } from 'react-native';
 
@@ -21,7 +21,7 @@ export type AvatarStackProps = {
   size?: number;
 };
 
-export function AvatarStack({
+function AppAvatarStackComponent({
   avatars,
   total,
   max = 5,
@@ -43,7 +43,7 @@ export function AvatarStack({
             { marginLeft: index === 0 ? 0 : -overlap },
           ]}
         >
-          <Avatar source={avatar.source} name={avatar.name} size={size} />
+          <AppAvatar source={avatar.source} name={avatar.name} size={size} />
         </View>
       ))}
       {overflow ? (
@@ -58,9 +58,9 @@ export function AvatarStack({
             },
           ]}
         >
-          <Text variant="caption" color="textMuted" weight="700">
+          <AppText variant="caption" color="textMuted" weight="700">
             {overflow}
-          </Text>
+          </AppText>
         </View>
       ) : null}
     </View>
@@ -84,3 +84,5 @@ function createStyles(theme: Theme) {
     },
   });
 }
+
+export const AppAvatarStack = React.memo(AppAvatarStackComponent);

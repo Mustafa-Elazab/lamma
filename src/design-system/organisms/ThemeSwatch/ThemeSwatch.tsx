@@ -9,8 +9,8 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Icon } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppIcon } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type ThemeSwatchProps = {
   label: string;
@@ -20,7 +20,7 @@ export type ThemeSwatchProps = {
   width?: number;
 };
 
-export function ThemeSwatch({
+function AppThemeSwatchComponent({
   label,
   image,
   selected = false,
@@ -47,11 +47,11 @@ export function ThemeSwatch({
         <Image source={image} style={styles.image} />
         {selected ? (
           <View style={styles.check}>
-            <Icon name="check" size={14} color="textInverse" />
+            <AppIcon name="check" size={14} color="textInverse" />
           </View>
         ) : null}
       </View>
-      <Text
+      <AppText
         variant="caption"
         color={selected ? 'primary' : 'textMuted'}
         weight={selected ? '700' : '500'}
@@ -59,7 +59,7 @@ export function ThemeSwatch({
         numberOfLines={1}
       >
         {label}
-      </Text>
+      </AppText>
     </Pressable>
   );
 }
@@ -89,3 +89,5 @@ function createStyles(theme: Theme) {
     },
   });
 }
+
+export const AppThemeSwatch = React.memo(AppThemeSwatchComponent);

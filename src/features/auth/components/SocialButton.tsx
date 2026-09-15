@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
-import { Text } from '../../../design-system/atoms/Text';
+import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 
@@ -44,9 +44,9 @@ export function SocialButton({
       ) : (
         <View style={styles.content}>
           <View style={styles.mark}>{mark}</View>
-          <Text variant="bodyStrong" color={isDark ? 'textInverse' : 'text'}>
+          <AppText variant="bodyStrong" color={isDark ? 'textInverse' : 'text'}>
             {label}
-          </Text>
+          </AppText>
         </View>
       )}
     </Pressable>

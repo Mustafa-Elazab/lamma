@@ -41,6 +41,11 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# Firebase config: android/app/google-services.json is committed so Android
+# builds work out of the box. For iOS, add ios/GoogleService-Info.plist locally
+# (see the README "Firebase" section) — it is intentionally not ignored so it
+# can be committed alongside google-services.json if desired.
+
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the

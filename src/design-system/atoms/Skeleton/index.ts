@@ -1,2 +1,2 @@
-export { Skeleton } from './Skeleton';
+export { AppSkeleton } from './Skeleton';
 export type { SkeletonProps } from './Skeleton';

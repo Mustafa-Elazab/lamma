@@ -3,10 +3,10 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, StyleSheet, View } from 'react-native';
 
-import { Text } from '../../../../design-system/atoms/Text';
-import { ListItem } from '../../../../design-system/molecules/ListItem';
-import { ScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppListItem } from '../../../../design-system/molecules/ListItem';
+import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../../design-system/theme/tokens';
 import type { IconName } from '../../../../design-system/atoms/Icon';
@@ -48,10 +48,10 @@ export function HelpSupportScreen(): React.ReactElement {
     ];
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
-        <ScreenHeader
+        <AppScreenHeader
           title={t('settings.helpTitle')}
           onBack={() => navigation.goBack()}
         />
@@ -61,7 +61,7 @@ export function HelpSupportScreen(): React.ReactElement {
         {items.map((item, index) => (
           <React.Fragment key={item.key}>
             {index > 0 ? <View style={styles.divider} /> : null}
-            <ListItem
+            <AppListItem
               title={item.label}
               leadingIcon={item.icon}
               showChevron
@@ -70,10 +70,10 @@ export function HelpSupportScreen(): React.ReactElement {
           </React.Fragment>
         ))}
       </View>
-      <Text variant="caption" color="textMuted" align="center">
+      <AppText variant="caption" color="textMuted" align="center">
         {t('settings.appVersion', { version: APP_VERSION })}
-      </Text>
-    </ScreenTemplate>
+      </AppText>
+    </AppScreenTemplate>
   );
 }
 

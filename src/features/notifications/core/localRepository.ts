@@ -2,36 +2,43 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { AppNotification } from './entity';
 import type { NotificationRepository } from './repository';
-import { buildSeedNotifications } from './seed';
 
-const READ_KEY = 'lamma.notifications.read';
+const STORAGE_KEY = 'lamma.notifications.items';
 
-async function readIds(): Promise<Set<string>> {
-  const raw = await AsyncStorage.getItem(READ_KEY);
-  return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+async function read(): Promise<AppNotification[]> {
+  const raw = await AsyncStorage.getItem(STORAGE_KEY);
+  return raw ? (JSON.parse(raw) as AppNotification[]) : [];
 }
 
-async function writeIds(ids: Set<string>): Promise<void> {
-  await AsyncStorage.setItem(READ_KEY, JSON.stringify([...ids]));
+async function write(items: AppNotification[]): Promise<void> {
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
+/**
+ * `__DEV__`-only notification repository. Starts empty (no seeded notifications)
+ * and is only used when `env.firebaseEnabled` is false. Production reads real
+ * notifications from Firestore.
+ */
 export class LocalNotificationRepository implements NotificationRepository {
   async list(): Promise<AppNotification[]> {
-    const readIdsSet = await readIds();
-    return buildSeedNotifications().map(n => ({
-      ...n,
-      read: n.read || readIdsSet.has(n.id),
-    }));
+    const items = await read();
+    return items.sort((a, b) => b.createdAt - a.createdAt);
   }
 
   async markRead(id: string): Promise<void> {
-    const ids = await readIds();
-    ids.add(id);
-    await writeIds(ids);
+    const items = await read();
+    await write(items.map(n => (n.id === id ? { ...n, read: true } : n)));
   }
 
   async markAllRead(): Promise<void> {
-    const ids = new Set(buildSeedNotifications().map(n => n.id));
-    await writeIds(ids);
+    const items = await read();
+    await write(items.map(n => ({ ...n, read: true })));
   }
+}
+
+/** Test/dev helper to seed the local notification store with fixtures. */
+export async function __seedLocalNotifications(
+  items: AppNotification[],
+): Promise<void> {
+  await write(items);
 }

@@ -13,6 +13,7 @@ import {
   signInAnonymously,
   signInWithCredential,
   signOut,
+  updateProfile,
   type FirebaseAuthTypes,
 } from '@react-native-firebase/auth';
 import { Platform } from 'react-native';
@@ -125,6 +126,17 @@ export class FirebaseAuthRepository implements AuthRepository {
     }
     const credential = AppleAuthProvider.credential(identityToken, nonce);
     return this.authenticateWithCredential(credential);
+  }
+
+  async updateProfile(patch: { displayName: string }): Promise<AuthUser> {
+    const auth = getAuth();
+    const current = auth.currentUser;
+    if (!current) {
+      throw new AuthError('auth/no-current-user', 'No signed-in user.');
+    }
+    await updateProfile(current, { displayName: patch.displayName });
+    await current.reload();
+    return mapUser(auth.currentUser) as AuthUser;
   }
 
   async signOut(): Promise<void> {

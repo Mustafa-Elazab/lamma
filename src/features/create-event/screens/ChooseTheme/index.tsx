@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { ImageBackground, ScrollView, View } from 'react-native';
 
-import { Button } from '../../../../design-system/atoms/Button';
-import { Icon } from '../../../../design-system/atoms/Icon';
-import { Text } from '../../../../design-system/atoms/Text';
-import { SectionHeader } from '../../../../design-system/molecules/SectionHeader';
-import { ThemeSwatch } from '../../../../design-system/organisms/ThemeSwatch';
-import { ScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
+import { AppButton } from '../../../../design-system/atoms/Button';
+import { AppIcon } from '../../../../design-system/atoms/Icon';
+import { AppText } from '../../../../design-system/atoms/Text';
+import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
+import { AppThemeSwatch } from '../../../../design-system/organisms/ThemeSwatch';
+import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import { CreateHeader } from '../../components/CreateHeader';
 import { WIZARD_STEP } from '../steps';
@@ -19,7 +19,7 @@ export function ChooseThemeScreen(): React.ReactElement {
   const c = useChooseThemeController();
 
   return (
-    <ScreenTemplate
+    <AppScreenTemplate
       edges={['top']}
       header={
         <CreateHeader
@@ -30,7 +30,7 @@ export function ChooseThemeScreen(): React.ReactElement {
         />
       }
       footer={
-        <Button
+        <AppButton
           label={c.t('create.useThisTheme')}
           rightIcon="navigation"
           onPress={c.goNext}
@@ -43,37 +43,37 @@ export function ChooseThemeScreen(): React.ReactElement {
         imageStyle={styles.heroImage}
       >
         <View style={styles.heroOverlay}>
-          <Text variant="heading" color="textInverse" numberOfLines={2}>
+          <AppText variant="heading" color="textInverse" numberOfLines={2}>
             {c.draft.title.trim() || c.t('create.eventTitle')}
-          </Text>
+          </AppText>
           {c.dateLabel ? (
             <View style={styles.metaRow}>
-              <Icon name="calendar" size={16} color="textInverse" />
-              <Text variant="caption" color="textInverse">
+              <AppIcon name="calendar" size={16} color="textInverse" />
+              <AppText variant="caption" color="textInverse">
                 {c.dateLabel}
-              </Text>
+              </AppText>
             </View>
           ) : null}
           {c.locationLabel ? (
             <View style={styles.metaRow}>
-              <Icon name="location" size={16} color="textInverse" />
-              <Text variant="caption" color="textInverse">
+              <AppIcon name="location" size={16} color="textInverse" />
+              <AppText variant="caption" color="textInverse">
                 {c.locationLabel}
-              </Text>
+              </AppText>
             </View>
           ) : null}
         </View>
       </ImageBackground>
 
       <View>
-        <SectionHeader title={c.t('create.themes')} />
+        <AppSectionHeader title={c.t('create.themes')} />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.swatchRow}
         >
           {c.themes.map(item => (
-            <ThemeSwatch
+            <AppThemeSwatch
               key={item.key}
               label={item.label}
               image={item.image}
@@ -83,6 +83,6 @@ export function ChooseThemeScreen(): React.ReactElement {
           ))}
         </ScrollView>
       </View>
-    </ScreenTemplate>
+    </AppScreenTemplate>
   );
 }

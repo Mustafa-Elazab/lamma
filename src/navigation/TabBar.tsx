@@ -7,8 +7,8 @@ import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Icon, type IconName } from '../design-system/atoms/Icon';
-import { Text } from '../design-system/atoms/Text';
+import { AppIcon, type IconName } from '../design-system/atoms/Icon';
+import { AppText } from '../design-system/atoms/Text';
 import { useTheme } from '../design-system/theme/ThemeProvider';
 import type { Theme } from '../design-system/theme/tokens';
 import { unreadCount, useNotifications } from '../features/notifications/core';
@@ -71,14 +71,30 @@ export function TabBar({
             style={styles.tab}
           >
             <View>
-              <Icon name={TAB_ICONS[routeName]} size={24} color={color} />
+              <AppIcon name={TAB_ICONS[routeName]} size={24} color={color} />
               {routeName === 'Notifications' && unreadNotifications > 0 ? (
-                <View style={styles.badge} />
+                <View style={styles.badge}>
+                  <AppText
+                    variant="caption"
+                    color="textInverse"
+                    allowFontScaling={false}
+                    style={styles.badgeText}
+                  >
+                    {unreadNotifications > 9 ? '9+' : String(unreadNotifications)}
+                  </AppText>
+                </View>
               ) : null}
             </View>
-            <Text variant="caption" color={color} weight={focused ? '700' : '500'}>
+            <AppText
+              variant="caption"
+              color={color}
+              weight={focused ? '700' : '500'}
+              numberOfLines={1}
+              allowFontScaling={false}
+              style={styles.label}
+            >
               {label}
-            </Text>
+            </AppText>
             {focused ? <View style={styles.activeDot} /> : null}
           </Pressable>
         );
@@ -102,7 +118,10 @@ function createStyles(theme: Theme) {
       alignItems: 'center',
       justifyContent: 'center',
       gap: 2,
+      paddingHorizontal: 2,
     },
+    // Smaller than the caption token so "Notifications" stays on a single line.
+    label: { fontSize: 10, lineHeight: 13 },
     activeDot: {
       width: 4,
       height: 4,
@@ -111,14 +130,18 @@ function createStyles(theme: Theme) {
     },
     badge: {
       position: 'absolute',
-      top: -2,
-      right: -4,
-      width: 9,
-      height: 9,
-      borderRadius: 5,
+      top: -6,
+      right: -10,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      paddingHorizontal: 4,
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: theme.colors.primary,
       borderWidth: 1.5,
       borderColor: theme.colors.surface,
     },
+    badgeText: { fontSize: 9, lineHeight: 12, fontWeight: '700' },
   });
 }

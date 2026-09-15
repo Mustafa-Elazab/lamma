@@ -9,10 +9,10 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Badge, type BadgeTone } from '../../atoms/Badge';
-import { Icon } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
-import { AvatarStack, type StackAvatar } from '../AvatarStack';
+import { AppBadge, type BadgeTone } from '../../atoms/Badge';
+import { AppIcon } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
+import { AppAvatarStack, type StackAvatar } from '../AvatarStack';
 
 export type EventCardStatus = {
   label: string;
@@ -43,7 +43,7 @@ export type EventCardProps = {
   onMore?: () => void;
 };
 
-export function EventCard({
+function AppEventCardComponent({
   data,
   variant = 'compact',
   onPress,
@@ -62,45 +62,45 @@ export function EventCard({
         <View style={styles.featuredBody}>
           <View style={styles.featuredTopRow}>
             {data.rsvpLabel ? (
-              <Badge label={data.rsvpLabel} tone="primary" icon="check" />
+              <AppBadge label={data.rsvpLabel} tone="primary" icon="check" />
             ) : (
               <View />
             )}
             {onMore ? (
               <Pressable onPress={onMore} hitSlop={8}>
-                <Icon name="more" size={20} color="textMuted" />
+                <AppIcon name="more" size={20} color="textMuted" />
               </Pressable>
             ) : null}
           </View>
-          <Text variant="heading">{data.title}</Text>
+          <AppText variant="heading">{data.title}</AppText>
           <View style={styles.metaRow}>
-            <Icon name="calendar" size={16} color="textMuted" />
-            <Text variant="caption" color="textMuted">
+            <AppIcon name="calendar" size={16} color="textMuted" />
+            <AppText variant="caption" color="textMuted">
               {data.timeLabel
                 ? `${data.dateLabel}  ·  ${data.timeLabel}`
                 : data.dateLabel}
-            </Text>
+            </AppText>
           </View>
           <View style={styles.metaRow}>
-            <Icon name="location" size={16} color="textMuted" />
-            <Text variant="caption" color="textMuted">
+            <AppIcon name="location" size={16} color="textMuted" />
+            <AppText variant="caption" color="textMuted">
               {data.locationLabel}
-            </Text>
+            </AppText>
           </View>
           <View style={styles.attendeeRow}>
-            <AvatarStack
+            <AppAvatarStack
               avatars={data.attendees}
               total={data.attendeeCount}
               size={30}
             />
-            <Text variant="caption" color="textMuted">
+            <AppText variant="caption" color="textMuted">
               {data.attendeeSummary ?? `${data.attendeeCount} going`}
-            </Text>
+            </AppText>
           </View>
           {data.description ? (
-            <Text variant="caption" color="textMuted" numberOfLines={2}>
+            <AppText variant="caption" color="textMuted" numberOfLines={2}>
               {data.description}
-            </Text>
+            </AppText>
           ) : null}
         </View>
       </Pressable>
@@ -115,11 +115,11 @@ export function EventCard({
       <Image source={data.coverImage} style={styles.compactCover} />
       <View style={styles.compactBody}>
         <View style={styles.compactTopRow}>
-          <Text variant="bodyStrong" numberOfLines={1} style={styles.flex}>
+          <AppText variant="bodyStrong" numberOfLines={1} style={styles.flex}>
             {data.title}
-          </Text>
+          </AppText>
           {data.status ? (
-            <Badge
+            <AppBadge
               label={data.status.label}
               tone={data.status.tone}
               icon={data.status.icon}
@@ -127,29 +127,29 @@ export function EventCard({
           ) : null}
         </View>
         <View style={styles.metaRow}>
-          <Icon name="calendar" size={14} color="textMuted" />
-          <Text variant="caption" color="textMuted">
+          <AppIcon name="calendar" size={14} color="textMuted" />
+          <AppText variant="caption" color="textMuted">
             {data.timeLabel
               ? `${data.dateLabel}  ·  ${data.timeLabel}`
               : data.dateLabel}
-          </Text>
+          </AppText>
         </View>
         <View style={styles.metaRow}>
-          <Icon name="location" size={14} color="textMuted" />
-          <Text variant="caption" color="textMuted" numberOfLines={1}>
+          <AppIcon name="location" size={14} color="textMuted" />
+          <AppText variant="caption" color="textMuted" numberOfLines={1}>
             {data.locationLabel}
-          </Text>
+          </AppText>
         </View>
         <View style={styles.attendeeRow}>
-          <AvatarStack
+          <AppAvatarStack
             avatars={data.attendees}
             total={data.attendeeCount}
             size={24}
             max={4}
           />
-          <Text variant="caption" color="textMuted">
+          <AppText variant="caption" color="textMuted">
             {data.attendeeSummary ?? `${data.attendeeCount} going`}
-          </Text>
+          </AppText>
         </View>
       </View>
     </Pressable>
@@ -173,6 +173,8 @@ function createStyles(theme: Theme) {
     },
     featured: {
       flexDirection: 'row',
+      alignItems: 'stretch',
+      minHeight: 176,
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       borderWidth: 1,
@@ -180,7 +182,9 @@ function createStyles(theme: Theme) {
       overflow: 'hidden',
       ...theme.shadows.card,
     },
-    featuredCover: { width: 150, height: '100%', resizeMode: 'cover' },
+    // No percentage height (its parent has no fixed height, which collapsed the
+    // cover to 0). alignSelf:'stretch' fills the row's cross-axis instead.
+    featuredCover: { width: 150, alignSelf: 'stretch', resizeMode: 'cover' },
     featuredBody: {
       flex: 1,
       padding: theme.spacing.lg,
@@ -216,3 +220,5 @@ function createStyles(theme: Theme) {
     },
   });
 }
+
+export const AppEventCard = React.memo(AppEventCardComponent);

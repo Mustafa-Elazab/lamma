@@ -27,7 +27,7 @@ export type ScreenTemplateProps = {
   testID?: string;
 };
 
-export function ScreenTemplate({
+function AppScreenTemplateComponent({
   children,
   header,
   footer,
@@ -86,3 +86,5 @@ function createStyles(theme: Theme) {
     },
   });
 }
+
+export const AppScreenTemplate = React.memo(AppScreenTemplateComponent);

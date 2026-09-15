@@ -21,6 +21,8 @@ export type EventDraft = {
   timezone: string;
   venueName: string;
   areaAddress: string;
+  latitude: number | null;
+  longitude: number | null;
   themeKey: EventThemeKey;
   visibility: EventVisibility;
   step: number;
@@ -38,6 +40,8 @@ export function createEmptyDraft(id: string): EventDraft {
     timezone: DEFAULT_TIMEZONE,
     venueName: '',
     areaAddress: '',
+    latitude: null,
+    longitude: null,
     themeKey: 'generic',
     visibility: 'private',
     step: 0,
@@ -76,6 +80,8 @@ export function draftToCreateInput(
     timezone: draft.timezone,
     venueName: draft.venueName.trim(),
     areaAddress: draft.areaAddress.trim(),
+    latitude: draft.latitude,
+    longitude: draft.longitude,
     visibility: draft.visibility,
   };
 }

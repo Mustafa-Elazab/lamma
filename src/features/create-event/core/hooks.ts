@@ -16,6 +16,15 @@ export function useDrafts() {
   });
 }
 
+export function useDraft(id: string | undefined) {
+  const repository = getDraftRepository();
+  return useQuery<EventDraft | null, Error>({
+    queryKey: draftKeys.detail(id ?? 'none'),
+    queryFn: () => (id ? repository.get(id) : Promise.resolve(null)),
+    enabled: Boolean(id),
+  });
+}
+
 export function useDeleteDraft() {
   const repository = getDraftRepository();
   const queryClient = useQueryClient();

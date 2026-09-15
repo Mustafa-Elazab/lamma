@@ -8,10 +8,10 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Avatar } from '../../atoms/Avatar';
-import { Badge } from '../../atoms/Badge';
-import { Icon } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppAvatar } from '../../atoms/Avatar';
+import { AppBadge } from '../../atoms/Badge';
+import { AppIcon } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type GuestRowProps = {
   name: string;
@@ -21,7 +21,7 @@ export type GuestRowProps = {
   onPressMore?: () => void;
 };
 
-export function GuestRow({
+function AppGuestRowComponent({
   name,
   subtitle,
   avatar,
@@ -33,22 +33,22 @@ export function GuestRow({
 
   return (
     <View style={styles.row}>
-      <Avatar source={avatar} name={name} size={48} />
+      <AppAvatar source={avatar} name={name} size={48} />
       <View style={styles.text}>
-        <Text variant="bodyStrong" numberOfLines={1}>
+        <AppText variant="bodyStrong" numberOfLines={1}>
           {name}
-        </Text>
+        </AppText>
         {subtitle ? (
-          <Text variant="caption" color="textMuted" numberOfLines={1}>
+          <AppText variant="caption" color="textMuted" numberOfLines={1}>
             {subtitle}
-          </Text>
+          </AppText>
         ) : null}
       </View>
       {hostLabel ? (
-        <Badge label={hostLabel} tone="primary" icon="crown" />
+        <AppBadge label={hostLabel} tone="primary" icon="crown" />
       ) : onPressMore ? (
         <Pressable onPress={onPressMore} hitSlop={8}>
-          <Icon name="more" size={20} color="textMuted" />
+          <AppIcon name="more" size={20} color="textMuted" />
         </Pressable>
       ) : null}
     </View>
@@ -66,3 +66,5 @@ function createStyles(theme: Theme) {
     text: { flex: 1, gap: 2 },
   });
 }
+
+export const AppGuestRow = React.memo(AppGuestRowComponent);

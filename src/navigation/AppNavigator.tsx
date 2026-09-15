@@ -4,6 +4,7 @@ import React from 'react';
 import { EventDetailsScreen } from '../features/events/screens/EventDetails';
 import { GuestListScreen } from '../features/events/screens/GuestList';
 import { ShareInviteScreen } from '../features/events/screens/ShareInvite';
+import { EditProfileScreen } from '../features/profile/screens/EditProfile';
 import { AppearanceScreen } from '../features/settings/screens/Appearance';
 import { HelpSupportScreen } from '../features/settings/screens/HelpSupport';
 import { LanguageSettingsScreen } from '../features/settings/screens/LanguageSettings';
@@ -32,6 +33,7 @@ export function AppNavigator(): React.ReactElement {
         component={ShareInviteScreen}
         options={{ presentation: 'modal' }}
       />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen
         name="LanguageSettings"
         component={LanguageSettingsScreen}

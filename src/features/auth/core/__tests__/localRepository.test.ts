@@ -46,6 +46,15 @@ describe('LocalAuthRepository', () => {
     expect(await repo.getCurrentUser()).toBeNull();
   });
 
+  it('updates the display name of the signed-in user', async () => {
+    const repo = new LocalAuthRepository();
+    await repo.signInWithGoogle();
+    const updated = await repo.updateProfile({ displayName: 'Mostafa' });
+    expect(updated.displayName).toBe('Mostafa');
+    const restored = await new LocalAuthRepository().getCurrentUser();
+    expect(restored?.displayName).toBe('Mostafa');
+  });
+
   it('persists the session across repository instances', async () => {
     const first = new LocalAuthRepository();
     await first.signInWithGoogle();

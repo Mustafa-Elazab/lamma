@@ -8,9 +8,9 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Button } from '../../atoms/Button';
-import { Icon, type IconName } from '../../atoms/Icon';
-import { Text } from '../../atoms/Text';
+import { AppButton } from '../../atoms/Button';
+import { AppIcon, type IconName } from '../../atoms/Icon';
+import { AppText } from '../../atoms/Text';
 
 export type EmptyStateProps = {
   title: string;
@@ -21,7 +21,7 @@ export type EmptyStateProps = {
   onAction?: () => void;
 };
 
-export function EmptyState({
+function AppEmptyStateComponent({
   title,
   message,
   icon = 'calendar',
@@ -38,19 +38,19 @@ export function EmptyState({
         <Image source={image} style={styles.image} />
       ) : (
         <View style={styles.iconCircle}>
-          <Icon name={icon} size={32} color="primary" />
+          <AppIcon name={icon} size={32} color="primary" />
         </View>
       )}
-      <Text variant="subheading" align="center">
+      <AppText variant="subheading" align="center">
         {title}
-      </Text>
+      </AppText>
       {message ? (
-        <Text variant="body" color="textMuted" align="center">
+        <AppText variant="body" color="textMuted" align="center">
           {message}
-        </Text>
+        </AppText>
       ) : null}
       {actionLabel && onAction ? (
-        <Button
+        <AppButton
           label={actionLabel}
           onPress={onAction}
           fullWidth={false}
@@ -88,3 +88,5 @@ function createStyles(theme: Theme) {
     action: { marginTop: theme.spacing.md },
   });
 }
+
+export const AppEmptyState = React.memo(AppEmptyStateComponent);

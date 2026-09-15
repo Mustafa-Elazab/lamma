@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-nat
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { Icon, type IconName } from '../Icon';
-import { Text } from '../Text';
+import { AppIcon, type IconName } from '../Icon';
+import { AppText } from '../Text';
 
 export type ChipProps = {
   label: string;
@@ -14,7 +14,7 @@ export type ChipProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function Chip({
+function AppChipComponent({
   label,
   icon,
   selected = false,
@@ -37,10 +37,10 @@ export function Chip({
         style,
       ]}
     >
-      {icon ? <Icon name={icon} size={16} color={fg} /> : null}
-      <Text variant="label" color={fg}>
+      {icon ? <AppIcon name={icon} size={16} color={fg} /> : null}
+      <AppText variant="label" color={fg}>
         {label}
-      </Text>
+      </AppText>
     </Pressable>
   );
 }
@@ -65,3 +65,5 @@ function createStyles(theme: Theme) {
     chipPressed: { opacity: 0.7 },
   });
 }
+
+export const AppChip = React.memo(AppChipComponent);

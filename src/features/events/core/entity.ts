@@ -49,6 +49,8 @@ export type LammaEvent = {
   description: string;
   category: EventCategory;
   coverKey: EventCoverKey;
+  /** Optional real cover photo (event media) URL; falls back to cover art. */
+  coverImageUrl?: string | null;
   themeKey: EventThemeKey;
   startAt: number;
   endAt: number;

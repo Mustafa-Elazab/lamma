@@ -13,7 +13,7 @@ export type IconProps = {
   strokeWidth?: number;
 };
 
-export function Icon({
+function AppIconComponent({
   name,
   size = 24,
   color = 'text',
@@ -33,3 +33,5 @@ export function Icon({
 }
 
 export type { IconName };
+
+export const AppIcon = React.memo(AppIconComponent);
