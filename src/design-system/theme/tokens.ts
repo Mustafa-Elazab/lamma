@@ -20,6 +20,7 @@ export const lammaColors = {
   border: '#F2DDE1',
   borderStrong: '#EABCC6',
   shadow: 'rgba(24, 34, 53, 0.12)',
+  overlay: 'rgba(24, 34, 53, 0.45)',
   success: '#27A36A',
   warning: '#D88A21',
   error: '#D94545',
