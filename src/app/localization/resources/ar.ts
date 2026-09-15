@@ -235,7 +235,7 @@ export const ar: TranslationSchema = {
     title: 'اللغة',
     english: 'English',
     arabic: 'العربية',
-    restartHint: 'يتغيّر اتجاه التطبيق ليناسب لغتك.',
+    restartHint: 'يُعاد تشغيل التطبيق لتطبيق اللغة واتجاه الواجهة.',
   },
   settings: {
     defaultBio: 'ناس طيبين. أيام أحلى.',

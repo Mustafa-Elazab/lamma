@@ -233,5 +233,7 @@ For iOS universal links, host `https://lamma.app/.well-known/apple-app-site-asso
 ## Localization & RTL
 
 Strings live in `src/app/localization/resources/{en,ar}.ts` behind a typed schema. Switching
-to Arabic flips layout direction via `I18nManager`. A parity test guarantees `en` and `ar`
-never drift apart.
+between English and Arabic persists the choice, calls `I18nManager.allowRTL/forceRTL`, and
+performs a full native restart with `react-native-restart` so every mounted native and React
+Navigation view adopts the new direction. A parity test guarantees `en` and `ar` never
+drift apart.

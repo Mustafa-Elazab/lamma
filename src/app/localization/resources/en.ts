@@ -233,7 +233,7 @@ export const en = {
     title: 'Language',
     english: 'English',
     arabic: 'العربية',
-    restartHint: 'The app layout updates to match your language.',
+    restartHint: 'The app restarts to apply your language and layout direction.',
   },
   settings: {
     defaultBio: 'Good people. Brighter days.',
