@@ -32,6 +32,8 @@ export type EventCardData = {
   description?: string;
   status?: EventCardStatus;
   rsvpLabel?: string;
+  /** Localized "N going" summary; falls back to English when omitted. */
+  attendeeSummary?: string;
 };
 
 export type EventCardProps = {
@@ -92,7 +94,7 @@ export function EventCard({
               size={30}
             />
             <Text variant="caption" color="textMuted">
-              {`${data.attendeeCount} going`}
+              {data.attendeeSummary ?? `${data.attendeeCount} going`}
             </Text>
           </View>
           {data.description ? (
@@ -146,7 +148,7 @@ export function EventCard({
             max={4}
           />
           <Text variant="caption" color="textMuted">
-            {`${data.attendeeCount} going`}
+            {data.attendeeSummary ?? `${data.attendeeCount} going`}
           </Text>
         </View>
       </View>
