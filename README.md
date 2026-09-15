@@ -174,6 +174,18 @@ npx react-native-bootsplash generate src/assets/branding/lamma_logo_exact_transp
   --platforms=android,ios --background=FFF8F4 --logo-width=180
 ```
 
+## Launcher icons
+
+The launcher uses `src/assets/branding/app_icon_source_1024.png`. Regenerate every Android
+legacy/round/adaptive density and every iPhone/iPad/App Store icon with:
+
+```sh
+npm run icons
+```
+
+The script uses `sharp`, writes adaptive icon XML plus mipmap foregrounds on Android, and
+updates the image files referenced by the iOS `AppIcon.appiconset`.
+
 ## Maps & location (Google Maps + OpenStreetMap)
 
 The Create Event location picker renders Google Maps and uses the free
