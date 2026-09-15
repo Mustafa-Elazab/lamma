@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ThemeProvider } from '../design-system/theme/ThemeProvider';
+import { AuthProvider, OnboardingProvider } from '../features/auth';
 import { LanguageProvider, useLanguage } from './localization';
 import { createQueryClient } from './queryClient';
 
@@ -33,7 +34,11 @@ export function AppProviders({
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <LanguageProvider>
-              <LocalizationGate>{children}</LocalizationGate>
+              <LocalizationGate>
+                <AuthProvider>
+                  <OnboardingProvider>{children}</OnboardingProvider>
+                </AuthProvider>
+              </LocalizationGate>
             </LanguageProvider>
           </ThemeProvider>
         </QueryClientProvider>
