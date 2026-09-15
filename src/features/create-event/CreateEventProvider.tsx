@@ -70,11 +70,16 @@ export function CreateEventProvider({
       return;
     }
     hydrated.current = true;
-    void repository.get(initialDraftId).then(loaded => {
-      if (loaded) {
-        setDraft(loaded);
-      }
-    });
+    void repository
+      .get(initialDraftId)
+      .then(loaded => {
+        if (loaded) {
+          setDraft(loaded);
+        }
+      })
+      .catch(error => {
+        reportError(error, 'create-event.load-draft', { initialDraftId });
+      });
   }, [initialDraftId, repository]);
 
   const update = useCallback((patch: Partial<EventDraft>) => {
@@ -93,9 +98,14 @@ export function CreateEventProvider({
       clearTimeout(saveTimer.current);
     }
     saveTimer.current = setTimeout(() => {
-      void repository.save(draft).then(() => {
-        void queryClient.invalidateQueries({ queryKey: draftKeys.list() });
-      });
+      void repository
+        .save(draft)
+        .then(() => {
+          void queryClient.invalidateQueries({ queryKey: draftKeys.list() });
+        })
+        .catch(error => {
+          reportError(error, 'create-event.autosave', { draftId: draft.id });
+        });
     }, 600);
     return () => {
       if (saveTimer.current) {

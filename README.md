@@ -147,6 +147,22 @@ with `firebase deploy --only firestore:rules`. Event creation requires both `hos
 `ownerId` to equal the fresh Firebase ID token's `uid`; user subcollections are restricted
 to that same uid.
 
+The checked-in file does not change the rules already running in Firebase. If the Firebase
+Console rules differ, authenticated writes can still return `firestore/permission-denied`.
+Install and authenticate the CLI on a machine allowed to deploy, then deploy the repository
+rules explicitly:
+
+```sh
+npm install --global firebase-tools
+firebase login
+firebase use fos7a-357902
+firebase deploy --only firestore:rules
+```
+
+Firebase Anonymous Auth is authenticated: a guest receives a real
+`request.auth.uid`. The explicit `/users/{uid}/drafts/{draftId}` rule permits that guest to
+read, create, update, and delete drafts only when the path uid equals the token uid.
+
 The prior event-write failure had two concrete client/rules contract problems: no Firestore
 rules were versioned with the app, and the event repository silently substituted the string
 `anonymous` when Firebase Auth had no current user. A protected write could therefore carry
@@ -251,6 +267,11 @@ Configure a key with both **Maps SDK for Android** and **Maps SDK for iOS** enab
   User-Defined Setting**, name it `GOOGLE_MAPS_API_KEY`, and paste the key as its value for
   Debug and Release. `Info.plist` expands that build setting and `AppDelegate.swift`
   supplies it to `GMSServices`.
+
+The property/build-setting **name** must remain the literal `GOOGLE_MAPS_API_KEY`. Do not put
+the key itself inside `getProperty("...")` or an Xcode placeholder: Android must call
+`getProperty("GOOGLE_MAPS_API_KEY")`, and iOS must use `$(GOOGLE_MAPS_API_KEY)`. The secret
+value belongs only in gitignored `android/local.properties`, the Xcode build setting, or CI.
 
 Restrict production keys by Android package/signing certificate and iOS bundle identifier.
 Nominatim requests use an identifying User-Agent and search is debounced to respect its
