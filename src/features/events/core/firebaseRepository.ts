@@ -209,7 +209,6 @@ export class FirebaseEventRepository implements EventRepository {
     // Keep these diagnostics at the actual network boundary. They intentionally
     // exclude the token while recording the uid, expiry, exact payload, and
     // Firestore response/error needed to diagnose security-rule failures.
-    // eslint-disable-next-line no-console
     console.info('[events.create] Firestore write request', {
       uid,
       tokenExpirationTime: tokenResult.expirationTime,
@@ -218,7 +217,6 @@ export class FirebaseEventRepository implements EventRepository {
 
     try {
       const ref = await addDoc(collection(this.db, COLLECTION), payload);
-      // eslint-disable-next-line no-console
       console.info('[events.create] Firestore write response', {
         id: ref.id,
         path: ref.path,
@@ -232,7 +230,6 @@ export class FirebaseEventRepository implements EventRepository {
       return mapDoc(snapshot, uid);
     } catch (error) {
       const details = error as { code?: string; message?: string };
-      // eslint-disable-next-line no-console
       console.error('[events.create] Firestore write failed', {
         uid,
         payload,
