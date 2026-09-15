@@ -30,6 +30,28 @@ export const lammaColors = {
 
 export type ColorToken = keyof typeof lammaColors;
 
+export const lammaDarkColors: Record<ColorToken, string> = {
+  background: '#12131A',
+  surface: '#1C1E27',
+  surfaceSoft: '#34232C',
+  surfaceWarm: '#2B2220',
+  primary: '#FF6178',
+  primaryPressed: '#E64860',
+  primarySoft: '#512934',
+  accentPeach: '#724737',
+  accentLavender: '#3D3452',
+  text: '#FFF9F6',
+  textMuted: '#B9B2BE',
+  textInverse: '#FFFFFF',
+  border: '#38313B',
+  borderStrong: '#67505B',
+  shadow: 'rgba(0, 0, 0, 0.42)',
+  overlay: 'rgba(4, 5, 10, 0.62)',
+  success: '#46C98B',
+  warning: '#F2AB45',
+  error: '#FF6B6B',
+};
+
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -90,12 +112,37 @@ export const shadows = {
 
 export type ShadowToken = keyof typeof shadows;
 
-export const theme = {
+export type Theme = {
+  colors: Record<ColorToken, string>;
+  spacing: typeof spacing;
+  radius: typeof radius;
+  typography: typeof typography;
+  shadows: Record<
+    ShadowToken,
+    {
+      shadowColor: string;
+      shadowOffset: { width: number; height: number };
+      shadowOpacity: number;
+      shadowRadius: number;
+      elevation: number;
+    }
+  >;
+};
+
+export const theme: Theme = {
   colors: lammaColors,
   spacing,
   radius,
   typography,
   shadows,
-} as const;
+};
 
-export type Theme = typeof theme;
+export const darkTheme: Theme = {
+  ...theme,
+  colors: lammaDarkColors,
+  shadows: {
+    card: { ...shadows.card, shadowColor: lammaDarkColors.shadow },
+    soft: { ...shadows.soft, shadowColor: lammaDarkColors.shadow },
+    floating: { ...shadows.floating, shadowColor: lammaDarkColors.primary },
+  },
+};

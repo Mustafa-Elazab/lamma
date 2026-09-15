@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useMemo } from 'react';
+import { useColorScheme, type ColorSchemeName } from 'react-native';
 
-import { theme as defaultTheme, type Theme } from './tokens';
+import {
+  darkTheme,
+  theme as defaultTheme,
+  type Theme,
+} from './tokens';
 
 const ThemeContext = createContext<Theme>(defaultTheme);
 
@@ -15,6 +20,29 @@ export function ThemeProvider({
 }: ThemeProviderProps): React.ReactElement {
   const value = useMemo(() => theme, [theme]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+export function resolveAppTheme(
+  mode: ThemeMode,
+  systemScheme: ColorSchemeName,
+): Theme {
+  return mode === 'dark' || (mode === 'system' && systemScheme === 'dark')
+    ? darkTheme
+    : defaultTheme;
+}
+
+export function AppThemeProvider({
+  mode,
+  children,
+}: {
+  mode: ThemeMode;
+  children: React.ReactNode;
+}): React.ReactElement {
+  const systemScheme = useColorScheme();
+  const activeTheme = resolveAppTheme(mode, systemScheme);
+  return <ThemeProvider theme={activeTheme}>{children}</ThemeProvider>;
 }
 
 /**

@@ -10,7 +10,9 @@ coming — with first‑class Arabic + English (RTL) support and a warm, Egypt�
 ## Highlights
 
 - **Design system first** — tokens (`src/design-system/theme/tokens.ts`) drive every screen;
-  no hardcoded colors in screens. Atoms → molecules → organisms → templates, all typed.
+  no hardcoded colors in screens. Light and dark token sets propagate live through the
+  theme context; system mode follows the native color scheme. Atoms → molecules →
+  organisms → templates, all typed.
 - **Bottom tab bar is the root navigator** — Home / Discover / Create / Notifications / Profile.
 - **Feature modules** — each feature has `core/{entity,repository,hooks,queryKeys}` with a
   **local + Firebase repository split** selected at runtime, and screens as

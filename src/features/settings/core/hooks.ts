@@ -9,13 +9,16 @@ import { getPreferencesRepository } from './preferencesRepository';
 
 const preferencesKey = ['preferences'] as const;
 
-export function usePreferences() {
+export function usePreferences(options?: { enabled?: boolean }) {
   const repository = getPreferencesRepository();
   const queryClient = useQueryClient();
   const query = useQuery<Preferences, Error>({
     queryKey: preferencesKey,
     queryFn: () => repository.get(),
-    initialData: DEFAULT_PREFERENCES,
+    // Placeholder paints immediately but remains stale, so persisted Firebase
+    // preferences are still fetched on every cold launch.
+    placeholderData: DEFAULT_PREFERENCES,
+    enabled: options?.enabled ?? true,
   });
 
   const mutation = useMutation<void, Error, Preferences, Preferences | undefined>({

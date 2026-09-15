@@ -4,8 +4,9 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { ThemeProvider } from '../design-system/theme/ThemeProvider';
-import { AuthProvider, OnboardingProvider } from '../features/auth';
+import { AppThemeProvider } from '../design-system/theme/ThemeProvider';
+import { AuthProvider, OnboardingProvider, useAuth } from '../features/auth';
+import { usePreferences } from '../features/settings/core';
 import { LanguageProvider, useLanguage } from './localization';
 import { createQueryClient } from './queryClient';
 
@@ -21,6 +22,24 @@ function LocalizationGate({
   return <>{children}</>;
 }
 
+function PreferenceThemeProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
+  const { status } = useAuth();
+  const { preferences } = usePreferences({
+    enabled: status === 'authenticated',
+  });
+  return (
+    <AppThemeProvider
+      mode={status === 'authenticated' ? preferences.appearance : 'light'}
+    >
+      {children}
+    </AppThemeProvider>
+  );
+}
+
 export function AppProviders({
   children,
 }: {
@@ -32,15 +51,15 @@ export function AppProviders({
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <LanguageProvider>
-              <LocalizationGate>
-                <AuthProvider>
+          <LanguageProvider>
+            <LocalizationGate>
+              <AuthProvider>
+                <PreferenceThemeProvider>
                   <OnboardingProvider>{children}</OnboardingProvider>
-                </AuthProvider>
-              </LocalizationGate>
-            </LanguageProvider>
-          </ThemeProvider>
+                </PreferenceThemeProvider>
+              </AuthProvider>
+            </LocalizationGate>
+          </LanguageProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
