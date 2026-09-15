@@ -20,7 +20,7 @@ function CreatePlaceholder(): React.ReactElement | null {
 }
 
 function renderTabBar(props: BottomTabBarProps): React.ReactElement {
-  return <TabBar {...props} unreadNotifications={2} />;
+  return <TabBar {...props} />;
 }
 
 export function TabNavigator(): React.ReactElement {

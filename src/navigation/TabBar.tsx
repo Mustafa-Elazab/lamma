@@ -11,6 +11,7 @@ import { Icon, type IconName } from '../design-system/atoms/Icon';
 import { Text } from '../design-system/atoms/Text';
 import { useTheme } from '../design-system/theme/ThemeProvider';
 import type { Theme } from '../design-system/theme/tokens';
+import { unreadCount, useNotifications } from '../features/notifications/core';
 import type { AppStackParamList, TabParamList } from './types';
 
 const TAB_ICONS: Record<keyof TabParamList, IconName> = {
@@ -21,20 +22,17 @@ const TAB_ICONS: Record<keyof TabParamList, IconName> = {
   Profile: 'profile',
 };
 
-type TabBarProps = BottomTabBarProps & {
-  unreadNotifications?: number;
-};
-
 export function TabBar({
   state,
   descriptors,
   navigation,
-  unreadNotifications = 0,
-}: TabBarProps): React.ReactElement {
+}: BottomTabBarProps): React.ReactElement {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const rootNav = useNavigation<NavigationProp<AppStackParamList>>();
+  const { data: notifications } = useNotifications();
+  const unreadNotifications = unreadCount(notifications ?? []);
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom + 8 }]}>
