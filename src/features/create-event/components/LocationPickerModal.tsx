@@ -27,6 +27,7 @@ import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
 import { reportError } from '../../../services/crashReporting';
 import { appLogger } from '../../../services/logger';
+import { isGoogleMapsConfigured } from '../../../services/mapConfiguration';
 import {
   reverseGeocode,
   searchPlaces,
@@ -66,12 +67,13 @@ export function LocationPickerModal({
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const mapRef = useRef<MapView>(null);
+  const mapConfigured = useMemo(isGoogleMapsConfigured, []);
   const [query, setQuery] = useState(initialQuery ?? '');
   const [results, setResults] = useState<GeoPlace[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapFailed, setMapFailed] = useState(false);
+  const [mapFailed, setMapFailed] = useState(!mapConfigured);
   const [confirming, setConfirming] = useState(false);
   const [coordinate, setCoordinate] = useState<LatLng>(
     initialLocation
@@ -91,17 +93,28 @@ export function LocationPickerModal({
     setResults([]);
     setError(false);
     setMapLoaded(false);
-    setMapFailed(false);
+    setMapFailed(!mapConfigured);
     if (initialLocation) {
       setCoordinate({
         latitude: initialLocation.lat,
         longitude: initialLocation.lng,
       });
     }
-  }, [initialLocation, initialQuery, visible]);
+  }, [initialLocation, initialQuery, mapConfigured, visible]);
 
   useEffect(() => {
-    if (!visible || mapLoaded) {
+    if (!visible) {
+      return;
+    }
+    if (!mapConfigured) {
+      appLogger.error(
+        '[maps] Native Google Maps API key is not configured',
+        new Error('maps/missing-api-key'),
+        { provider: 'google' },
+      );
+      return;
+    }
+    if (mapLoaded) {
       return;
     }
     const timeout = setTimeout(() => {
@@ -113,7 +126,7 @@ export function LocationPickerModal({
       );
     }, 8_000);
     return () => clearTimeout(timeout);
-  }, [mapLoaded, visible]);
+  }, [mapConfigured, mapLoaded, visible]);
 
   useEffect(() => {
     if (!visible) {
@@ -274,32 +287,36 @@ export function LocationPickerModal({
         contentStyle={styles.content}
       >
         <View style={styles.mapContainer}>
-          <MapView
-            ref={mapRef}
-            provider={PROVIDER_GOOGLE}
-            style={StyleSheet.absoluteFill}
-            initialRegion={initialRegion}
-            onPress={handleMapPress}
-            onMapReady={() => {
-              appLogger.log('[maps] Google MapView ready', {
-                provider: 'google',
-              });
-            }}
-            onMapLoaded={() => {
-              setMapLoaded(true);
-              setMapFailed(false);
-            }}
-            showsCompass
-            showsMyLocationButton
-            toolbarEnabled={false}
-          >
-            <Marker
-              coordinate={coordinate}
-              draggable
-              pinColor={theme.colors.primary}
-              onDragEnd={event => setCoordinate(event.nativeEvent.coordinate)}
-            />
-          </MapView>
+          {mapConfigured ? (
+            <MapView
+              ref={mapRef}
+              provider={PROVIDER_GOOGLE}
+              style={StyleSheet.absoluteFill}
+              initialRegion={initialRegion}
+              onPress={handleMapPress}
+              onMapReady={() => {
+                appLogger.log('[maps] Google MapView ready', {
+                  provider: 'google',
+                });
+              }}
+              onMapLoaded={() => {
+                setMapLoaded(true);
+                setMapFailed(false);
+              }}
+              showsCompass
+              showsMyLocationButton
+              toolbarEnabled={false}
+            >
+              <Marker
+                coordinate={coordinate}
+                draggable
+                pinColor={theme.colors.primary}
+                onDragEnd={event =>
+                  setCoordinate(event.nativeEvent.coordinate)
+                }
+              />
+            </MapView>
+          ) : null}
 
           <View style={styles.search}>
             <AppInput
@@ -325,6 +342,13 @@ export function LocationPickerModal({
             ) : null}
           </View>
 
+          <View style={styles.coordinateCard}>
+            <AppIcon name="location" size={20} color="primary" />
+            <AppText variant="caption" color="textMuted">
+              {coordinate.latitude.toFixed(5)}, {coordinate.longitude.toFixed(5)}
+            </AppText>
+          </View>
+
           {mapFailed ? (
             <View style={styles.mapError}>
               <AppIcon name="close" size={28} color="error" />
@@ -333,13 +357,6 @@ export function LocationPickerModal({
               </AppText>
             </View>
           ) : null}
-
-          <View style={styles.coordinateCard}>
-            <AppIcon name="location" size={20} color="primary" />
-            <AppText variant="caption" color="textMuted">
-              {coordinate.latitude.toFixed(5)}, {coordinate.longitude.toFixed(5)}
-            </AppText>
-          </View>
         </View>
 
         {error ? (

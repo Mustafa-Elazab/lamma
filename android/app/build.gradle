@@ -98,6 +98,8 @@ android {
         versionCode 1
         versionName "1.0"
         manifestPlaceholders = [GOOGLE_MAPS_API_KEY: googleMapsApiKey]
+        buildConfigField "boolean", "GOOGLE_MAPS_CONFIGURED",
+            (!googleMapsApiKey.trim().isEmpty()).toString()
     }
     signingConfigs {
         debug {
