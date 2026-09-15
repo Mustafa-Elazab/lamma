@@ -8,6 +8,9 @@ concurrency:
   group: ci-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -27,12 +30,16 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Install Functions dependencies
+        run: npm ci --prefix functions
       - name: Lint
         run: yarn lint
       - name: Type-check
         run: yarn typecheck
       - name: Test
         run: yarn test --runInBand
+      - name: Build Functions
+        run: npm --prefix functions run build
       - name: Assemble Android debug
         working-directory: android
         env:
