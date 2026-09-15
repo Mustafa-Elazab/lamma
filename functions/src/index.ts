@@ -22,6 +22,9 @@ export const updateEventRsvpCounters = onDocumentWritten(
     }
 
     const data = snapshot.data();
+    if (!data) {
+      return;
+    }
     const rsvps = (data.rsvps ?? {}) as Record<string, RsvpStatus>;
     const statuses = Object.values(rsvps);
     const attendeeCount = statuses.filter(status => status !== 'none').length;
