@@ -60,7 +60,7 @@ Requires Node >= 22.11 and a working React Native environment
 
 ```sh
 # 1. Install JS dependencies
-npm install --legacy-peer-deps
+yarn install --frozen-lockfile
 
 # 2. iOS only: install pods
 bundle install
@@ -89,9 +89,22 @@ exclusively by Jest and never bundled into the app.
 
 ```sh
 npm test           # Jest unit tests (repositories, hooks helpers, validators, i18n parity)
-npx tsc --noEmit   # TypeScript type-check (no `any`)
+yarn typecheck     # TypeScript type-check (no `any`)
 npm run lint       # ESLint
 ```
+
+## Development observability
+
+Development builds connect to Reactotron before the app is registered. Start Reactotron on
+the development machine to inspect structured application logs, errors, Firestore writes,
+analytics events, push notifications, and map startup. The import and connection are guarded
+by `__DEV__`; Reactotron is a development dependency and is removed from release bundles.
+Reactotron listens on port `9090`; for a USB-connected Android device, run
+`adb reverse tcp:9090 tcp:9090` if the app cannot reach the desktop client.
+
+The navigation root is wrapped in a global error boundary. Its branded fallback keeps the
+app usable with a **Try again** action, while non-fatal errors are sent to Firebase
+Crashlytics when the native Firebase app is available.
 
 ## Firebase (default backend)
 
@@ -102,7 +115,8 @@ npm run lint       # ESLint
 2. Enable **Cloud Firestore**.
 3. Add the platform apps and config files:
    - Android: `android/app/google-services.json`
-   - iOS: `ios/GoogleService-Info.plist` (add to the Xcode project)
+   - iOS: `ios/GoogleService-Info.plist` for bundle id `com.lamma.app` (the
+     Xcode project already includes this path in the app resources)
 4. Google Sign-In: copy your **Web client ID** (OAuth 2.0) into `googleWebClientId` in
    `src/config/env.ts` (this id is passed to `GoogleSignin.configure`).
 5. Apple Sign-In: enable the *Sign in with Apple* capability in Xcode (iOS only).
@@ -112,14 +126,49 @@ npm run lint       # ESLint
 Guest → provider **account linking** preserves a guest's data when they upgrade, and
 `updateProfile` backs the Edit Profile screen.
 
+The committed Android config is valid for application id `com.lamma` and is processed by the
+Google Services Gradle plugin. The iOS plist is not committed, so iOS Firebase builds still
+require that file. Analytics records navigation screen views plus `sign_in_method`,
+`event_created`, `event_published`, `rsvp_submitted`, and `invite_shared`.
+
+Messaging requests notification permission, stores the current FCM token in AsyncStorage
+and `/users/{uid}/devices/{tokenId}`, refreshes it when Firebase rotates it, detaches it on
+sign-out, and registers foreground/background/open handlers. Cold-start notification links
+are queued until authentication and onboarding have resolved.
+Notification data should contain `eventId` (or `event_id`); tapping it opens
+`https://lamma.app/e/{id}` through the existing navigation deep-link configuration. For iOS,
+enable **Push Notifications** and **Background Modes → Remote notifications** for the Lamma
+target and upload an APNs authentication key to Firebase. The project includes the required
+entitlements and Crashlytics dSYM upload phase; a matching Apple provisioning profile is
+still required.
+
+Remote Config fetches and activates at startup with safe in-code defaults for
+`event_discovery_enabled`, `messaging_enabled`, and `max_event_guest_count`.
+
 Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid),
 `users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
-`users/{uid}/meta/preferences`.
+`users/{uid}/meta/preferences`, `users/{uid}/devices/{tokenId}`.
 
 The repository includes `firestore.rules` and `firebase.json`. Deploy the reviewed rules
 with `firebase deploy --only firestore:rules`. Event creation requires both `hostId` and
 `ownerId` to equal the fresh Firebase ID token's `uid`; user subcollections are restricted
 to that same uid.
+
+The checked-in file does not change the rules already running in Firebase. If the Firebase
+Console rules differ, authenticated writes can still return `firestore/permission-denied`.
+Install and authenticate the CLI on a machine allowed to deploy, then deploy the repository
+rules explicitly:
+
+```sh
+npm install --global firebase-tools
+firebase login
+firebase use fos7a-357902
+firebase deploy --only firestore:rules
+```
+
+Firebase Anonymous Auth is authenticated: a guest receives a real
+`request.auth.uid`. The explicit `/users/{uid}/drafts/{draftId}` rule permits that guest to
+read, create, update, and delete drafts only when the path uid equals the token uid.
 
 The prior event-write failure had two concrete client/rules contract problems: no Firestore
 rules were versioned with the app, and the event repository silently substituted the string
@@ -130,6 +179,26 @@ and validates the ID token immediately before writing, writes matching `hostId` 
 `ownerId`, awaits both the write and read-back, and retains the draft on any failure. The
 repository logs the exact payload and sanitized Firestore result/error at the write
 boundary (never the token itself).
+
+## GitHub Actions and release secrets
+
+Pull requests to `main` run dependency installation, ESLint, TypeScript, Jest, and an Android
+debug assembly. Pushes to `main` assemble and upload a release APK.
+
+Configure these GitHub Actions secrets for a signed, map-enabled release:
+
+- `ANDROID_KEYSTORE_BASE64` — base64-encoded release keystore
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+- `GOOGLE_MAPS_API_KEY` — restricted Android Maps SDK key
+
+If any signing secret is absent, CI deliberately produces an **unsigned** release APK and
+prints a warning; it never falls back to the debug key. If the Maps key is absent, the build
+continues and the location picker shows a visible configuration error. Android Firebase does
+not need a CI secret while the repository's `google-services.json` remains committed. If that
+policy changes, provision the file as a secret before the Gradle step rather than inventing
+credentials.
 
 ### Cloud Functions decision
 
@@ -205,6 +274,11 @@ Configure a key with both **Maps SDK for Android** and **Maps SDK for iOS** enab
   User-Defined Setting**, name it `GOOGLE_MAPS_API_KEY`, and paste the key as its value for
   Debug and Release. `Info.plist` expands that build setting and `AppDelegate.swift`
   supplies it to `GMSServices`.
+
+The property/build-setting **name** must remain the literal `GOOGLE_MAPS_API_KEY`. Do not put
+the key itself inside `getProperty("...")` or an Xcode placeholder: Android must call
+`getProperty("GOOGLE_MAPS_API_KEY")`, and iOS must use `$(GOOGLE_MAPS_API_KEY)`. The secret
+value belongs only in gitignored `android/local.properties`, the Xcode build setting, or CI.
 
 Restrict production keys by Android package/signing certificate and iOS bundle identifier.
 Nominatim requests use an identifying User-Agent and search is debounced to respect its

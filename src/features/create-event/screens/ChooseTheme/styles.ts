@@ -6,7 +6,10 @@ export function createStyles(theme: Theme) {
   return StyleSheet.create({
     hero: {
       width: '100%',
-      aspectRatio: 0.76,
+      maxWidth: 600,
+      maxHeight: 420,
+      aspectRatio: 1.15,
+      alignSelf: 'center',
       borderRadius: theme.radius.lg,
       overflow: 'hidden',
     },
@@ -17,6 +20,7 @@ export function createStyles(theme: Theme) {
       justifyContent: 'center',
       padding: theme.spacing.xl,
       gap: theme.spacing.sm,
+      backgroundColor: theme.colors.overlay,
     },
     swatchRow: {
       gap: theme.spacing.md,

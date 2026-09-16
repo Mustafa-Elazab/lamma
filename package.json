@@ -8,16 +8,21 @@
     "icons": "node scripts/generate-app-icons.mjs",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.5.1",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-community/datetimepicker": "^8.6.0",
-    "@react-native-firebase/app": "^23.8.8",
-    "@react-native-firebase/auth": "^23.8.8",
-    "@react-native-firebase/firestore": "^23.8.8",
+    "@react-native-firebase/analytics": "^26.4.0",
+    "@react-native-firebase/app": "^26.4.0",
+    "@react-native-firebase/auth": "^26.4.0",
+    "@react-native-firebase/crashlytics": "^26.4.0",
+    "@react-native-firebase/firestore": "^26.4.0",
+    "@react-native-firebase/messaging": "^26.4.0",
+    "@react-native-firebase/remote-config": "^26.4.0",
     "@react-native-google-signin/google-signin": "^16.1.5",
     "@react-native/new-app-screen": "0.87.1",
     "@react-navigation/bottom-tabs": "^7.18.18",
@@ -56,6 +61,7 @@
     "prettier": "2.8.8",
     "react-native-svg-transformer": "^1.5.3",
     "react-test-renderer": "19.2.3",
+    "reactotron-react-native": "^5.3.1",
     "sharp": "^0.35.4",
     "typescript": "^6.0.3"
   },

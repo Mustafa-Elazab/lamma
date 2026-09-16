@@ -6,6 +6,8 @@ import {
   type InfiniteData,
 } from '@tanstack/react-query';
 
+import { trackEvent } from '../../../services/analytics';
+import { reportError } from '../../../services/crashReporting';
 import type {
   EventCategory,
   EventListFilter,
@@ -70,6 +72,16 @@ export function useRsvpMutation() {
     onSuccess: updated => {
       queryClient.setQueryData(eventKeys.detail(updated.id), updated);
       void queryClient.invalidateQueries({ queryKey: eventKeys.all });
+      void trackEvent('rsvp_submitted', {
+        event_id: updated.id,
+        status: updated.viewerRsvp,
+      });
+    },
+    onError: (error, variables) => {
+      reportError(error, 'events.rsvp', {
+        eventId: variables.eventId,
+        status: variables.status,
+      });
     },
   });
 }
@@ -79,8 +91,15 @@ export function useCreateEvent() {
   const queryClient = useQueryClient();
   return useMutation<LammaEvent, Error, CreateEventInput>({
     mutationFn: input => repository.createEvent(input),
-    onSuccess: () => {
+    onSuccess: event => {
       void queryClient.invalidateQueries({ queryKey: eventKeys.all });
+      void trackEvent('event_created', {
+        event_id: event.id,
+        visibility: event.visibility,
+      });
+    },
+    onError: error => {
+      reportError(error, 'events.create-mutation');
     },
   });
 }

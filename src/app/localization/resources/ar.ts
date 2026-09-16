@@ -18,6 +18,10 @@ export const ar: TranslationSchema = {
     copied: 'تم النسخ!',
     share: 'مشاركة',
   },
+  errors: {
+    unexpectedTitle: 'حدث خطأ في لمّة',
+    unexpectedMessage: 'خططك محفوظة. حاول مجددًا للعودة إلى لمّتك.',
+  },
   tabs: {
     home: 'الرئيسية',
     discover: 'استكشف',
@@ -115,6 +119,10 @@ export const ar: TranslationSchema = {
     locationHint: 'اكتب 3 أحرف على الأقل للبحث في OpenStreetMap',
     locationNoResults: 'لم يتم العثور على أماكن. جرّب بحثًا مختلفًا.',
     locationError: 'تعذّر البحث الآن. تحقق من اتصالك.',
+    locationConfirmError:
+      'تعذّر تحديد هذا الموقع. حرّك العلامة وحاول مجددًا.',
+    mapUnavailable:
+      'تعذّر تحميل الخريطة. تحقق من إعداد مفتاح Google Maps في التطبيق الأصلي.',
     chooseTheme: 'اختر تصميمًا',
     themes: 'التصاميم',
     useThisTheme: 'استخدم هذا التصميم',

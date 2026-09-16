@@ -6,6 +6,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function signedInAs(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
     function ownsNewEvent() {
       return signedIn()
         && request.resource.data.hostId == request.auth.uid
@@ -47,8 +51,30 @@ service cloud.firestore {
         && resource.data.ownerId == request.auth.uid;
     }
 
-    match /users/{uid}/{document=**} {
-      allow read, write: if signedIn() && request.auth.uid == uid;
+    match /users/{uid} {
+      allow read, write: if signedInAs(uid);
+
+      // Anonymous Firebase Auth users have a real request.auth.uid and receive
+      // the same per-user draft access as linked Google/Apple accounts.
+      match /drafts/{draftId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      match /notifications/{notificationId} {
+        allow read: if signedInAs(uid);
+        allow update: if signedInAs(uid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['read']);
+        allow create, delete: if false;
+      }
+
+      match /meta/{documentId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      match /devices/{deviceId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
     }
 
     match /{document=**} {

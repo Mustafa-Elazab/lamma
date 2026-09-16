@@ -16,6 +16,11 @@ export const en = {
     copied: 'Copied!',
     share: 'Share',
   },
+  errors: {
+    unexpectedTitle: 'Lamma hit a snag',
+    unexpectedMessage:
+      'Your plans are safe. Try again to return to your gathering.',
+  },
   tabs: {
     home: 'Home',
     discover: 'Discover',
@@ -113,6 +118,10 @@ export const en = {
     locationHint: 'Type at least 3 characters to search OpenStreetMap',
     locationNoResults: 'No places found. Try a different search.',
     locationError: 'Could not search right now. Check your connection.',
+    locationConfirmError:
+      'Could not resolve this location. Move the pin and try again.',
+    mapUnavailable:
+      'The map could not load. Check that the native Google Maps API key is configured.',
     chooseTheme: 'Choose a theme',
     themes: 'Themes',
     useThisTheme: 'Use this theme',
