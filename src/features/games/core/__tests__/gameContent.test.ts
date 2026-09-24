@@ -72,3 +72,25 @@ describe('game content', () => {
     }
   });
 });
+
+describe('quarter mile packs', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { QUARTER_MILE_PACKS } = require('../../quarter-mile/content/packs');
+  it('ships cars plus sports categories with unique, bilingual items', () => {
+    const packs = QUARTER_MILE_PACKS as import('../types').QuarterMilePack[];
+    expect(packs.map(p => p.id)).toEqual(
+      expect.arrayContaining(['german-cars', 'football-stars', 'ufc-fighters']),
+    );
+    const ids = packs.flatMap(p => p.items.map(i => i.id));
+    expect(new Set(ids).size).toBe(ids.length);
+    packs.forEach(pack => {
+      expect(pack.items.length).toBeGreaterThanOrEqual(14);
+      pack.items.forEach(item => {
+        expect(item.name.en).toBeTruthy();
+        expect(item.name.ar).toBeTruthy();
+        expect(item.score).toBeGreaterThan(0);
+        expect(item.score).toBeLessThanOrEqual(100);
+      });
+    });
+  });
+});

@@ -436,7 +436,7 @@ export function GameLobbyScreen({
           {c.gameplay.kind === 'quarter-mile' ? (
             <AppCard style={styles.card}>
               <AppText variant="subheading">
-                {c.t('games.quarterMileSetup')}
+                {c.quarterMileCurrentPackName || c.t('games.quarterMileSetup')}
               </AppText>
               {c.quarterMileSpectator ? (
                 <AppText variant="body" color="textMuted">
@@ -613,6 +613,30 @@ export function GameLobbyScreen({
             </AppText>
           ) : !c.isHost ? (
             <AppText variant="bodyStrong">{c.t('games.waitingForHostStart')}</AppText>
+          ) : null}
+          {c.game.id === 'quarter-mile' && c.quarterMilePacks.length > 1 ? (
+            <View style={styles.setupLines}>
+              <AppText variant="bodyStrong">
+                {c.t('games.quarterMileChooseCategory')}
+              </AppText>
+              <View style={styles.wrapRow}>
+                {c.quarterMilePacks.map(pack => (
+                  <AppButton
+                    key={pack.id}
+                    label={localizeText(pack.name, language)}
+                    size="sm"
+                    fullWidth={false}
+                    variant={
+                      c.selectedQuarterMilePackId === pack.id
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                    disabled={!c.isHost}
+                    onPress={() => c.selectQuarterMilePack(pack.id)}
+                  />
+                ))}
+              </View>
+            </View>
           ) : null}
           {c.game.id === 'trivia-time' ? (
             <View style={styles.setupLines}>

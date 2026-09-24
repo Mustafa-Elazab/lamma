@@ -129,6 +129,12 @@ export function useGameLobbyController(gameId: GameId) {
     (gameContent?.quarterMilePacks?.length
       ? gameContent.quarterMilePacks
       : QUARTER_MILE_PACKS) ?? EMPTY_QUARTER_MILE_PACKS;
+  const [quarterMilePackId, setQuarterMilePackId] = useState<string | null>(
+    null,
+  );
+  const selectedQuarterMilePack =
+    quarterMilePacks.find(pack => pack.id === quarterMilePackId) ??
+    quarterMilePacks[0];
   const icebreakerPrompts =
     gameContent?.icebreakerPrompts ?? EMPTY_ICEBREAKER_PROMPTS;
   const [triviaSettings, setTriviaSettings] = useState<TriviaSettings>({
@@ -311,13 +317,16 @@ export function useGameLobbyController(gameId: GameId) {
       };
     }
     if (gameId === 'quarter-mile') {
-      const pack = quarterMilePacks[0];
+      const pack = selectedQuarterMilePack;
       return {
         title: t('games.quarterMileSetup'),
         lines: [
           t('games.quarterMileHint'),
           pack
-            ? `${localizeText(pack.name, language)} · ${pack.items.length}`
+            ? t('games.quarterMilePackLine', {
+                pack: localizeText(pack.name, language),
+                count: pack.items.length,
+              })
             : '',
         ].filter(Boolean),
       };
@@ -360,7 +369,7 @@ export function useGameLobbyController(gameId: GameId) {
     language,
     t,
     triviaPacks,
-    quarterMilePacks,
+    selectedQuarterMilePack,
   ]);
 
   const start = useCallback(() => {
@@ -396,7 +405,7 @@ export function useGameLobbyController(gameId: GameId) {
       return;
     }
     if (gameId === 'quarter-mile') {
-      const pack = quarterMilePacks[0];
+      const pack = selectedQuarterMilePack;
       if (!pack || connectedPlayers.length < 2) {
         return;
       }
@@ -426,7 +435,7 @@ export function useGameLobbyController(gameId: GameId) {
     gameplay,
     icebreakerPrompts,
     isHost,
-    quarterMilePacks,
+    selectedQuarterMilePack,
     requiredConnectedPlayers,
     session,
     triviaPacks,
@@ -877,6 +886,15 @@ export function useGameLobbyController(gameId: GameId) {
     refetchContent: contentQuery.refetch,
     triviaPacks,
     quarterMilePacks,
+    selectedQuarterMilePackId: selectedQuarterMilePack?.id ?? null,
+    selectQuarterMilePack: setQuarterMilePackId,
+    quarterMileCurrentPackName:
+      gameplay?.kind === 'quarter-mile'
+        ? localizeText(
+            quarterMilePacks.find(pack => pack.id === gameplay.state.packId)?.name,
+            language,
+          )
+        : '',
     current: session.current,
     players,
     connectedPlayers,
