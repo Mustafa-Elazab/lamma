@@ -2,6 +2,9 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { usePreferences, type NotificationPreferences } from '../../core';
+import {
+  cancelAllEventReminders,
+} from '../../../../services/eventReminders';
 
 export function useNotificationSettingsController() {
   const { t } = useTranslation();
@@ -13,6 +16,9 @@ export function useNotificationSettingsController() {
       ...preferences,
       notifications: { ...preferences.notifications, [key]: value },
     });
+    if (key === 'reminders' && !value) {
+      void cancelAllEventReminders();
+    }
   };
 
   const items: {

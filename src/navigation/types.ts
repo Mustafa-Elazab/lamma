@@ -1,9 +1,17 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 
+import type { GameId } from '../features/games';
+
+export type GamesStackParamList = {
+  GamesHub: undefined;
+  GameLobby: { gameId: GameId };
+  GameJoin: { code: string };
+};
+
 export type TabParamList = {
   Home: undefined;
   Discover: undefined;
-  Create: undefined;
+  Games: NavigatorScreenParams<GamesStackParamList> | undefined;
   Notifications: undefined;
   Profile: undefined;
 };

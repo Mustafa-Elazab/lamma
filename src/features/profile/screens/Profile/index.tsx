@@ -39,7 +39,7 @@ export function ProfileScreen(): React.ReactElement {
               <AppText variant="caption" color="textMuted">
                 {c.isGuest
                   ? c.t('profile.upgradePrompt')
-                  : `${c.t('profile.hostedEvents', {
+                  : `${c.hostedCount === 1 ? c.t('profile.oneHostedEvent') : c.t('profile.hostedEvents', {
                       count: c.hostedCount,
                     })}  ·  ${c.t('profile.joined', { count: 37 })}`}
               </AppText>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { I18nManager, View } from 'react-native';
 
 import { iconRegistry, type IconName } from '../../../assets/icons';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -11,6 +12,11 @@ export type IconProps = {
   /** Overrides the token color with a raw value (rarely needed). */
   rawColor?: string;
   strokeWidth?: number;
+  /**
+   * When true, directional icons (currently `back`) flip in RTL so "back"
+   * always points toward the previous screen.
+   */
+  rtlMirror?: boolean;
 };
 
 function AppIconComponent({
@@ -19,16 +25,20 @@ function AppIconComponent({
   color = 'text',
   rawColor,
   strokeWidth,
+  rtlMirror = name === 'back',
 }: IconProps): React.ReactElement {
   const theme = useTheme();
   const SvgIcon = iconRegistry[name];
+  const mirror = rtlMirror && I18nManager.isRTL;
   return (
-    <SvgIcon
-      width={size}
-      height={size}
-      color={rawColor ?? theme.colors[color]}
-      strokeWidth={strokeWidth}
-    />
+    <View style={mirror ? { transform: [{ scaleX: -1 }] } : undefined}>
+      <SvgIcon
+        width={size}
+        height={size}
+        color={rawColor ?? theme.colors[color]}
+        strokeWidth={strokeWidth}
+      />
+    </View>
   );
 }
 

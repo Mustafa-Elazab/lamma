@@ -161,6 +161,9 @@ export class LocalEventRepository implements EventRepository {
       updates: [],
       createdAt: Date.now(),
     };
+    if (input.customThemeUri) {
+      event.coverImageUrl = input.customThemeUri;
+    }
     events.unshift(event);
     return event;
   }

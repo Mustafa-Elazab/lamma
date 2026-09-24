@@ -6,7 +6,7 @@
  * Nominatim usage policy requires an identifying User-Agent and asks callers to
  * keep request volume low; the picker debounces search input to comply.
  */
-import { env } from '../../../config/env';
+import { publicWebOrigin } from '../../../config/env';
 
 export type GeoPlace = {
   /** Full, human readable address, e.g. "Zooba, 26th of July St, Zamalek…". */
@@ -29,7 +29,7 @@ const BASE_URL = 'https://nominatim.openstreetmap.org';
 function headers(): Record<string, string> {
   return {
     Accept: 'application/json',
-    'User-Agent': `Lamma/1.0 (+https://${env.deepLinkHost})`,
+    'User-Agent': `Lamma/1.0 (+${publicWebOrigin()})`,
   };
 }
 
@@ -62,6 +62,7 @@ export async function searchPlaces(
   }
   const url =
     `${BASE_URL}/search?format=jsonv2&addressdetails=1&limit=${limit}` +
+    `&countrycodes=eg&viewbox=24.5,31.7,37.0,22.0&bounded=0` +
     `&q=${encodeURIComponent(trimmed)}`;
   const response = await fetch(url, { headers: headers() });
   if (!response.ok) {

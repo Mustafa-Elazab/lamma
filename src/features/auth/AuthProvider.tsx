@@ -15,7 +15,7 @@ import {
   syncStoredMessagingToken,
 } from '../../services/messaging';
 import { getAuthRepository } from './core/authRepository';
-import type { AuthStatus, AuthUser } from './core/entity';
+import { AuthError, type AuthStatus, type AuthUser } from './core/entity';
 
 export type SignInProvider = 'google' | 'apple' | 'guest';
 
@@ -78,8 +78,13 @@ export function AuthProvider({
         }
         await trackEvent('sign_in_method', { method: provider });
       } catch (err) {
+        if (err instanceof AuthError && err.code === 'auth/cancelled') {
+          return;
+        }
         const message =
-          err instanceof Error ? err.message : 'auth.errorGeneric';
+          err instanceof AuthError && err.code === 'auth/play-services'
+            ? 'auth.errorPlayServices'
+            : 'auth.errorGeneric';
         reportError(err, 'auth.sign-in', { provider });
         setError(message);
       } finally {

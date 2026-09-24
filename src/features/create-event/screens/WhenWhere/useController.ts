@@ -104,10 +104,12 @@ export function useWhenWhereController() {
     [draft.startAt, update],
   );
 
+  const [attemptedNext, setAttemptedNext] = useState(false);
+
   const onConfirmLocation = useCallback(
     (location: EventLocation) => {
       update({
-        venueName: draft.venueName.trim() || location.label,
+        venueName: location.label || draft.venueName.trim() || location.address.split(',')[0] || '',
         areaAddress: location.address,
         latitude: location.lat,
         longitude: location.lng,
@@ -120,6 +122,8 @@ export function useWhenWhereController() {
   const goNext = useCallback(() => {
     if (whenWhere.valid) {
       navigation.navigate('ChooseTheme');
+    } else {
+      setAttemptedNext(true);
     }
   }, [navigation, whenWhere.valid]);
 
@@ -127,6 +131,7 @@ export function useWhenWhereController() {
     t,
     draft,
     whenWhere,
+    attemptedNext,
     picker,
     setPicker,
     dateLabel,

@@ -2,6 +2,30 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" />
+
+    <queries>
+      <package android:name="com.whatsapp" />
+      <package android:name="com.whatsapp.w4b" />
+      <intent>
+        <action android:name="android.intent.action.SEND" />
+        <data android:mimeType="image/*" />
+      </intent>
+      <intent>
+        <action android:name="android.intent.action.SEND" />
+        <data android:mimeType="text/plain" />
+      </intent>
+    </queries>
 
     <application
       android:name=".MainApplication"
@@ -27,21 +51,27 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
-        <!-- Custom scheme deep links: lamma://e/{id} -->
+        <!-- Custom scheme fallback: lamma://e/{eventId} and lamma://g/{code}.
+             Never shared directly; used by the web page's Open in Lamma button. -->
         <intent-filter>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="lamma" />
         </intent-filter>
-        <!-- Verified Android App Links: https://lamma.app/e/{id} opens in-app.
-             Requires /.well-known/assetlinks.json on the domain (see README). -->
+        <!-- Verified Android App Links on the free Vercel domain.
+             https://lamma-links.vercel.app/e/{eventId} and /g/{code} open Lamma
+             when installed. Needs web/.well-known/assetlinks.json deployed on
+             the same host. If the Vercel project URL changes, change the host
+             here and PUBLIC_SHARE_BASE_URL in src/config/env.ts. -->
         <intent-filter android:autoVerify="true">
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="https" android:host="lamma.app" android:pathPrefix="/e/" />
-            <data android:scheme="https" android:host="www.lamma.app" android:pathPrefix="/e/" />
+            <data android:scheme="https" />
+            <data android:host="lamma-links.vercel.app" />
+            <data android:pathPrefix="/e/" />
+            <data android:pathPrefix="/g/" />
         </intent-filter>
       </activity>
     </application>

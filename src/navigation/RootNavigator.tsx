@@ -1,10 +1,11 @@
 import {
   createNavigationContainerRef,
   DefaultTheme,
+  StackActions,
   NavigationContainer,
   type Theme as NavTheme,
 } from '@react-navigation/native';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Linking } from 'react-native';
 import BootSplash from 'react-native-bootsplash';
 
@@ -17,8 +18,9 @@ import { reportError } from '../services/crashReporting';
 import { setNotificationOpenHandler } from '../services/messaging';
 import { AppNavigator } from './AppNavigator';
 import { AuthNavigator } from './AuthNavigator';
-import { linking } from './linking';
+import { linking, type PendingLink } from './linking';
 import type { RootStackParamList } from './types';
+import { usePendingLink } from './usePendingLink';
 
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
@@ -71,12 +73,37 @@ export function RootNavigator(): React.ReactElement {
     }),
     [theme],
   );
+  const appReady = status === 'authenticated' && checked && completed;
+  const openPendingLink = useCallback((link: PendingLink): boolean => {
+    if (!navigationRef.isReady()) {
+      return false;
+    }
+    if (link.kind === 'event') {
+      const current = navigationRef.getCurrentRoute();
+      const currentId = (current?.params as { eventId?: string } | undefined)
+        ?.eventId;
+      if (current?.name === 'EventDetails' && currentId === link.eventId) {
+        return true;
+      }
+      navigationRef.dispatch(
+        StackActions.push('EventDetails', { eventId: link.eventId }),
+      );
+      return true;
+    }
+    navigationRef.navigate('MainTabs', {
+      screen: 'Games',
+      params: { screen: 'GameJoin', params: { code: link.code } },
+    } as never);
+    return true;
+  }, []);
+  usePendingLink(openPendingLink, appReady);
+
   useEffect(() => {
-    if (status !== 'authenticated' || !checked || !completed) {
+    if (!appReady) {
       return;
     }
     return setNotificationOpenHandler(link => Linking.openURL(link));
-  }, [checked, completed, status]);
+  }, [appReady]);
 
   return (
     <NavigationContainer

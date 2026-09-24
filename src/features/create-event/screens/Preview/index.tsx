@@ -111,7 +111,9 @@ export function PreviewScreen(): React.ReactElement {
       </View>
       {c.publishError ? (
         <AppText variant="caption" color="error" align="center">
-          {c.t('create.publishError')}
+          {c.publishError.includes('storage/unauthorized')
+            ? c.t('create.storageUnauthorized')
+            : c.t('create.publishError')}
         </AppText>
       ) : null}
     </AppScreenTemplate>

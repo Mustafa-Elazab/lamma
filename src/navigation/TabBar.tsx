@@ -1,8 +1,4 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import {
-  useNavigation,
-  type NavigationProp,
-} from '@react-navigation/native';
 import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,12 +8,12 @@ import { AppText } from '../design-system/atoms/Text';
 import { useTheme } from '../design-system/theme/ThemeProvider';
 import type { Theme } from '../design-system/theme/tokens';
 import { unreadCount, useNotifications } from '../features/notifications/core';
-import type { AppStackParamList, TabParamList } from './types';
+import type { TabParamList } from './types';
 
 const TAB_ICONS: Record<keyof TabParamList, IconName> = {
   Home: 'home',
   Discover: 'search',
-  Create: 'plus-circle',
+  Games: 'group',
   Notifications: 'bell',
   Profile: 'profile',
 };
@@ -30,7 +26,6 @@ export function TabBar({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const rootNav = useNavigation<NavigationProp<AppStackParamList>>();
   const { data: notifications } = useNotifications();
   const unreadNotifications = unreadCount(notifications ?? []);
 
@@ -47,10 +42,6 @@ export function TabBar({
         const color = focused ? 'primary' : 'textMuted';
 
         const onPress = () => {
-          if (routeName === 'Create') {
-            rootNav.navigate('CreateEvent');
-            return;
-          }
           const event = navigation.emit({
             type: 'tabPress',
             target: route.key,
@@ -80,7 +71,9 @@ export function TabBar({
                     allowFontScaling={false}
                     style={styles.badgeText}
                   >
-                    {unreadNotifications > 9 ? '9+' : String(unreadNotifications)}
+                    {unreadNotifications > 9
+                      ? '9+'
+                      : String(unreadNotifications)}
                   </AppText>
                 </View>
               ) : null}

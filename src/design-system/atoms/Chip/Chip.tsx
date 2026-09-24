@@ -38,7 +38,12 @@ function AppChipComponent({
       ]}
     >
       {icon ? <AppIcon name={icon} size={16} color={fg} /> : null}
-      <AppText variant="label" color={fg}>
+      <AppText
+        variant="label"
+        color={fg}
+        numberOfLines={1}
+        style={styles.label}
+      >
         {label}
       </AppText>
     </Pressable>
@@ -57,6 +62,9 @@ function createStyles(theme: Theme) {
       backgroundColor: theme.colors.surface,
       borderWidth: 1,
       borderColor: theme.colors.border,
+    },
+    label: {
+      flexGrow: 0,
     },
     chipSelected: {
       backgroundColor: theme.colors.surfaceSoft,

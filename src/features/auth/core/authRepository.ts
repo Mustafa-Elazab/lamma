@@ -18,6 +18,7 @@ export function getAuthRepository(): AuthRepository {
     } = require('./firebaseRepository') as typeof import('./firebaseRepository');
     instance = new FirebaseAuthRepository({
       googleWebClientId: env.googleWebClientId,
+      googleIosClientId: env.googleIosClientId,
     });
   } else {
     instance = new LocalAuthRepository();

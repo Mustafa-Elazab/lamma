@@ -126,22 +126,24 @@ export function HomeScreen(): React.ReactElement {
           ) : undefined
         }
       />
-      <View style={styles.createAction}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={c.t('home.createEvent')}
-          onPress={c.openCreate}
-          style={({ pressed }) => [
-            styles.createButton,
-            pressed && styles.createButtonPressed,
-          ]}
-        >
-          <AppIcon name="plus" size={30} color="textInverse" />
-        </Pressable>
-        <AppText variant="caption" color="primary">
-          {c.t('home.createEvent')}
-        </AppText>
-      </View>
+      {(!c.isLoading && !c.isError && (c.events.length > 0 || Boolean(c.featuredCard))) ? (
+        <View style={styles.createAction}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={c.t('home.createEvent')}
+            onPress={c.openCreate}
+            style={({ pressed }) => [
+              styles.createButton,
+              pressed && styles.createButtonPressed,
+            ]}
+          >
+            <AppIcon name="plus" size={30} color="textInverse" />
+          </Pressable>
+          <AppText variant="caption" color="primary">
+            {c.t('home.createEvent')}
+          </AppText>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

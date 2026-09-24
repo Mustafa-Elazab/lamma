@@ -4,6 +4,7 @@ import React from 'react';
 import { EventDetailsScreen } from '../features/events/screens/EventDetails';
 import { GuestListScreen } from '../features/events/screens/GuestList';
 import { ShareInviteScreen } from '../features/events/screens/ShareInvite';
+import { GameSessionProvider } from '../features/games/core/session';
 import { EditProfileScreen } from '../features/profile/screens/EditProfile';
 import { AppearanceScreen } from '../features/settings/screens/Appearance';
 import { HelpSupportScreen } from '../features/settings/screens/HelpSupport';
@@ -19,33 +20,35 @@ const Stack = createNativeStackNavigator<AppStackParamList>();
 
 export function AppNavigator(): React.ReactElement {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="MainTabs" component={TabNavigator} />
-      <Stack.Screen
-        name="CreateEvent"
-        component={CreateEventNavigator}
-        options={{ presentation: 'modal' }}
-      />
-      <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
-      <Stack.Screen name="GuestList" component={GuestListScreen} />
-      <Stack.Screen
-        name="ShareInvite"
-        component={ShareInviteScreen}
-        options={{ presentation: 'modal' }}
-      />
-      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      <Stack.Screen
-        name="LanguageSettings"
-        component={LanguageSettingsScreen}
-      />
-      <Stack.Screen
-        name="NotificationSettings"
-        component={NotificationSettingsScreen}
-      />
-      <Stack.Screen name="Appearance" component={AppearanceScreen} />
-      <Stack.Screen name="MyDrafts" component={MyDraftsScreen} />
-      <Stack.Screen name="SavedThemes" component={SavedThemesScreen} />
-      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
-    </Stack.Navigator>
+    <GameSessionProvider>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen
+          name="CreateEvent"
+          component={CreateEventNavigator}
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
+        <Stack.Screen name="GuestList" component={GuestListScreen} />
+        <Stack.Screen
+          name="ShareInvite"
+          component={ShareInviteScreen}
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+        <Stack.Screen
+          name="LanguageSettings"
+          component={LanguageSettingsScreen}
+        />
+        <Stack.Screen
+          name="NotificationSettings"
+          component={NotificationSettingsScreen}
+        />
+        <Stack.Screen name="Appearance" component={AppearanceScreen} />
+        <Stack.Screen name="MyDrafts" component={MyDraftsScreen} />
+        <Stack.Screen name="SavedThemes" component={SavedThemesScreen} />
+        <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+      </Stack.Navigator>
+    </GameSessionProvider>
   );
 }

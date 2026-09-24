@@ -12,7 +12,7 @@ import {
 
 import { reportError } from '../../../services/crashReporting';
 import { appLogger } from '../../../services/logger';
-import type { EventDraft } from './draftEntity';
+import { normalizeDraft, type EventDraft } from './draftEntity';
 import type { DraftRepository } from './draftRepository';
 
 type SnapshotLike = { id: string; data: () => unknown };
@@ -30,7 +30,8 @@ function draftsCollection(): CollectionReference {
 }
 
 function mapDraft(snapshot: SnapshotLike): EventDraft {
-  return snapshot.data() as EventDraft;
+  const data = (snapshot.data() ?? {}) as Partial<EventDraft>;
+  return normalizeDraft({ ...data, id: snapshot.id });
 }
 
 export class FirebaseDraftRepository implements DraftRepository {

@@ -11,6 +11,8 @@ export function createStyles(theme: Theme) {
       paddingHorizontal: theme.spacing.lg,
       paddingTop: theme.spacing.sm,
       gap: 2,
+      alignSelf: 'stretch',
+      width: '100%',
     },
     profileCard: {
       flexDirection: 'row',

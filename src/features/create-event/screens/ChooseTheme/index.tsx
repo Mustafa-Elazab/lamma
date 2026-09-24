@@ -9,6 +9,7 @@ import { AppThemeSwatch } from '../../../../design-system/organisms/ThemeSwatch'
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import { CreateHeader } from '../../components/CreateHeader';
+import { draftThemeSource } from '../../core/draftMedia';
 import { WIZARD_STEP } from '../steps';
 import { createStyles } from './styles';
 import { useChooseThemeController } from './useController';
@@ -38,9 +39,10 @@ export function ChooseThemeScreen(): React.ReactElement {
       }
     >
       <ImageBackground
-        source={c.heroImage}
+        source={draftThemeSource(c.draft)}
         style={styles.hero}
         imageStyle={styles.heroImage}
+        resizeMode="cover"
       >
         <View style={styles.heroOverlay}>
           <AppText
@@ -82,10 +84,21 @@ export function ChooseThemeScreen(): React.ReactElement {
               key={item.key}
               label={item.label}
               image={item.image}
-              selected={c.selected === item.key}
+              selected={!c.selectedIsCustom && c.selected === item.key}
               onPress={() => c.setTheme(item.key)}
             />
           ))}
+          <AppThemeSwatch
+            label={c.t('create.customTheme')}
+            image={
+              c.draft.customThemeUri
+                ? { uri: c.draft.customThemeUri }
+                : undefined
+            }
+            placeholderIcon="photos"
+            selected={c.selectedIsCustom}
+            onPress={() => void c.pickCustomTheme()}
+          />
         </ScrollView>
       </View>
     </AppScreenTemplate>

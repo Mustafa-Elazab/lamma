@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { EventDraft } from './draftEntity';
+import { normalizeDraft, type EventDraft } from './draftEntity';
 import type { DraftRepository } from './draftRepository';
 
 const STORAGE_KEY = 'lamma.drafts';
@@ -19,12 +19,14 @@ async function writeAll(map: DraftMap): Promise<void> {
 export class LocalDraftRepository implements DraftRepository {
   async list(): Promise<EventDraft[]> {
     const map = await readAll();
-    return Object.values(map).sort((a, b) => b.updatedAt - a.updatedAt);
+    return Object.values(map)
+      .map(normalizeDraft)
+      .sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
   async get(id: string): Promise<EventDraft | null> {
     const map = await readAll();
-    return map[id] ?? null;
+    return map[id] ? normalizeDraft(map[id]) : null;
   }
 
   async save(draft: EventDraft): Promise<void> {

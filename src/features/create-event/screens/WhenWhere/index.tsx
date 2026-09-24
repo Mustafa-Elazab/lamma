@@ -82,7 +82,6 @@ export function WhenWhereScreen(): React.ReactElement {
           label={c.t('common.next')}
           rightIcon="navigation"
           onPress={c.goNext}
-          disabled={!c.whenWhere.valid}
         />
       }
     >
@@ -116,6 +115,11 @@ export function WhenWhereScreen(): React.ReactElement {
             onPress={() => setPicker('end')}
           />
         </View>
+        {c.attemptedNext && !c.draft.startAt ? (
+          <AppText variant="caption" color="error">
+            {c.t('create.errorDateRequired')}
+          </AppText>
+        ) : null}
       </View>
 
       <View style={styles.section}>
@@ -139,6 +143,11 @@ export function WhenWhereScreen(): React.ReactElement {
           placeholder={!c.draft.areaAddress}
           onPress={() => setPicker('location')}
         />
+        {c.attemptedNext && (!c.draft.venueName || !c.draft.areaAddress) ? (
+          <AppText variant="caption" color="error">
+            {c.t('create.errorAddressRequired')}
+          </AppText>
+        ) : null}
         {c.hasCoordinates ? (
           <Pressable
             style={local.mapPreview}

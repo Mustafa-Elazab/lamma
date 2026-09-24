@@ -65,7 +65,7 @@ function AppListItemComponent({
       {trailing}
       {showChevron ? (
         <View style={styles.chevron}>
-          <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} />
+          <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} rtlMirror={false} />
         </View>
       ) : null}
     </>

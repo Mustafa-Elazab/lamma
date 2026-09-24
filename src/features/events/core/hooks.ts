@@ -8,6 +8,7 @@ import {
 
 import { trackEvent } from '../../../services/analytics';
 import { reportError } from '../../../services/crashReporting';
+import { syncEventReminders } from '../../../services/eventReminders';
 import type {
   EventCategory,
   EventListFilter,
@@ -76,6 +77,11 @@ export function useRsvpMutation() {
         event_id: updated.id,
         status: updated.viewerRsvp,
       });
+      const remindersEnabled =
+        queryClient.getQueryData<{
+          notifications?: { reminders?: boolean };
+        }>(['preferences'])?.notifications?.reminders ?? true;
+      void syncEventReminders(updated, remindersEnabled);
     },
     onError: (error, variables) => {
       reportError(error, 'events.rsvp', {
@@ -97,6 +103,11 @@ export function useCreateEvent() {
         event_id: event.id,
         visibility: event.visibility,
       });
+      const remindersEnabled =
+        queryClient.getQueryData<{
+          notifications?: { reminders?: boolean };
+        }>(['preferences'])?.notifications?.reminders ?? true;
+      void syncEventReminders(event, remindersEnabled);
     },
     onError: error => {
       reportError(error, 'events.create-mutation');

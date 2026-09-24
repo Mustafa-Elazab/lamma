@@ -8,7 +8,12 @@ import com.facebook.react.uimanager.ViewManager
 class MapConfigPackage : ReactPackage {
   override fun createNativeModules(
     reactContext: ReactApplicationContext,
-  ): List<NativeModule> = listOf(MapConfigModule(reactContext))
+  ): List<NativeModule> =
+    listOf(
+      MapConfigModule(reactContext),
+      NativeIntentModule(reactContext),
+      LammaGameSessionModule(reactContext),
+    )
 
   override fun createViewManagers(
     reactContext: ReactApplicationContext,

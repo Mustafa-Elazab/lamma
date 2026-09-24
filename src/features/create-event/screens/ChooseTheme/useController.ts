@@ -4,6 +4,7 @@ import {
 } from '@react-navigation/native';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Alert } from 'react-native';
 
 import { useLanguage } from '../../../../app/localization';
 import type { CreateEventStackParamList } from '../../../../navigation/types';
@@ -11,6 +12,7 @@ import { formatDateLong, formatTime } from '../../../../utils/format';
 import { themeSource, type EventThemeKey } from '../../../events';
 import { useCreateEventContext } from '../../CreateEventProvider';
 import { resolveDraftTheme } from '../../core/draftEntity';
+import { pickThemeImage } from '../../core/pickThemeImage';
 import { wizardSteps } from '../steps';
 
 const THEME_KEYS: EventThemeKey[] = [
@@ -28,7 +30,6 @@ export function useChooseThemeController() {
     useNavigation<NavigationProp<CreateEventStackParamList>>();
   const { draft, update } = useCreateEventContext();
 
-  const selected = resolveDraftTheme(draft);
   const steps = useMemo(() => wizardSteps(t), [t]);
 
   const themes = useMemo(
@@ -52,9 +53,34 @@ export function useChooseThemeController() {
     : undefined;
 
   const setTheme = useCallback(
-    (themeKey: EventThemeKey) => update({ themeKey }),
+    (themeKey: EventThemeKey) =>
+      update({
+        themeType: 'preset',
+        themeKey,
+        themeExplicit: true,
+        customThemeUri: null,
+      }),
     [update],
   );
+
+  const pickCustomTheme = useCallback(async () => {
+    try {
+      const uri = await pickThemeImage();
+      if (!uri) {
+        return;
+      }
+      update({
+        themeType: 'custom',
+        themeExplicit: true,
+        customThemeUri: uri,
+      });
+    } catch {
+      Alert.alert(t('create.customTheme'), t('create.publishError'));
+    }
+  }, [t, update]);
+
+  const selectedIsCustom = draft.themeType === 'custom';
+  const selectedPreset = resolveDraftTheme(draft);
 
   const goBack = useCallback(() => navigation.goBack(), [navigation]);
   const goNext = useCallback(
@@ -67,11 +93,12 @@ export function useChooseThemeController() {
     draft,
     steps,
     themes,
-    selected,
+    selected: selectedPreset,
+    selectedIsCustom,
     dateLabel,
     locationLabel,
-    heroImage: themeSource(selected),
     setTheme,
+    pickCustomTheme,
     goBack,
     goNext,
   };

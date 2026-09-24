@@ -37,8 +37,11 @@ service cloud.firestore {
     }
 
     match /events/{eventId} {
-      // The signed-in app may open public events and private invitation links.
-      allow read: if signedIn();
+      // Invite links (`/e/{eventId}`) are the access token: anyone with the id
+      // may fetch that one document (Vercel event page). Listing still requires
+      // a signed-in app session.
+      allow get: if true;
+      allow list: if signedIn();
       allow create: if ownsNewEvent();
       allow update: if signedIn()
         && ownershipIsUnchanged()
@@ -49,6 +52,38 @@ service cloud.firestore {
         );
       allow delete: if signedIn()
         && resource.data.ownerId == request.auth.uid;
+    }
+
+    match /gameSessions/{sessionId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.hostId == request.auth.uid;
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.hostId
+        && request.resource.data.gameId == resource.data.gameId
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.hostId == resource.data.hostId;
+      allow delete: if signedIn()
+        && resource.data.hostId == request.auth.uid;
+
+      match /playerActions/{actionId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.id == actionId
+          && request.resource.data.playerId == request.auth.uid
+          && request.resource.data.createdAt is int;
+        allow update, delete: if false;
+      }
+    }
+
+    match /games/{gameId} {
+      allow read: if signedIn();
+      allow write: if false;
+
+      match /{document=**} {
+        allow read: if signedIn();
+        allow write: if false;
+      }
     }
 
     match /users/{uid} {

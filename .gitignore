@@ -68,8 +68,17 @@ yarn-error.log
 # Temporary files created by Metro to check the health of the file watcher
 .metro-health-check*
 
+# Web fallback
+web/.next/
+web/.env.local
+
 # testing
 /coverage
+
+# Vercel / Next invite site
+web/.next
+web/out
+.next
 
 # Yarn
 .yarn/*
@@ -81,3 +90,6 @@ yarn-error.log
 
 # Png
 *.png
+
+# txt
+*.txt

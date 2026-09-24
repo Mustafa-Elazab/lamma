@@ -27,6 +27,10 @@ export type CreateEventInput = {
   latitude?: number | null;
   longitude?: number | null;
   visibility: LammaEvent['visibility'];
+  /** Local file:// URI set when user picks a custom theme photo. The repository
+   * is responsible for uploading this to remote storage before writing the event,
+   * then replacing it with the download URL as coverImageUrl. */
+  customThemeUri?: string | null;
 };
 
 export interface EventRepository {

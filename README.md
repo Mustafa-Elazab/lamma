@@ -19,7 +19,7 @@ coming — with first‑class Arabic + English (RTL) support and a warm, Egypt�
   `screens/<Name>/{index,styles,types,useController}`.
 - **i18n + RTL from the start** — `en` and `ar` resource bundles with a typed schema and
   parity tests; language toggle everywhere.
-- **Deep links** — invite links use `lamma.app/e/{id}` (`lamma://`, `https://lamma.app`).
+- **Deep links** — invite links use `https://lamma-app.vercel.app/e/{id}` (`lamma://` when the app is installed).
 - **Real assets** — onboarding art, event covers, theme art, share chrome and SVG icons all
   live in `src/assets` (no placeholder gradients for theme art).
 
@@ -39,7 +39,7 @@ themes, Help, Sign out).
 src/
   app/                  # providers, localization (i18n + LanguageProvider), query client, splash
   assets/               # branding, onboarding, event covers/themes, share, icons (+ index)
-  config/               # env flags (firebaseEnabled, googleWebClientId, deepLinkHost)
+  config/               # env flags (firebaseEnabled, googleWebClientId, publicWebUrl)
   design-system/        # theme, atoms, molecules, organisms, templates (barrel exports)
   features/
     auth/               # Google/Apple/Anonymous + account linking, onboarding
@@ -114,9 +114,11 @@ Crashlytics when the native Firebase app is available.
    Anonymous. (Do **not** enable Phone — the app never uses it; there is no phone/OTP flow.)
 2. Enable **Cloud Firestore**.
 3. Add the platform apps and config files:
-   - Android: `android/app/google-services.json`
-   - iOS: `ios/GoogleService-Info.plist` for bundle id `com.lamma.app` (the
-     Xcode project already includes this path in the app resources)
+   - Android: `android/app/google-services.json` for application id
+     `com.getlamma.app`
+   - iOS: `ios/GoogleService-Info.plist` for bundle id
+     `com.getlamma.app` (the Xcode project already includes this
+     path in the app resources)
 4. Google Sign-In: copy your **Web client ID** (OAuth 2.0) into `googleWebClientId` in
    `src/config/env.ts` (this id is passed to `GoogleSignin.configure`).
 5. Apple Sign-In: enable the *Sign in with Apple* capability in Xcode (iOS only).
@@ -126,17 +128,17 @@ Crashlytics when the native Firebase app is available.
 Guest → provider **account linking** preserves a guest's data when they upgrade, and
 `updateProfile` backs the Edit Profile screen.
 
-The committed Android config is valid for application id `com.lamma` and is processed by the
-Google Services Gradle plugin. The iOS plist is not committed, so iOS Firebase builds still
-require that file. Analytics records navigation screen views plus `sign_in_method`,
-`event_created`, `event_published`, `rsvp_submitted`, and `invite_shared`.
+The native Firebase config files must be downloaded for the current app ids and
+are processed by the Google Services / Firebase SDK tooling. Analytics records
+navigation screen views plus `sign_in_method`, `event_created`,
+`event_published`, `rsvp_submitted`, and `invite_shared`.
 
 Messaging requests notification permission, stores the current FCM token in AsyncStorage
 and `/users/{uid}/devices/{tokenId}`, refreshes it when Firebase rotates it, detaches it on
 sign-out, and registers foreground/background/open handlers. Cold-start notification links
 are queued until authentication and onboarding have resolved.
 Notification data should contain `eventId` (or `event_id`); tapping it opens
-`https://lamma.app/e/{id}` through the existing navigation deep-link configuration. For iOS,
+`lamma://e/{id}` (Event Details) after auth and onboarding. For iOS,
 enable **Push Notifications** and **Background Modes → Remote notifications** for the Lamma
 target and upload an APNs authentication key to Firebase. The project includes the required
 entitlements and Crashlytics dSYM upload phase; a matching Apple provisioning profile is
@@ -205,23 +207,32 @@ credentials.
 Basic event creation remains a direct, awaited client Firestore write protected by security
 rules; a callable function adds no trust or consistency benefit for that operation.
 
-One server-side function is required by the current data model:
+Server-side functions required by the current data model:
 `updateEventRsvpCounters` in `functions/src/index.ts` recalculates `goingCount` and
 `attendeeCount` from the RSVP map after event writes. Rules prevent clients from changing
-those aggregate fields directly. Deploy it with:
+those aggregate fields directly.
+
+`sendEventStartNotifications` runs every minute, checks events whose `startAt` is in the
+recent polling window, leases each event to avoid overlapping scheduler double-sends, sends
+an FCM start alert to every user whose RSVP is `going`, and then sets
+`startNotificationSent: true` with delivery counts. The Android payload uses the
+`event-start-alarm` high-importance channel created by the app. This is intentionally a
+polling implementation; if exact-second delivery becomes important, replace the polling
+lease with a Cloud Tasks enqueue at each event's `startAt`.
+
+Deploy them with:
 
 ```sh
 npm --prefix functions install
 npm --prefix functions run build
-firebase deploy --only functions:updateEventRsvpCounters
+firebase deploy --only functions:updateEventRsvpCounters,functions:sendEventStartNotifications
 ```
 
 No invite-slug function is added because invite links currently use Firestore's unique
-event document ID, not a user-facing slug. No notification fan-out function is added
-because the current publish model has no invitee uid list or publish-state transition to
-fan out; adding one now would invent a production data contract. When either feature is
-introduced, unique slug allocation, invite notification fan-out, and any client-untrusted
-publish validation belong in callable functions/triggers rather than client code.
+event document ID, not a user-facing slug. When invite slugs or publish-time invite fan-out
+are introduced, unique slug allocation, invite notification fan-out, and any
+client-untrusted publish validation belong in callable functions/triggers rather than
+client code.
 
 To develop **without** native Firebase config, set `firebaseEnabled` to `false` — the app
 falls back to the empty in-memory dev repositories described above.
@@ -291,32 +302,29 @@ device's local time, stores the resulting UTC epoch milliseconds, and Home/Event
 render those timestamps in the viewer's device-local time. There is intentionally no
 event-timezone field or picker.
 
-## Deep links & Android App Links
+## Deep links & invite URLs
 
-Invite links use `https://lamma.app/e/{id}` (and the `lamma://` scheme). React Navigation
-`linking` maps `e/:eventId` → Event Details, so cold/warm starts open the event in-app.
+Invite links are `https://lamma-app.vercel.app/e/{id}` (App Links / Universal Links).
+This is the Dynamic Links *behavior* without Firebase Dynamic Links (that product
+was shut down in August 2025):
 
-- **Android App Links**: `AndroidManifest.xml` declares an `autoVerify` intent filter for
-  `https://lamma.app/e/*` plus a `lamma://` scheme filter.
-- **iOS**: the `lamma://` URL scheme is registered in `Info.plist`. For universal links, add an
-  Associated Domains entitlement (`applinks:lamma.app`) in Xcode.
-- **Digital Asset Links**: to make Android verify the links (open in-app without a chooser),
-  host `https://lamma.app/.well-known/assetlinks.json`:
+- **Lamma installed** and the link is verified → OS opens Event Details. No browser.
+- **Lamma not installed** → `/e/{id}` 302-redirects to the Play Store (or App Store
+  on iOS). There is no event web page.
 
-```json
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.lamma",
-      "sha256_cert_fingerprints": ["<your app signing SHA-256 fingerprint>"]
-    }
-  }
-]
+The Next.js host in `web/` only serves Digital Asset Links, Apple App Site
+Association, and that store redirect. Set the Vercel **Root Directory** to `web`.
+
+```sh
+yarn web:dev
 ```
 
-For iOS universal links, host `https://lamma.app/.well-known/apple-app-site-association`.
+- **Android App Links**: `autoVerify` for `https://lamma-app.vercel.app/e/*` plus `lamma://`.
+- **iOS**: `lamma://` in `Info.plist` and Associated Domains `applinks:lamma-app.vercel.app`.
+- **Digital Asset Links**: `/.well-known/assetlinks.json`. Add Play App Signing
+  SHA-256 via `ANDROID_SHA256_CERT_FINGERPRINTS` on Vercel (comma-separated).
+- **Apple App Site Association**: `/.well-known/apple-app-site-association`.
+  Set `APPLE_TEAM_ID` on Vercel to your Apple Developer Team ID.
 
 ## Localization & RTL
 

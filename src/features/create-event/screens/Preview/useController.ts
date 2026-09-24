@@ -11,9 +11,9 @@ import type {
   CreateEventStackParamList,
 } from '../../../../navigation/types';
 import { formatDateTime, formatTime } from '../../../../utils/format';
-import { themeSource, type EventVisibility } from '../../../events';
+import { type EventVisibility } from '../../../events';
 import { useCreateEventContext } from '../../CreateEventProvider';
-import { resolveDraftTheme } from '../../core/draftEntity';
+import { draftThemeSource } from '../../core/draftMedia';
 import { wizardSteps } from '../steps';
 
 export function usePreviewController() {
@@ -78,7 +78,7 @@ export function usePreviewController() {
     t,
     draft,
     steps,
-    heroImage: themeSource(resolveDraftTheme(draft)),
+    heroImage: draftThemeSource(draft),
     dateLabel,
     timeLabel,
     locationLabel,

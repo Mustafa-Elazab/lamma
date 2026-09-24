@@ -7,6 +7,11 @@ import {
   setDoc,
 } from '@react-native-firebase/firestore';
 import {
+  EventType,
+  default as notifee,
+  type Event as NotifeeEvent,
+} from '@notifee/react-native';
+import {
   AuthorizationStatus,
   getInitialNotification,
   getMessaging,
@@ -22,15 +27,20 @@ import {
 } from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
 
-import { buildEventDeepLink } from '../navigation/linking';
+import { buildEventAppLink } from '../navigation/linking';
 import { reportError } from './crashReporting';
 import { appLogger } from './logger';
+import { ensureEventStartNotificationChannel } from './notificationChannels';
 
 const TOKEN_STORAGE_KEY = '@lamma/messaging/fcm-token';
 const BACKGROUND_MESSAGE_KEY = '@lamma/messaging/last-background-message';
 type NotificationOpenHandler = (link: string) => void | Promise<void>;
 let notificationOpenHandler: NotificationOpenHandler | null = null;
 let pendingNotificationLink: string | null = null;
+
+function isEventStartMessage(message: RemoteMessage): boolean {
+  return message.data?.type === 'event_start';
+}
 
 function eventIdFromMessage(
   message: RemoteMessage,
@@ -43,7 +53,7 @@ export function eventLinkFromMessage(
   message: RemoteMessage,
 ): string | null {
   const eventId = eventIdFromMessage(message);
-  return eventId ? buildEventDeepLink(eventId) : null;
+  return eventId ? buildEventAppLink(eventId) : null;
 }
 
 function tokenDocument(uid: string, token: string) {
@@ -156,6 +166,48 @@ async function openMessageEvent(
   }
 }
 
+async function openNotifeeEvent(event: NotifeeEvent): Promise<void> {
+  if (event.type !== EventType.PRESS) {
+    return;
+  }
+  const value = event.detail.notification?.data?.eventId;
+  const eventId = typeof value === 'string' ? value : null;
+  if (!eventId) {
+    return;
+  }
+  const link = buildEventAppLink(eventId);
+  if (notificationOpenHandler) {
+    await notificationOpenHandler(link);
+  } else {
+    pendingNotificationLink = link;
+  }
+}
+
+async function displayForegroundStartNotification(
+  message: RemoteMessage,
+): Promise<void> {
+  const eventId = eventIdFromMessage(message);
+  if (!eventId) {
+    return;
+  }
+  const channelId = await ensureEventStartNotificationChannel();
+  await notifee.displayNotification({
+    title:
+      message.notification?.title ??
+      (typeof message.data?.title === 'string'
+        ? message.data.title
+        : 'Your event is starting now'),
+    body:
+      message.notification?.body ??
+      (typeof message.data?.body === 'string' ? message.data.body : undefined),
+    data: { eventId },
+    android: {
+      channelId,
+      pressAction: { id: 'default' },
+    },
+  });
+}
+
 export function registerBackgroundMessagingHandler(): void {
   setBackgroundMessageHandler(getMessaging(), async message => {
     appLogger.log('[messaging] Background message received', {
@@ -186,6 +238,7 @@ export async function initializeMessaging(): Promise<() => void> {
       ) {
         await registerDeviceForRemoteMessages(messaging);
       }
+      await ensureEventStartNotificationChannel();
       await storeToken(await getToken(messaging));
     }
   } catch (error) {
@@ -197,6 +250,18 @@ export async function initializeMessaging(): Promise<() => void> {
       messageId: message.messageId,
       title: message.notification?.title,
       eventId: eventIdFromMessage(message),
+    });
+    if (isEventStartMessage(message)) {
+      void displayForegroundStartNotification(message).catch(error => {
+        reportError(error, 'messaging.display-start-notification', {
+          messageId: message.messageId,
+        });
+      });
+    }
+  });
+  const unsubscribeNotifeeForeground = notifee.onForegroundEvent(event => {
+    void openNotifeeEvent(event).catch(error => {
+      reportError(error, 'messaging.open-foreground-notification');
     });
   });
   const unsubscribeOpened = onNotificationOpenedApp(messaging, message => {
@@ -220,6 +285,7 @@ export async function initializeMessaging(): Promise<() => void> {
 
   return () => {
     unsubscribeForeground();
+    unsubscribeNotifeeForeground();
     unsubscribeOpened();
     unsubscribeToken();
   };

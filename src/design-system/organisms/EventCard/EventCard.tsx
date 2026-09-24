@@ -58,7 +58,11 @@ function AppEventCardComponent({
         onPress={onPress}
         style={({ pressed }) => [styles.featured, pressed && styles.pressed]}
       >
-        <Image source={data.coverImage} style={styles.featuredCover} />
+        <Image
+          source={data.coverImage}
+          style={styles.featuredCover}
+          resizeMode="cover"
+        />
         <View style={styles.featuredBody}>
           <View style={styles.featuredTopRow}>
             {data.rsvpLabel ? (
@@ -112,7 +116,11 @@ function AppEventCardComponent({
       onPress={onPress}
       style={({ pressed }) => [styles.compact, pressed && styles.pressed]}
     >
-      <Image source={data.coverImage} style={styles.compactCover} />
+      <Image
+        source={data.coverImage}
+        style={styles.compactCover}
+        resizeMode="cover"
+      />
       <View style={styles.compactBody}>
         <View style={styles.compactTopRow}>
           <AppText variant="bodyStrong" numberOfLines={1} style={styles.flex}>
@@ -174,7 +182,7 @@ function createStyles(theme: Theme) {
     featured: {
       flexDirection: 'row',
       alignItems: 'stretch',
-      minHeight: 304,
+      minHeight: 120,
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       borderWidth: 1,
@@ -182,9 +190,10 @@ function createStyles(theme: Theme) {
       overflow: 'hidden',
       ...theme.shadows.card,
     },
-    // No percentage height (its parent has no fixed height, which collapsed the
-    // cover to 0). alignSelf:'stretch' fills the row's cross-axis instead.
-    featuredCover: { width: '43%', alignSelf: 'stretch', resizeMode: 'cover' },
+    featuredCover: {
+      width: '43%',
+      height: 120,
+    },
     featuredBody: {
       flex: 1,
       padding: theme.spacing.lg,
@@ -208,8 +217,7 @@ function createStyles(theme: Theme) {
     },
     compactCover: {
       width: 120,
-      alignSelf: 'stretch',
-      resizeMode: 'cover',
+      height: 120,
     },
     compactBody: {
       flex: 1,

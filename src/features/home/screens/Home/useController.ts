@@ -1,9 +1,10 @@
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useLanguage } from '../../../../app/localization';
 import type { AppStackParamList } from '../../../../navigation/types';
+import { syncUpcomingEventReminders } from '../../../../services/eventReminders';
 import { displayNameOrGuest } from '../../../auth/core/entity';
 import { useAuth } from '../../../auth';
 import {
@@ -12,12 +13,14 @@ import {
   useHomeFeed,
   type LammaEvent,
 } from '../../../events';
+import { usePreferences } from '../../../settings/core';
 import type { HomeTab, HomeTabItem } from './types';
 
 export function useHomeController() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { preferences } = usePreferences();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const [filter, setFilter] = useState<HomeTab>('upcoming');
 
@@ -28,6 +31,20 @@ export function useHomeController() {
     () => (query.data?.pages ?? []).flatMap(page => page.page.events),
     [query.data],
   );
+
+  useEffect(() => {
+    if (filter !== 'upcoming') {
+      return;
+    }
+    const upcoming = [
+      ...(featured ? [featured] : []),
+      ...events,
+    ];
+    void syncUpcomingEventReminders(
+      upcoming,
+      preferences.notifications.reminders,
+    );
+  }, [events, featured, filter, preferences.notifications.reminders]);
 
   const greetingName = useMemo(() => {
     const full = displayNameOrGuest(user, t('profile.guest'));

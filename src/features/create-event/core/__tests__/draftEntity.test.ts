@@ -2,6 +2,7 @@ import {
   createEmptyDraft,
   draftToCreateInput,
   isDraftEmpty,
+  normalizeDraft,
   resolveDraftTheme,
 } from '../draftEntity';
 
@@ -10,6 +11,8 @@ describe('draft entity', () => {
     const draft = createEmptyDraft('d1');
     expect(isDraftEmpty(draft)).toBe(true);
     expect(draft.themeKey).toBe('generic');
+    expect(draft.themeExplicit).toBe(false);
+    expect(draft.themeType).toBe('preset');
   });
 
   it('resolves theme from category when not overridden', () => {
@@ -22,8 +25,50 @@ describe('draft entity', () => {
       ...createEmptyDraft('d1'),
       category: 'wedding' as const,
       themeKey: 'travel' as const,
+      themeExplicit: true,
     };
     expect(resolveDraftTheme(draft)).toBe('travel');
+  });
+
+  it('keeps the last preset (generic) instead of falling back to the first', () => {
+    const draft = {
+      ...createEmptyDraft('d1'),
+      category: 'wedding' as const,
+      themeKey: 'generic' as const,
+      themeExplicit: true,
+      themeType: 'preset' as const,
+    };
+    expect(resolveDraftTheme(draft)).toBe('generic');
+  });
+
+  it('does not treat a custom photo as the first preset', () => {
+    const draft = {
+      ...createEmptyDraft('d1'),
+      category: 'wedding' as const,
+      themeType: 'custom' as const,
+      customThemeUri: 'file:///tmp/theme.jpg',
+      themeExplicit: true,
+    };
+    expect(resolveDraftTheme(draft)).toBe('generic');
+    expect(draftToCreateInput({
+      ...draft,
+      title: 'Dinner',
+      description: '',
+      startAt: Date.now() + 86_400_000,
+      endAt: Date.now() + 90_000_000,
+      venueName: 'Zooba',
+      areaAddress: 'Zamalek',
+    })?.customThemeUri).toBe('file:///tmp/theme.jpg');
+  });
+
+  it('hydrates older drafts that lack themeExplicit', () => {
+    const hydrated = normalizeDraft({
+      id: 'old',
+      category: 'wedding',
+      themeKey: 'travel',
+    });
+    expect(hydrated.themeExplicit).toBe(true);
+    expect(resolveDraftTheme(hydrated)).toBe('travel');
   });
 
   it('returns null create input for incomplete drafts', () => {

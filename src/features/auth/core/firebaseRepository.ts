@@ -3,6 +3,8 @@ import {
 } from '@invertase/react-native-apple-authentication';
 import {
   GoogleSignin,
+  isErrorWithCode,
+  statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {
   AppleAuthProvider,
@@ -17,7 +19,7 @@ import {
   type AuthCredential,
   type User,
 } from '@react-native-firebase/auth';
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 
 import { AuthError, type AuthProviderId, type AuthUser } from './entity';
 import type { AuthRepository } from './repository';
@@ -55,13 +57,30 @@ function mapUser(user: User | null): AuthUser | null {
 }
 
 export type FirebaseAuthConfig = {
-  /** OAuth web client id required for Google sign-in on Android/iOS. */
+  /** OAuth web client id required for Google sign-in id tokens. */
   googleWebClientId: string;
+  /** iOS OAuth client id (client_type 2) so the native SDK can return. */
+  googleIosClientId: string;
 };
+
+const PLAY_SERVICES_PACKAGE = 'com.google.android.gms';
+
+async function openPlayServicesStore(): Promise<void> {
+  const market = `market://details?id=${PLAY_SERVICES_PACKAGE}`;
+  const web = `https://play.google.com/store/apps/details?id=${PLAY_SERVICES_PACKAGE}`;
+  const supported = await Linking.canOpenURL(market);
+  await Linking.openURL(supported ? market : web);
+}
 
 export class FirebaseAuthRepository implements AuthRepository {
   constructor(private readonly config: FirebaseAuthConfig) {
-    GoogleSignin.configure({ webClientId: config.googleWebClientId });
+    GoogleSignin.configure({
+      webClientId: config.googleWebClientId,
+      iosClientId: config.googleIosClientId,
+      offlineAccess: false,
+      forceCodeForRefreshToken: false,
+      scopes: ['profile', 'email'],
+    });
   }
 
   subscribe(listener: (user: AuthUser | null) => void): () => void {
@@ -103,8 +122,30 @@ export class FirebaseAuthRepository implements AuthRepository {
   }
 
   async signInWithGoogle(): Promise<AuthUser> {
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    if (Platform.OS === 'android') {
+      try {
+        await GoogleSignin.hasPlayServices({
+          showPlayServicesUpdateDialog: true,
+        });
+      } catch (error) {
+        const missing =
+          isErrorWithCode(error) &&
+          error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE;
+        if (missing) {
+          await openPlayServicesStore();
+          throw new AuthError(
+            'auth/play-services',
+            'auth.errorPlayServices',
+          );
+        }
+        throw error;
+      }
+    }
+
     const response = await GoogleSignin.signIn();
+    if (response.type === 'cancelled') {
+      throw new AuthError('auth/cancelled', 'Google sign-in was cancelled.');
+    }
     const idToken =
       response.data?.idToken ?? (await GoogleSignin.getTokens()).idToken;
     if (!idToken) {
@@ -139,6 +180,11 @@ export class FirebaseAuthRepository implements AuthRepository {
   }
 
   async signOut(): Promise<void> {
+    try {
+      await GoogleSignin.signOut();
+    } catch {
+      // Native Google session may not exist (guest / Apple-only).
+    }
     await signOut(getAuth());
   }
 
