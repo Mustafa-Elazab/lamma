@@ -2,14 +2,14 @@ import type { GameDefinition, GameId } from './types';
 
 export const GAME_REGISTRY: GameDefinition[] = [
   {
-    id: 'mafioso',
-    name: { en: 'Mafioso', ar: 'مافيوزو' },
+    id: 'imposter',
+    name: { en: 'Imposter', ar: 'مين الدخيل؟' },
     shortDescription: {
-      en: 'Two hidden mafiosos, clues each round, discussion, and a vote.',
-      ar: 'مافيوزوان مخفيان، دليل كل جولة، نقاش، ثم تصويت.',
+      en: 'Everyone gets the same secret word except one. Give clues, vote, catch the imposter.',
+      ar: 'الكل عارف نفس الكلمة إلا واحد. قول تلميح، صوّت، واكشف الدخيل.',
     },
     icon: 'shield',
-    minPlayers: 4,
+    minPlayers: 3,
     maxPlayers: 12,
     syncType: 'host-led',
     accent: 'rose',

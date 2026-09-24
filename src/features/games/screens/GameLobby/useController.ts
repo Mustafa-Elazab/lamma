@@ -1,5 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Share } from 'react-native';
+import { Alert, Share } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,6 @@ import type {
   GamePlayer,
   GameSessionPlayerAction,
   IcebreakerPrompt,
-  MafiosoContent,
   QuarterMilePack,
   TriviaPack,
 } from '../../core/types';
@@ -28,14 +27,16 @@ import {
   type IcebreakerRound,
 } from '../../icebreakers/engine';
 import {
-  advanceMafiosoPhase,
-  castMafiosoVote,
-  createMafiosoState,
-  currentMafiosoPhaseSlot,
-  revealMafiosoVote,
-  type MafiosoState,
-} from '../../mafioso/engine';
-import { MAFIOSO_PHASE_COUNT, mafiosoRolePlan } from '../../mafioso/rules';
+  allImposterVotesIn,
+  castImposterVote,
+  createImposterRound,
+  imposterGuess,
+  imposterLeaderboard,
+  revealImposterVote,
+  skipImposterGuess,
+  startImposterVote,
+  type ImposterState,
+} from '../../imposter/engine';
 import {
   advanceQuarterMileTurn,
   applyQuarterMileChoice,
@@ -60,11 +61,25 @@ import {
   type TriviaSettings,
 } from '../../trivia/scoring';
 
-const EMPTY_MAFIOSO_PHASES: MafiosoContent['phases'] = [];
 const EMPTY_TRIVIA_PACKS: TriviaPack[] = [];
 const EMPTY_QUARTER_MILE_PACKS: QuarterMilePack[] = [];
 const EMPTY_ICEBREAKER_PROMPTS: IcebreakerPrompt[] = [];
 const EMPTY_PLAYERS: GamePlayer[] = [];
+const EMPTY_IDS: string[] = [];
+
+/** Late joiners get a zero-score row the first time they answer. */
+function withTriviaPlayer(
+  round: TriviaRoundState,
+  player: GamePlayer | null,
+): TriviaRoundState {
+  if (!player || round.scores.some(score => score.playerId === player.id)) {
+    return round;
+  }
+  return {
+    ...round,
+    scores: [...round.scores, { playerId: player.id, name: player.name, score: 0 }],
+  };
+}
 
 function localizeGameDefinition(
   definition: GameDefinition,
@@ -77,24 +92,8 @@ function localizeGameDefinition(
   };
 }
 
-function getRoleLabel(
-  mafioso: MafiosoContent | undefined,
-  role: string,
-  language: ReturnType<typeof useLanguage>['language'],
-): string {
-  return localizeText(mafioso?.roles[role]?.label, language) || role;
-}
-
-function getRoleDescription(
-  mafioso: MafiosoContent | undefined,
-  role: string,
-  language: ReturnType<typeof useLanguage>['language'],
-): string {
-  return localizeText(mafioso?.roles[role]?.description, language);
-}
-
 type GameplayState =
-  | { kind: 'mafioso'; state: MafiosoState }
+  | { kind: 'imposter'; state: ImposterState }
   | { kind: 'trivia-setup'; settings: TriviaSettings }
   | { kind: 'trivia-time'; round: TriviaRoundState }
   | { kind: 'quarter-mile'; state: QuarterMileState }
@@ -105,7 +104,7 @@ function isGameplayState(value: unknown): value is GameplayState {
     return false;
   }
   return (
-    (value as { kind?: unknown }).kind === 'mafioso' ||
+    (value as { kind?: unknown }).kind === 'imposter' ||
     (value as { kind?: unknown }).kind === 'trivia-setup' ||
     (value as { kind?: unknown }).kind === 'trivia-time' ||
     (value as { kind?: unknown }).kind === 'quarter-mile' ||
@@ -125,8 +124,6 @@ export function useGameLobbyController(gameId: GameId) {
     gameContent?.definition ?? gameById(gameId),
     language,
   );
-  const mafiosoContent = gameContent?.mafioso;
-  const mafiosoPhases = mafiosoContent?.phases ?? EMPTY_MAFIOSO_PHASES;
   const triviaPacks = gameContent?.triviaPacks ?? EMPTY_TRIVIA_PACKS;
   const quarterMilePacks =
     (gameContent?.quarterMilePacks?.length
@@ -163,16 +160,12 @@ export function useGameLobbyController(gameId: GameId) {
     : null;
   const currentTriviaSettings =
     gameplay?.kind === 'trivia-setup' ? gameplay.settings : triviaSettings;
-  const me =
-    players.find(player => player.id === user?.uid) ??
-    players.find(player => !player.isHost) ??
-    players[0] ??
-    null;
-  const isHost = Boolean(me && session.current?.hostId === me.id);
-  const requiredConnectedPlayers =
-    game.syncType === 'host-led'
-      ? Math.min(game.minPlayers, 1)
-      : game.minPlayers;
+  // Always identify the local player by their own auth uid. Never fall back to
+  // another player (that made guests think they were the host).
+  const localPlayerId = user?.uid ?? 'local-host';
+  const me = players.find(player => player.id === localPlayerId) ?? null;
+  const isHost = Boolean(session.current && session.current.hostId === localPlayerId);
+  const requiredConnectedPlayers = Math.max(1, game.minPlayers);
   const canStart =
     isHost && connectedPlayers.length >= requiredConnectedPlayers;
 
@@ -202,53 +195,68 @@ export function useGameLobbyController(gameId: GameId) {
     players,
     requiredConnectedPlayers,
   ]);
-  const myMafiosoAssignment =
-    gameplay?.kind === 'mafioso' && me
-      ? gameplay.state.assignments.find(
-          assignment => assignment.playerId === me.id,
-        )
-      : undefined;
-  const mafiosoPhaseIndex =
-    gameplay?.kind === 'mafioso'
-      ? currentMafiosoPhaseSlot(gameplay.state)
-      : -1;
-  const mafiosoPhase =
-    mafiosoPhaseIndex >= 0
-      ? localizeText(mafiosoPhases[mafiosoPhaseIndex], language)
-      : null;
-  const mafiosoClues = mafiosoContent?.clues ?? [];
-  const currentMafiosoClue =
-    gameplay?.kind === 'mafioso'
-      ? mafiosoClues[gameplay.state.clueIndex % Math.max(mafiosoClues.length, 1)]
-      : undefined;
-  const mafiosoVoteTargets =
-    gameplay?.kind === 'mafioso'
-      ? gameplay.state.assignments.filter(
-          assignment =>
-            !gameplay.state.eliminatedPlayerIds.includes(assignment.playerId),
-        )
-      : [];
-  const myMafiosoVote =
-    gameplay?.kind === 'mafioso' && me
-      ? gameplay.state.votes[me.id]
-      : undefined;
-  const myPendingMafiosoVote =
-    gameplay?.kind === 'mafioso' && me
-      ? session.playerActions.find(
-          action =>
-            action.kind === 'mafioso-vote' &&
-            action.playerId === me.id &&
-            action.phaseIndex === gameplay.state.phaseIndex &&
-            !(session.current?.appliedActionIds ?? []).includes(action.id),
-        )
-      : undefined;
-  const mafiosoRevealedAssignment =
-    gameplay?.kind === 'mafioso' && gameplay.state.lastRevealedPlayerId
-      ? gameplay.state.assignments.find(
-          assignment =>
-            assignment.playerId === gameplay.state.lastRevealedPlayerId,
-        )
-      : undefined;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (gameplay?.kind !== 'trivia-time' || gameplay.round.phase !== 'question') {
+      return undefined;
+    }
+    const interval = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(interval);
+  }, [gameplay]);
+
+  const appliedIds = session.current?.appliedActionIds ?? EMPTY_IDS;
+  const isPending = useCallback(
+    (predicate: (action: GameSessionPlayerAction) => boolean) =>
+      session.playerActions.some(
+        action =>
+          action.playerId === localPlayerId &&
+          !appliedIds.includes(action.id) &&
+          predicate(action),
+      ),
+    [appliedIds, localPlayerId, session.playerActions],
+  );
+
+  const sendAction = useCallback(
+    (action: Parameters<typeof session.submitPlayerAction>[0]) => {
+      session.submitPlayerAction(action).catch(error => {
+        appLogger.error('[games.action] submit failed', error, {
+          kind: action.kind,
+        });
+        Alert.alert(t('games.actionFailedTitle'), t('games.actionFailed'));
+      });
+    },
+    [session, t],
+  );
+
+  const imposter = gameplay?.kind === 'imposter' ? gameplay.state : null;
+  const amInImposterRound = Boolean(
+    imposter && imposter.playerIds.includes(localPlayerId),
+  );
+  const amImposter = Boolean(imposter && imposter.imposterId === localPlayerId);
+  const myImposterVote = imposter?.votes[localPlayerId];
+  const myPendingImposterVote = imposter
+    ? isPending(a => a.kind === 'imposter-vote' && a.round === imposter.round)
+    : false;
+  const myPendingImposterGuess = imposter
+    ? isPending(a => a.kind === 'imposter-guess' && a.round === imposter.round)
+    : false;
+  const imposterVoteCounts = useMemo(() => {
+    if (!imposter) {
+      return [] as Array<{ playerId: string; name: string; count: number }>;
+    }
+    const counts: Record<string, number> = {};
+    Object.values(imposter.votes).forEach(target => {
+      counts[target] = (counts[target] ?? 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([playerId, count]) => ({
+        playerId,
+        name: imposter.playerNames[playerId] ?? playerId,
+        count,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [imposter]);
+
   const myPendingTriviaAnswer =
     gameplay?.kind === 'trivia-time' && me
       ? session.playerActions.find(
@@ -261,26 +269,48 @@ export function useGameLobbyController(gameId: GameId) {
       : undefined;
   const canSeeIcebreakerPrompt =
     gameplay?.kind === 'icebreakers' &&
-    Boolean(me && gameplay.current?.player.id === me.id);
+    gameplay.current?.player.id === localPlayerId;
+  const myPendingIcebreakerNext =
+    gameplay?.kind === 'icebreakers' && gameplay.current
+      ? isPending(
+          a =>
+            a.kind === 'icebreaker-next' &&
+            a.round === gameplay.current?.round,
+        )
+      : false;
+  const triviaSecondsLeft =
+    gameplay?.kind === 'trivia-time' && gameplay.round.phase === 'question'
+      ? Math.max(
+          0,
+          Math.ceil(
+            (gameplay.round.questionStartedAtMs +
+              gameplay.round.settings.secondsPerQuestion * 1000 -
+              now) /
+              1000,
+          ),
+        )
+      : null;
+  const triviaAnsweredCount =
+    gameplay?.kind === 'trivia-time'
+      ? Object.keys(gameplay.round.answers).length
+      : 0;
+  const quarterMileSpectator =
+    gameplay?.kind === 'quarter-mile' &&
+    !gameplay.state.playerOrder.includes(localPlayerId);
 
   const gameSummary = useMemo(() => {
-    if (gameId === 'mafioso') {
-      const phaseLabels = mafiosoPhases
-        .map(phase => localizeText(phase, language))
-        .filter(Boolean);
+    if (gameId === 'imposter') {
       return {
-        title: t('games.mafiosoSetup'),
+        title: t('games.imposterSetup'),
         lines: [
-          t('games.mafiosoRoleCount', {
-            count: mafiosoRolePlan(
-              Math.max(requiredConnectedPlayers, connectedPlayers.length),
-            ).length,
-          }),
-          phaseLabels.join(' · '),
+          t('games.imposterRule1'),
+          t('games.imposterRule2'),
+          t('games.imposterRule3'),
+          t('games.imposterRule4'),
         ],
       };
     }
-        if (gameId === 'quarter-mile') {
+    if (gameId === 'quarter-mile') {
       const pack = quarterMilePacks[0];
       return {
         title: t('games.quarterMileSetup'),
@@ -324,26 +354,26 @@ export function useGameLobbyController(gameId: GameId) {
       ],
     };
   }, [
-    connectedPlayers.length,
     currentTriviaSettings,
     gameId,
     icebreakerPrompts.length,
     language,
-    mafiosoPhases,
-    requiredConnectedPlayers,
     t,
     triviaPacks,
     quarterMilePacks,
   ]);
 
   const start = useCallback(() => {
-    if (!isHost) {
+    if (!isHost || connectedPlayers.length < requiredConnectedPlayers) {
       return;
     }
-    if (gameId === 'mafioso') {
+    if (gameId === 'imposter') {
       session.startCurrent({
-        kind: 'mafioso',
-        state: createMafiosoState(connectedPlayers),
+        kind: 'imposter',
+        state: createImposterRound({
+          players: connectedPlayers,
+          previous: gameplay?.kind === 'imposter' ? gameplay.state : undefined,
+        }),
       });
       return;
     }
@@ -393,9 +423,11 @@ export function useGameLobbyController(gameId: GameId) {
     connectedPlayers,
     currentTriviaSettings,
     gameId,
+    gameplay,
     icebreakerPrompts,
     isHost,
     quarterMilePacks,
+    requiredConnectedPlayers,
     session,
     triviaPacks,
   ]);
@@ -427,47 +459,134 @@ export function useGameLobbyController(gameId: GameId) {
     session.updateGameState({ kind: 'trivia-setup', settings: triviaSettings });
   }, [gameId, gameplay, isHost, session, triviaSettings]);
 
-  const advanceMafioso = useCallback(() => {
-    if (!isHost || gameplay?.kind !== 'mafioso') {
-      return;
-    }
-    const phaseCount = Math.max(
-      mafiosoPhases.length,
-      MAFIOSO_PHASE_COUNT,
-    );
-    if (gameplay.state.phaseIndex % phaseCount === 3) {
-      session.updateGameState({
-        kind: 'mafioso',
-        state: revealMafiosoVote(gameplay.state),
-      });
+  const openImposterVote = useCallback(() => {
+    if (!isHost || gameplay?.kind !== 'imposter') {
       return;
     }
     session.updateGameState({
-      kind: 'mafioso',
-      state: advanceMafiosoPhase(gameplay.state),
+      kind: 'imposter',
+      state: startImposterVote(gameplay.state),
     });
-  }, [gameplay, isHost, mafiosoPhases.length, session]);
+  }, [gameplay, isHost, session]);
 
-  const voteMafioso = useCallback(
+  const revealImposter = useCallback(() => {
+    if (!isHost || gameplay?.kind !== 'imposter') {
+      return;
+    }
+    session.updateGameState({
+      kind: 'imposter',
+      state: revealImposterVote(gameplay.state),
+    });
+  }, [gameplay, isHost, session]);
+
+  const skipGuess = useCallback(() => {
+    if (!isHost || gameplay?.kind !== 'imposter') {
+      return;
+    }
+    session.updateGameState({
+      kind: 'imposter',
+      state: skipImposterGuess(gameplay.state),
+    });
+  }, [gameplay, isHost, session]);
+
+  const voteImposter = useCallback(
     (targetPlayerId: string) => {
-      if (gameplay?.kind !== 'mafioso' || !me || mafiosoPhaseIndex !== 3) {
+      if (gameplay?.kind !== 'imposter' || gameplay.state.phase !== 'vote') {
         return;
       }
-      session
-        .submitPlayerAction({
-          kind: 'mafioso-vote',
-          playerId: me.id,
-          targetPlayerId,
-          phaseIndex: gameplay.state.phaseIndex,
-        })
-        .catch(() => undefined);
+      if (isHost) {
+        session.updateGameState({
+          kind: 'imposter',
+          state: castImposterVote(gameplay.state, localPlayerId, targetPlayerId),
+        });
+        return;
+      }
+      sendAction({
+        kind: 'imposter-vote',
+        playerId: localPlayerId,
+        targetPlayerId,
+        round: gameplay.state.round,
+      });
     },
-    [gameplay, mafiosoPhaseIndex, me, session],
+    [gameplay, isHost, localPlayerId, sendAction, session],
   );
+
+  const guessImposterWord = useCallback(
+    (wordId: string) => {
+      if (gameplay?.kind !== 'imposter' || gameplay.state.phase !== 'guess') {
+        return;
+      }
+      if (isHost) {
+        session.updateGameState({
+          kind: 'imposter',
+          state: imposterGuess(gameplay.state, localPlayerId, wordId),
+        });
+        return;
+      }
+      sendAction({
+        kind: 'imposter-guess',
+        playerId: localPlayerId,
+        wordId,
+        round: gameplay.state.round,
+      });
+    },
+    [gameplay, isHost, localPlayerId, sendAction, session],
+  );
+
+  // Host: apply guests' imposter votes and guesses.
+  useEffect(() => {
+    if (!isHost || gameplay?.kind !== 'imposter') {
+      return;
+    }
+    const pending = session.playerActions.filter(
+      action =>
+        (action.kind === 'imposter-vote' || action.kind === 'imposter-guess') &&
+        action.round === gameplay.state.round &&
+        !appliedIds.includes(action.id),
+    );
+    if (pending.length === 0) {
+      return;
+    }
+    const state = pending.reduce((next, action) => {
+      if (action.kind === 'imposter-vote') {
+        return castImposterVote(next, action.playerId, action.targetPlayerId);
+      }
+      if (action.kind === 'imposter-guess') {
+        return imposterGuess(next, action.playerId, action.wordId);
+      }
+      return next;
+    }, gameplay.state);
+    session.updateGameState(
+      { kind: 'imposter', state },
+      pending.map(action => action.id),
+    );
+  }, [appliedIds, gameplay, isHost, session]);
+
+  // Host: reveal automatically once every connected player in the round voted.
+  useEffect(() => {
+    if (
+      !isHost ||
+      gameplay?.kind !== 'imposter' ||
+      gameplay.state.phase !== 'vote'
+    ) {
+      return;
+    }
+    if (
+      allImposterVotesIn(
+        gameplay.state,
+        connectedPlayers.map(player => player.id),
+      )
+    ) {
+      session.updateGameState({
+        kind: 'imposter',
+        state: revealImposterVote(gameplay.state),
+      });
+    }
+  }, [connectedPlayers, gameplay, isHost, session]);
 
   const answerTrivia = useCallback(
     (optionIndex: number) => {
-      if (gameplay?.kind !== 'trivia-time' || !me) {
+      if (gameplay?.kind !== 'trivia-time') {
         return;
       }
       const answeredAtMs = Date.now();
@@ -475,25 +594,23 @@ export function useGameLobbyController(gameId: GameId) {
         session.updateGameState({
           kind: 'trivia-time',
           round: answerTriviaQuestion(
-            gameplay.round,
-            me.id,
+            withTriviaPlayer(gameplay.round, me),
+            localPlayerId,
             optionIndex,
             answeredAtMs,
           ),
         });
         return;
       }
-      session
-        .submitPlayerAction({
-          kind: 'trivia-answer',
-          playerId: me.id,
-          optionIndex,
-          questionIndex: gameplay.round.currentIndex,
-          answeredAtMs,
-        })
-        .catch(() => undefined);
+      sendAction({
+        kind: 'trivia-answer',
+        playerId: localPlayerId,
+        optionIndex,
+        questionIndex: gameplay.round.currentIndex,
+        answeredAtMs,
+      });
     },
-    [gameplay, isHost, me, session],
+    [gameplay, isHost, localPlayerId, me, sendAction, session],
   );
 
   useEffect(() => {
@@ -513,7 +630,10 @@ export function useGameLobbyController(gameId: GameId) {
     const round = pendingAnswerActions.reduce(
       (nextRound, action) =>
         answerTriviaQuestion(
-          nextRound,
+          withTriviaPlayer(
+            nextRound,
+            players.find(player => player.id === action.playerId) ?? null,
+          ),
           action.playerId,
           action.optionIndex,
           action.answeredAtMs,
@@ -524,32 +644,7 @@ export function useGameLobbyController(gameId: GameId) {
       { kind: 'trivia-time', round },
       pendingAnswerActions.map(action => action.id),
     );
-  }, [gameplay, isHost, session]);
-
-  useEffect(() => {
-    if (!isHost || gameplay?.kind !== 'mafioso') {
-      return;
-    }
-    const appliedActionIds = session.current?.appliedActionIds ?? [];
-    const pendingVoteActions = session.playerActions.filter(
-      action =>
-        action.kind === 'mafioso-vote' &&
-        action.phaseIndex === gameplay.state.phaseIndex &&
-        !appliedActionIds.includes(action.id),
-    ) as Array<Extract<GameSessionPlayerAction, { kind: 'mafioso-vote' }>>;
-    if (pendingVoteActions.length === 0) {
-      return;
-    }
-    const state = pendingVoteActions.reduce(
-      (nextState, action) =>
-        castMafiosoVote(nextState, action.playerId, action.targetPlayerId),
-      gameplay.state,
-    );
-    session.updateGameState(
-      { kind: 'mafioso', state },
-      pendingVoteActions.map(action => action.id),
-    );
-  }, [gameplay, isHost, session]);
+  }, [gameplay, isHost, players, session]);
 
   const revealTrivia = useCallback(() => {
     if (!isHost || gameplay?.kind !== 'trivia-time') {
@@ -574,25 +669,25 @@ export function useGameLobbyController(gameId: GameId) {
 
   const chooseQuarterMile = useCallback(
     (choice: 'take' | 'leave') => {
-      if (!me || gameplay?.kind !== 'quarter-mile') {
+      if (gameplay?.kind !== 'quarter-mile') {
         return;
       }
       const turnIndex = gameplay.state.turnIndex;
       if (isHost) {
         session.updateGameState({
           kind: 'quarter-mile',
-          state: applyQuarterMileChoice(gameplay.state, me.id, choice),
+          state: applyQuarterMileChoice(gameplay.state, localPlayerId, choice),
         });
         return;
       }
-      void session.submitPlayerAction({
+      sendAction({
         kind: 'quarter-mile-choice',
-        playerId: me.id,
+        playerId: localPlayerId,
         turnIndex,
         choice,
       });
     },
-    [gameplay, isHost, me, session],
+    [gameplay, isHost, localPlayerId, sendAction, session],
   );
 
   const nextQuarterMile = useCallback(() => {
@@ -604,6 +699,68 @@ export function useGameLobbyController(gameId: GameId) {
       state: advanceQuarterMileTurn(gameplay.state),
     });
   }, [gameplay, isHost, session]);
+
+  const finishIcebreakerTurn = useCallback(() => {
+    if (gameplay?.kind !== 'icebreakers' || !gameplay.current) {
+      return;
+    }
+    if (gameplay.current.player.id !== localPlayerId && !isHost) {
+      return;
+    }
+    if (isHost) {
+      session.updateGameState({
+        kind: 'icebreakers',
+        current: nextIcebreakerRound({
+          players: connectedPlayers,
+          prompts: icebreakerPrompts,
+          previous: gameplay.current,
+        }),
+      });
+      return;
+    }
+    sendAction({
+      kind: 'icebreaker-next',
+      playerId: localPlayerId,
+      round: gameplay.current.round,
+    });
+  }, [
+    connectedPlayers,
+    gameplay,
+    icebreakerPrompts,
+    isHost,
+    localPlayerId,
+    sendAction,
+    session,
+  ]);
+
+  // Host: when the spotlighted guest taps Done, move to the next person.
+  useEffect(() => {
+    if (!isHost || gameplay?.kind !== 'icebreakers' || !gameplay.current) {
+      return;
+    }
+    const current = gameplay.current;
+    const action = session.playerActions.find(
+      item =>
+        item.kind === 'icebreaker-next' &&
+        item.round === current.round &&
+        item.playerId === current.player.id &&
+        !appliedIds.includes(item.id),
+    );
+    if (!action) {
+      return;
+    }
+    session.updateGameState(
+      {
+        kind: 'icebreakers',
+        current: nextIcebreakerRound({
+          players: connectedPlayers,
+          prompts: icebreakerPrompts,
+          previous: current,
+        }),
+      },
+      action.id,
+    );
+  }, [appliedIds, connectedPlayers, gameplay, icebreakerPrompts, isHost, session]);
 
   const nextIcebreaker = useCallback(() => {
     if (!isHost || gameplay?.kind !== 'icebreakers') {
@@ -624,6 +781,13 @@ export function useGameLobbyController(gameId: GameId) {
       return undefined;
     }
     if (gameplay.round.phase === 'question') {
+      const everyoneAnswered =
+        connectedPlayers.length > 0 &&
+        connectedPlayers.every(player => gameplay.round.answers[player.id]);
+      if (everyoneAnswered) {
+        const early = setTimeout(revealTrivia, 800);
+        return () => clearTimeout(early);
+      }
       const timeoutMs = Math.max(
         0,
         gameplay.round.questionStartedAtMs +
@@ -638,7 +802,7 @@ export function useGameLobbyController(gameId: GameId) {
       return () => clearTimeout(timeout);
     }
     return undefined;
-  }, [gameplay, isHost, nextTrivia, revealTrivia]);
+  }, [connectedPlayers, gameplay, isHost, nextTrivia, revealTrivia]);
 
 
   useEffect(() => {
@@ -717,32 +881,35 @@ export function useGameLobbyController(gameId: GameId) {
     players,
     connectedPlayers,
     canStart,
+    canStartNext: isHost && connectedPlayers.length >= requiredConnectedPlayers,
     gameplay,
     me,
     isHost,
-    myMafiosoAssignment,
-    mafiosoPhaseIndex,
-    mafiosoVoteTargets,
-    myMafiosoVote,
-    myPendingMafiosoVote,
-    mafiosoRevealedAssignment,
-    mafiosoPhase,
-    currentMafiosoClue,
-    mafiosoClueText: currentMafiosoClue
-      ? localizeText(currentMafiosoClue.text, language)
-      : null,
-    mafiosoWinner: gameplay?.kind === 'mafioso' ? gameplay.state.winner : undefined,
-    mafiosoRoleLabel: (role: string) =>
-      getRoleLabel(mafiosoContent, role, language),
-    mafiosoRoleDescription: (role: string) =>
-      getRoleDescription(mafiosoContent, role, language),
+    localPlayerId,
+    requiredConnectedPlayers,
+    imposter,
+    amInImposterRound,
+    amImposter,
+    myImposterVote,
+    myPendingImposterVote,
+    myPendingImposterGuess,
+    imposterVoteCounts,
+    imposterLeaderboard: imposter ? imposterLeaderboard(imposter) : [],
+    openImposterVote,
+    revealImposter,
+    skipGuess,
+    voteImposter,
+    guessImposterWord,
+    triviaSecondsLeft,
+    triviaAnsweredCount,
+    quarterMileSpectator,
+    myPendingIcebreakerNext,
+    finishIcebreakerTurn,
     myPendingTriviaAnswer,
     canSeeIcebreakerPrompt,
     triviaSettings,
     currentTriviaSettings,
     updateTriviaSetting,
-    advanceMafioso,
-    voteMafioso,
     answerTrivia,
     revealTrivia,
     nextTrivia,

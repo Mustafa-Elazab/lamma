@@ -1,7 +1,7 @@
 import { ICEBREAKER_PROMPTS } from '../../icebreakers/content/prompts';
 import { TRIVIA_PACKS } from '../../trivia/content/packs';
 import { scoreTriviaAnswer } from '../../trivia/scoring';
-import { mafiosoRolePlan } from '../../mafioso/rules';
+import { IMPOSTER_CATEGORIES } from '../../imposter/words';
 
 describe('game content', () => {
   it('ships at least 30 questions per trivia pack', () => {
@@ -60,10 +60,15 @@ describe('game content', () => {
     ).toBe(0);
   });
 
-  it('creates a Mafioso role plan for the current player count', () => {
-    expect(mafiosoRolePlan(6)).toHaveLength(6);
-    expect(mafiosoRolePlan(6)).toContain('mafia');
-    expect(mafiosoRolePlan(6).filter(r => r === 'mafia')).toHaveLength(2);
-    expect(mafiosoRolePlan(6)).toContain('villager');
+  it('ships a bilingual Imposter word bank with enough words per category', () => {
+    for (const category of IMPOSTER_CATEGORIES) {
+      expect(category.name.en && category.name.ar).toBeTruthy();
+      expect(category.words.length).toBeGreaterThanOrEqual(8);
+      const ids = new Set(category.words.map(word => word.id));
+      expect(ids.size).toBe(category.words.length);
+      for (const word of category.words) {
+        expect(word.word.en && word.word.ar).toBeTruthy();
+      }
+    }
   });
 });

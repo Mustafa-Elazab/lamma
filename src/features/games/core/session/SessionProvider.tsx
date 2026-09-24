@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
@@ -42,27 +43,11 @@ type GameSessionContextValue = SessionState & {
   leaveCurrent: () => void;
 };
 
-type PlayerActionInput =
-  | Omit<
-      Extract<GameSessionPlayerAction, { kind: 'join' }>,
-      'id' | 'createdAt'
-    >
-  | Omit<
-      Extract<GameSessionPlayerAction, { kind: 'trivia-answer' }>,
-      'id' | 'createdAt'
-    >
-  | Omit<
-      Extract<GameSessionPlayerAction, { kind: 'mafioso-vote' }>,
-      'id' | 'createdAt'
-    >
-  | Omit<
-      Extract<GameSessionPlayerAction, { kind: 'quarter-mile-choice' }>,
-      'id' | 'createdAt'
-    >
-  | Omit<
-      Extract<GameSessionPlayerAction, { kind: 'connection' }>,
-      'id' | 'createdAt'
-    >;
+type PlayerActionInput = GameSessionPlayerAction extends infer A
+  ? A extends GameSessionPlayerAction
+    ? Omit<A, 'id' | 'createdAt'>
+    : never
+  : never;
 
 const GameSessionContext = createContext<GameSessionContextValue | undefined>(
   undefined,
@@ -84,10 +69,9 @@ export function GameSessionProvider({
   const transport = useMemo(() => getGameSessionTransport(), []);
   const currentCode = state.current?.code;
   const localPlayerId = user?.uid ?? 'local-host';
-  const currentPlayerId =
-    state.current?.players.find(player => player.id === user?.uid)?.id ??
-    state.current?.players.find(player => !player.isHost)?.id ??
-    localPlayerId;
+  const currentPlayerId = user?.uid
+    ? user.uid
+    : state.current?.players.find(player => !player.isHost)?.id ?? localPlayerId;
   const hasCurrentSession = Boolean(state.current);
   const isCurrentHost = state.current?.hostId === currentPlayerId;
 
@@ -232,12 +216,18 @@ export function GameSessionProvider({
     return () => subscription.remove();
   }, [hasCurrentSession, isCurrentHost, submitConnectionPresence]);
 
+  // Keep the latest presence sender in a ref so the "went offline" signal only
+  // fires when the guest really leaves the room, not every time the callback
+  // identity changes (that used to mark fresh joiners as disconnected).
+  const presenceRef = useRef(submitConnectionPresence);
+  presenceRef.current = submitConnectionPresence;
   useEffect(() => {
-    if (!hasCurrentSession || isCurrentHost) {
+    if (!currentCode || isCurrentHost) {
       return undefined;
     }
-    return () => submitConnectionPresence(false);
-  }, [hasCurrentSession, isCurrentHost, submitConnectionPresence]);
+    const sendOffline = presenceRef.current;
+    return () => sendOffline(false);
+  }, [currentCode, isCurrentHost]);
 
   const joinCurrent = useCallback(
     (playerName: string) => {

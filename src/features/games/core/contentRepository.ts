@@ -19,8 +19,6 @@ import type {
   GameId,
   GameSyncType,
   IcebreakerPrompt,
-  MafiosoClue,
-  MafiosoRoleContent,
   TriviaQuestion,
 } from './types';
 import type { LocalizedText } from './localized';
@@ -60,15 +58,6 @@ function mapGameDoc(snapshot: SnapshotLike): GameDefinition {
     maxPlayers: numberValue(data.maxPlayers, 12),
     syncType: stringValue<GameSyncType>(data.syncType, 'host-led'),
     accent: stringValue<GameDefinition['accent']>(data.accent, 'mint'),
-  };
-}
-
-function mapMafiosoRole(snapshot: SnapshotLike): MafiosoRoleContent {
-  const data = (snapshot.data() ?? {}) as DocumentData;
-  return {
-    id: snapshot.id,
-    label: localized(data.label, snapshot.id),
-    description: localized(data.description),
   };
 }
 
@@ -131,42 +120,6 @@ export async function fetchGameContent(): Promise<GameContent[]> {
       (gamesSnapshot.docs as SnapshotLike[]).map(async gameDoc => {
         const definition = mapGameDoc(gameDoc);
         const content: GameContent = { definition };
-
-        if (definition.id === 'mafioso') {
-          const [phaseDocs, roleDocs] = await Promise.all([
-            getOrderedSubcollection([
-              GAMES_COLLECTION,
-              definition.id,
-              'phases',
-            ]),
-            getOrderedSubcollection([GAMES_COLLECTION, definition.id, 'roles']),
-          ]);
-          const clueDocs = await getOrderedSubcollection([
-            GAMES_COLLECTION,
-            definition.id,
-            'clues',
-          ]).catch(() => [] as SnapshotLike[]);
-          content.mafioso = {
-            phases: phaseDocs.map(snapshot =>
-              localized((snapshot.data() as DocumentData).label, snapshot.id),
-            ),
-            roles: roleDocs.reduce<Record<string, MafiosoRoleContent>>(
-              (next, snapshot) => ({
-                ...next,
-                [snapshot.id]: mapMafiosoRole(snapshot),
-              }),
-              {},
-            ),
-            clues: clueDocs.map<MafiosoClue>(snapshot => ({
-              id: snapshot.id,
-              text: localized(
-                (snapshot.data() as DocumentData).text ??
-                  (snapshot.data() as DocumentData).prompt,
-                snapshot.id,
-              ),
-            })),
-          };
-        }
 
         if (definition.id === 'quarter-mile') {
           const [packDocs, itemDocs] = await Promise.all([
