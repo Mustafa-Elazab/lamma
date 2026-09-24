@@ -11,9 +11,7 @@
     "seed:games": "node scripts/seed-games-content.js",
     "start": "react-native start",
     "test": "jest",
-    "typecheck": "tsc --noEmit",
-    "web:dev": "yarn --cwd web dev",
-    "web:build": "yarn --cwd web build"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.5.1",

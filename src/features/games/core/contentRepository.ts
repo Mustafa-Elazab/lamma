@@ -21,7 +21,6 @@ import type {
   IcebreakerPrompt,
   MafiosoClue,
   MafiosoRoleContent,
-  QuarterMileItem,
   TriviaQuestion,
 } from './types';
 import type { LocalizedText } from './localized';
