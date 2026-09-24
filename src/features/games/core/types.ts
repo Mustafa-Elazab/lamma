@@ -52,6 +52,8 @@ export type QuarterMileItem = {
 export type QuarterMilePack = {
   id: string;
   name: LocalizedText;
+  /** When 'usd-k', item scores are approximate prices in thousands of US dollars. */
+  unit?: 'usd-k';
   items: QuarterMileItem[];
 };
 

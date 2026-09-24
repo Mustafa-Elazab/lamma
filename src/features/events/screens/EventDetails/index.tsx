@@ -93,7 +93,7 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
                 <AppText variant="label" color="textMuted">
                   {c.t('event.contactHost')}
                 </AppText>
-                <AppIcon name="back" size={16} color="textMuted" />
+                <AppIcon name="back" size={16} color="textMuted" forward />
               </View>
             </View>
 

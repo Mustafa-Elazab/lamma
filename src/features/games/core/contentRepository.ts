@@ -132,7 +132,7 @@ export async function fetchGameContent(): Promise<GameContent[]> {
               id: snapshot.id,
               name: localized(data.name, snapshot.id),
               score: numberValue(data.score, 50),
-              packId: stringValue(data.packId, 'german-cars'),
+              packId: stringValue(data.packId, 'cars'),
             };
           });
           content.quarterMilePacks = packDocs.map(snapshot => {
@@ -141,6 +141,7 @@ export async function fetchGameContent(): Promise<GameContent[]> {
             return {
               id,
               name: localized(data.name, id),
+              ...(data.unit === 'usd-k' ? { unit: 'usd-k' as const } : {}),
               items: items
                 .filter(item => item.packId === id)
                 .map(({ id: itemId, name, score }) => ({

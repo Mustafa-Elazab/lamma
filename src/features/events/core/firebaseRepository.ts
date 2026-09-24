@@ -2,6 +2,7 @@ import { getAuth } from '@react-native-firebase/auth';
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -9,6 +10,7 @@ import {
   limit as fbLimit,
   orderBy,
   query,
+  Timestamp,
   updateDoc,
   where,
   type DocumentData,
@@ -86,6 +88,43 @@ export class FirebaseEventRepository implements EventRepository {
     return getFirestore();
   }
 
+  private purgeStarted = false;
+
+  /**
+   * Events are deleted once they end. Firestore TTL (expireAt) needs the Blaze
+   * plan, so every app session also removes a small batch of ended events
+   * itself (rules allow anyone signed in to delete an event that has ended).
+   */
+  private purgeEndedEvents(): void {
+    if (this.purgeStarted) {
+      return;
+    }
+    this.purgeStarted = true;
+    const run = async () => {
+      const snap = await getDocs(
+        query(
+          collection(this.db, COLLECTION),
+          where('endAt', '<', Date.now()),
+          fbLimit(25),
+        ),
+      );
+      await Promise.all(
+        (snap.docs as Array<SnapshotLike & { ref: unknown }>).map(d =>
+          deleteDoc(d.ref as Parameters<typeof deleteDoc>[0]).catch(() => undefined),
+        ),
+      );
+      if (snap.docs.length > 0) {
+        appLogger.log('[events.purge] removed ended events', {
+          count: snap.docs.length,
+        });
+      }
+    };
+    run().catch(error => {
+      this.purgeStarted = false;
+      appLogger.error('[events.purge] failed', error);
+    });
+  }
+
   async getHomeFeed(params: {
     filter: EventListFilter;
     cursor?: string | null;
@@ -95,6 +134,7 @@ export class FirebaseEventRepository implements EventRepository {
     const pageSize = params.limit ?? 5;
     const now = Date.now();
     const base = collection(this.db, COLLECTION);
+    this.purgeEndedEvents();
 
     try {
       let events: LammaEvent[] = [];
@@ -266,6 +306,8 @@ export class FirebaseEventRepository implements EventRepository {
       themeKey: input.themeKey,
       startAt: input.startAt,
       endAt: input.endAt,
+      // Firestore TTL deletes the doc after this time (once Blaze is enabled).
+      expireAt: Timestamp.fromMillis(input.endAt),
       venueName: input.venueName,
       areaAddress: input.areaAddress,
       latitude: input.latitude ?? null,

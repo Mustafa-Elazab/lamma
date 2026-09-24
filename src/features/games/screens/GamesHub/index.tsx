@@ -43,7 +43,7 @@ export function GamesHubScreen(): React.ReactElement {
             {String(item.shortDescription)}
           </AppText>
         </View>
-        <AppIcon name="back" size={20} color="textMuted" rtlMirror={false} />
+        <AppIcon name="back" size={20} color="textMuted" forward />
       </View>
       <View style={styles.metaRow}>
         <View style={styles.metaPill}>

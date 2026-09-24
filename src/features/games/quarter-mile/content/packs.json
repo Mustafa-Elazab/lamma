@@ -1,154 +1,219 @@
 [
   {
-    "id": "german-cars",
+    "id": "cars",
     "name": {
-      "en": "German cars",
-      "ar": "عربيات ألماني"
+      "en": "Cars",
+      "ar": "عربيات"
     },
+    "unit": "usd-k",
     "items": [
       {
-        "id": "passat-cc",
+        "id": "car-bugatti-chiron",
         "name": {
-          "en": "Passat CC",
-          "ar": "باسات سي سي"
+          "en": "Bugatti Chiron",
+          "ar": "بوجاتي شيرون"
         },
-        "score": 62
+        "score": 3000
       },
       {
-        "id": "golf-4",
+        "id": "car-lambo-revuelto",
         "name": {
-          "en": "Golf 4",
-          "ar": "جولف 4"
+          "en": "Lamborghini Revuelto",
+          "ar": "لامبورجيني ريفويلتو"
         },
-        "score": 48
+        "score": 610
       },
       {
-        "id": "e30",
+        "id": "car-ferrari-sf90",
         "name": {
-          "en": "BMW E30",
-          "ar": "بي إم دبليو E30"
+          "en": "Ferrari SF90",
+          "ar": "فيراري SF90"
         },
-        "score": 70
+        "score": 525
       },
       {
-        "id": "x6",
+        "id": "car-rolls-cullinan",
         "name": {
-          "en": "BMW X6",
-          "ar": "بي إم دبليو X6"
+          "en": "Rolls-Royce Cullinan",
+          "ar": "رولز رويس كولينان"
         },
-        "score": 78
+        "score": 350
       },
       {
-        "id": "911-turbo-s",
+        "id": "car-mclaren-750s",
         "name": {
-          "en": "911 Turbo S",
-          "ar": "٩١١ توربو إس"
+          "en": "McLaren 750S",
+          "ar": "ماكلارين 750S"
         },
-        "score": 98
+        "score": 330
       },
       {
-        "id": "g63",
+        "id": "car-aston-db12",
         "name": {
-          "en": "G63",
-          "ar": "جي ٦٣"
+          "en": "Aston Martin DB12",
+          "ar": "أستون مارتن DB12"
         },
-        "score": 92
+        "score": 250
       },
       {
-        "id": "m5-comp",
+        "id": "car-bentley-gt",
         "name": {
-          "en": "M5 Competition",
-          "ar": "إم ٥ كومبيتيشن"
+          "en": "Bentley Continental GT",
+          "ar": "بنتلي كونتيننتال GT"
         },
-        "score": 94
+        "score": 240
       },
       {
-        "id": "mokka",
+        "id": "car-911-turbo-s",
         "name": {
-          "en": "Opel Mokka",
-          "ar": "أوبل موكا"
+          "en": "Porsche 911 Turbo S",
+          "ar": "بورشه ٩١١ توربو إس"
         },
-        "score": 35
+        "score": 230
       },
       {
-        "id": "q8",
+        "id": "car-g63",
         "name": {
-          "en": "Audi Q8",
-          "ar": "أودي Q8"
+          "en": "Mercedes G63",
+          "ar": "مرسيدس G63"
         },
-        "score": 84
+        "score": 180
       },
       {
-        "id": "astra-turbo",
+        "id": "car-bmw-m5",
         "name": {
-          "en": "Astra Turbo",
-          "ar": "أسترا توربو"
+          "en": "BMW M5",
+          "ar": "بي إم دبليو M5"
         },
-        "score": 44
+        "score": 120
       },
       {
-        "id": "taycan",
+        "id": "car-nissan-gtr",
         "name": {
-          "en": "Taycan",
-          "ar": "تايكان"
+          "en": "Nissan GT-R",
+          "ar": "نيسان GT-R"
         },
-        "score": 90
+        "score": 120
       },
       {
-        "id": "amg-gt",
+        "id": "car-range-rover",
         "name": {
-          "en": "AMG GT",
-          "ar": "إيه إم جي جي تي"
+          "en": "Range Rover",
+          "ar": "رينج روفر"
         },
-        "score": 93
+        "score": 110
       },
       {
-        "id": "gls-600",
+        "id": "car-taycan",
         "name": {
-          "en": "GLS 600",
-          "ar": "جي إل إس ٦٠٠"
+          "en": "Porsche Taycan",
+          "ar": "بورشه تايكان"
         },
-        "score": 88
+        "score": 100
       },
       {
-        "id": "rsq8",
+        "id": "car-tesla-model-s",
         "name": {
-          "en": "RS Q8",
-          "ar": "آر إس كيو ٨"
+          "en": "Tesla Model S",
+          "ar": "تسلا موديل S"
         },
-        "score": 91
+        "score": 75
       },
       {
-        "id": "a3",
+        "id": "car-hellcat",
         "name": {
-          "en": "Audi A3",
-          "ar": "أودي A3"
+          "en": "Dodge Challenger Hellcat",
+          "ar": "دودج تشالنجر هيلكات"
         },
-        "score": 52
+        "score": 65
       },
       {
-        "id": "panamera",
+        "id": "car-land-cruiser",
         "name": {
-          "en": "Panamera",
-          "ar": "باناميرا"
-        },
-        "score": 86
-      },
-      {
-        "id": "cla-300",
-        "name": {
-          "en": "CLA 300",
-          "ar": "سي إل إيه ٣٠٠"
+          "en": "Toyota Land Cruiser",
+          "ar": "تويوتا لاند كروزر"
         },
         "score": 58
       },
       {
-        "id": "r8",
+        "id": "car-supra",
         "name": {
-          "en": "Audi R8",
-          "ar": "أودي آر ٨"
+          "en": "Toyota Supra",
+          "ar": "تويوتا سوبرا"
         },
-        "score": 96
+        "score": 57
+      },
+      {
+        "id": "car-civic-type-r",
+        "name": {
+          "en": "Honda Civic Type R",
+          "ar": "هوندا سيفيك Type R"
+        },
+        "score": 45
+      },
+      {
+        "id": "car-mustang-gt",
+        "name": {
+          "en": "Ford Mustang GT",
+          "ar": "فورد موستانج GT"
+        },
+        "score": 45
+      },
+      {
+        "id": "car-wrangler",
+        "name": {
+          "en": "Jeep Wrangler",
+          "ar": "جيب رانجلر"
+        },
+        "score": 33
+      },
+      {
+        "id": "car-golf-gti",
+        "name": {
+          "en": "VW Golf GTI",
+          "ar": "فولكس جولف GTI"
+        },
+        "score": 33
+      },
+      {
+        "id": "car-camry",
+        "name": {
+          "en": "Toyota Camry",
+          "ar": "تويوتا كامري"
+        },
+        "score": 29
+      },
+      {
+        "id": "car-corolla",
+        "name": {
+          "en": "Toyota Corolla",
+          "ar": "تويوتا كورولا"
+        },
+        "score": 23
+      },
+      {
+        "id": "car-elantra",
+        "name": {
+          "en": "Hyundai Elantra",
+          "ar": "هيونداي إلنترا"
+        },
+        "score": 22
+      },
+      {
+        "id": "car-sunny",
+        "name": {
+          "en": "Nissan Sunny",
+          "ar": "نيسان صني"
+        },
+        "score": 15
+      },
+      {
+        "id": "car-verna",
+        "name": {
+          "en": "Hyundai Verna",
+          "ar": "هيونداي فيرنا"
+        },
+        "score": 12
       }
     ]
   },

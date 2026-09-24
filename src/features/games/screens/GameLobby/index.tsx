@@ -496,11 +496,13 @@ export function GameLobbyScreen({
                   </AppText>
                   <AppText variant="body">
                     {localizeText(c.gameplay.state.lastChoice.known.name, language)}{' '}
-                    /{' '}
+                    ({c.formatQuarterMileScore(c.gameplay.state.lastChoice.known.score)})
+                    {' / '}
                     {localizeText(
                       c.gameplay.state.lastChoice.hidden.name,
                       language,
-                    )}
+                    )}{' '}
+                    ({c.formatQuarterMileScore(c.gameplay.state.lastChoice.hidden.score)})
                   </AppText>
                   {c.isHost ? (
                     <AppButton
@@ -542,7 +544,7 @@ export function GameLobbyScreen({
                 <AppText key={row.playerId} variant="body" color="textMuted">
                   {c.players.find(p => p.id === row.playerId)?.name ??
                     row.playerId}
-                  : {row.score}
+                  : {c.formatQuarterMileScore(row.score)}
                 </AppText>
               ))}
             </AppCard>

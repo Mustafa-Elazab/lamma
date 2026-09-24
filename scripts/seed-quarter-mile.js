@@ -36,6 +36,7 @@ async function main() {
     batch.set(db.doc(`games/quarter-mile/packs/${pack.id}`), {
       id: pack.id,
       name: pack.name,
+      ...(pack.unit ? { unit: pack.unit } : {}),
       order,
     });
     pack.items.forEach((item, itemOrder) => {

@@ -50,8 +50,13 @@ service cloud.firestore {
           resource.data.ownerId == request.auth.uid
           || changesOnlyOwnRsvp()
         );
+      // Owners can delete anytime; anyone signed in may clean up an event
+      // that has already ended (the app purges ended events on load).
       allow delete: if signedIn()
-        && resource.data.ownerId == request.auth.uid;
+        && (
+          resource.data.ownerId == request.auth.uid
+          || resource.data.endAt < request.time.toMillis()
+        );
     }
 
     match /gameSessions/{sessionId} {

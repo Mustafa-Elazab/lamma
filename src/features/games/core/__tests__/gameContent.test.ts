@@ -79,7 +79,7 @@ describe('quarter mile packs', () => {
   it('ships cars plus sports categories with unique, bilingual items', () => {
     const packs = QUARTER_MILE_PACKS as import('../types').QuarterMilePack[];
     expect(packs.map(p => p.id)).toEqual(
-      expect.arrayContaining(['german-cars', 'football-stars', 'ufc-fighters']),
+      expect.arrayContaining(['cars', 'football-stars', 'ufc-fighters']),
     );
     const ids = packs.flatMap(p => p.items.map(i => i.id));
     expect(new Set(ids).size).toBe(ids.length);
@@ -89,8 +89,20 @@ describe('quarter mile packs', () => {
         expect(item.name.en).toBeTruthy();
         expect(item.name.ar).toBeTruthy();
         expect(item.score).toBeGreaterThan(0);
-        expect(item.score).toBeLessThanOrEqual(100);
+        expect(item.score).toBeLessThanOrEqual(pack.unit === 'usd-k' ? 5000 : 100);
       });
     });
+  });
+});
+
+describe('quarter mile price formatting', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { formatQuarterMileScore } = require('../../quarter-mile/content/packs');
+  it('shows car prices in dollars and plain scores otherwise', () => {
+    expect(formatQuarterMileScore(45, 'usd-k')).toBe('$45k');
+    expect(formatQuarterMileScore(3000, 'usd-k')).toBe('$3M');
+    expect(formatQuarterMileScore(1250, 'usd-k')).toBe('$1.25M');
+    expect(formatQuarterMileScore(1100, 'usd-k')).toBe('$1.1M');
+    expect(formatQuarterMileScore(80)).toBe('80');
   });
 });

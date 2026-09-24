@@ -17,6 +17,10 @@ export type IconProps = {
    * always points toward the previous screen.
    */
   rtlMirror?: boolean;
+  /**
+   * Use the `back` glyph as a forward arrow: points right in LTR and left in RTL.
+   */
+  forward?: boolean;
 };
 
 function AppIconComponent({
@@ -26,10 +30,11 @@ function AppIconComponent({
   rawColor,
   strokeWidth,
   rtlMirror = name === 'back',
+  forward = false,
 }: IconProps): React.ReactElement {
   const theme = useTheme();
   const SvgIcon = iconRegistry[name];
-  const mirror = rtlMirror && I18nManager.isRTL;
+  const mirror = forward ? !I18nManager.isRTL : rtlMirror && I18nManager.isRTL;
   return (
     <View style={mirror ? { transform: [{ scaleX: -1 }] } : undefined}>
       <SvgIcon
