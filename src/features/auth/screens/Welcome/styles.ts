@@ -47,15 +47,11 @@ export function createStyles(theme: Theme) {
       justifyContent: 'center',
       ...theme.shadows.soft,
     },
-    heroMonogram: {
+    heroLogo: {
       width: 106,
       height: 106,
-      borderRadius: 53,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.colors.primary,
+      borderRadius: 24,
     },
-    heroLetter: { fontSize: 36, lineHeight: 42 },
     titleBlock: { gap: theme.spacing.xs, marginTop: theme.spacing.lg },
     welcomeTitle: { fontSize: 36, lineHeight: 42 },
     guestButton: { marginTop: theme.spacing.xxl },

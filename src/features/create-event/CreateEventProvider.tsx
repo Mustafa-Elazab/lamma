@@ -9,6 +9,8 @@ import React, {
   useState,
 } from 'react';
 
+import { trackEvent } from '../../services/analytics';
+import { reportError } from '../../services/crashReporting';
 import { useCreateEvent, type LammaEvent } from '../events';
 import {
   createEmptyDraft,
@@ -68,11 +70,16 @@ export function CreateEventProvider({
       return;
     }
     hydrated.current = true;
-    void repository.get(initialDraftId).then(loaded => {
-      if (loaded) {
-        setDraft(loaded);
-      }
-    });
+    void repository
+      .get(initialDraftId)
+      .then(loaded => {
+        if (loaded) {
+          setDraft(loaded);
+        }
+      })
+      .catch(error => {
+        reportError(error, 'create-event.load-draft', { initialDraftId });
+      });
   }, [initialDraftId, repository]);
 
   const update = useCallback((patch: Partial<EventDraft>) => {
@@ -91,9 +98,14 @@ export function CreateEventProvider({
       clearTimeout(saveTimer.current);
     }
     saveTimer.current = setTimeout(() => {
-      void repository.save(draft).then(() => {
-        void queryClient.invalidateQueries({ queryKey: draftKeys.list() });
-      });
+      void repository
+        .save(draft)
+        .then(() => {
+          void queryClient.invalidateQueries({ queryKey: draftKeys.list() });
+        })
+        .catch(error => {
+          reportError(error, 'create-event.autosave', { draftId: draft.id });
+        });
     }, 600);
     return () => {
       if (saveTimer.current) {
@@ -118,8 +130,13 @@ export function CreateEventProvider({
       const event = await createEvent.mutateAsync(input);
       await repository.remove(draft.id);
       await queryClient.invalidateQueries({ queryKey: draftKeys.list() });
+      await trackEvent('event_published', {
+        event_id: event.id,
+        visibility: event.visibility,
+      });
       return event;
     } catch (error) {
+      reportError(error, 'create-event.publish', { draftId: draft.id });
       setPublishError(
         error instanceof Error ? error.message : 'events/create-failed',
       );

@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { branding } from '../../../../assets';
 import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { GoogleMark, AppleMark } from '../../../../design-system/atoms/ProviderMarks';
@@ -28,15 +29,11 @@ export function WelcomeScreen(): React.ReactElement {
           <View style={styles.heroCircleOne} />
           <View style={styles.heroCircleTwo} />
           <View style={styles.heroBadge}>
-            <View style={styles.heroMonogram}>
-              <AppText
-                variant="heading"
-                color="textInverse"
-                style={styles.heroLetter}
-              >
-                L
-              </AppText>
-            </View>
+            <Image
+              source={branding.appIcon}
+              style={styles.heroLogo}
+              resizeMode="cover"
+            />
           </View>
         </View>
 
@@ -95,7 +92,11 @@ export function WelcomeScreen(): React.ReactElement {
           </AppText>
           {c.error ? (
             <AppText variant="caption" color="error">
-              {t('auth.errorGeneric')}
+              {t(
+                c.error === 'auth.errorPlayServices'
+                  ? 'auth.errorPlayServices'
+                  : 'auth.errorGeneric',
+              )}
             </AppText>
           ) : null}
         </View>

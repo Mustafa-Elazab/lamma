@@ -7,8 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../../app/localization';
 import type { AppStackParamList } from '../../../../navigation/types';
 import { useDeleteDraft, useDrafts } from '../../../create-event/core';
-import { resolveDraftTheme } from '../../../create-event/core/draftEntity';
-import { themeSource } from '../../../events';
+import { draftThemeSource } from '../../../create-event/core/draftMedia';
 import { formatDateShort } from '../../../../utils/format';
 
 export function useMyDraftsController() {
@@ -30,7 +29,7 @@ export function useMyDraftsController() {
     lastEdited: t('drafts.lastEdited', {
       when: formatDateShort(draft.updatedAt, language),
     }),
-    coverSource: themeSource(resolveDraftTheme(draft)),
+    coverSource: draftThemeSource(draft),
   }));
 
   return {

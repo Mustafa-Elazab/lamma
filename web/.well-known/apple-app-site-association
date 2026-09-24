@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "A3AGJ9J2TQ.com.getlamma.app",
+        "paths": ["/e/*", "/g/*"]
+      }
+    ]
+  }
+}

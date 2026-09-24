@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import {
+  I18nManager,
   StyleSheet,
   Text as RNText,
   type StyleProp,
@@ -30,12 +31,15 @@ function AppTextComponent({
 
   const computed = useMemo<StyleProp<TextStyle>>(() => {
     const token = theme.typography[variant];
+    const resolvedAlign =
+      align ?? (I18nManager.isRTL ? 'right' : 'left');
     return {
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       fontWeight: weight ?? (token.fontWeight as TextStyle['fontWeight']),
       color: theme.colors[color],
-      textAlign: align,
+      textAlign: resolvedAlign,
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     };
   }, [align, color, theme, variant, weight]);
 

@@ -11,9 +11,11 @@ import {
   query,
   updateDoc,
   where,
-  type FirebaseFirestoreTypes,
+  type DocumentData,
 } from '@react-native-firebase/firestore';
 
+import { reportError } from '../../../services/crashReporting';
+import { appLogger } from '../../../services/logger';
 import {
   CATEGORY_TO_COVER,
   type EventListFilter,
@@ -26,8 +28,9 @@ import type {
   EventRepository,
   HomeFeed,
 } from './repository';
+import { uploadEventThemeImage } from './uploadThemeImage';
 
-type DocData = FirebaseFirestoreTypes.DocumentData;
+type DocData = DocumentData;
 
 /** Minimal structural shape shared by document and query snapshots. */
 type SnapshotLike = { id: string; data: () => unknown };
@@ -51,6 +54,7 @@ function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
     description: (data.description as string) ?? '',
     category: (data.category as LammaEvent['category']) ?? 'other',
     coverKey: (data.coverKey as LammaEvent['coverKey']) ?? 'dinner',
+    coverImageUrl: (data.coverImageUrl as string | null) ?? null,
     themeKey: (data.themeKey as LammaEvent['themeKey']) ?? 'generic',
     startAt: (data.startAt as number) ?? 0,
     endAt: (data.endAt as number) ?? 0,
@@ -59,7 +63,11 @@ function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
     latitude: (data.latitude as number | null) ?? null,
     longitude: (data.longitude as number | null) ?? null,
     hostId: (data.hostId as string) ?? '',
-    hostName: (data.hostName as string) ?? '',
+    hostName:
+      (data.hostName as string)?.trim() ||
+      ((data.hostId as string) === uid
+        ? (getAuth().currentUser?.displayName ?? 'Host')
+        : 'Host'),
     hostPhoto: (data.hostPhoto as string | null) ?? null,
     attendees: (data.attendees as LammaEvent['attendees']) ?? [],
     attendeeCount: (data.attendeeCount as number) ?? 0,
@@ -88,44 +96,69 @@ export class FirebaseEventRepository implements EventRepository {
     const now = Date.now();
     const base = collection(this.db, COLLECTION);
 
-    const q =
-      params.filter === 'hosting'
-        ? query(
-            base,
-            where('hostId', '==', uid),
-            orderBy('startAt', 'asc'),
-            fbLimit(pageSize + 1),
-          )
-        : params.filter === 'past'
-        ? query(
-            base,
-            where('endAt', '<', now),
-            orderBy('endAt', 'desc'),
-            fbLimit(pageSize + 1),
-          )
-        : query(
-            base,
-            where('endAt', '>=', now),
-            orderBy('endAt', 'asc'),
-            fbLimit(pageSize + 1),
-          );
+    try {
+      let events: LammaEvent[] = [];
 
-    const snap = await getDocs(q);
-    const events = (snap.docs as SnapshotLike[]).map(d => mapDoc(d, uid));
-    const featured =
-      !params.cursor && params.filter === 'upcoming'
-        ? events.find(e => e.viewerRsvp === 'going') ?? events[0] ?? null
-        : null;
-    const list = featured ? events.filter(e => e.id !== featured.id) : events;
-    return {
-      featured,
-      page: { events: list.slice(0, pageSize), nextCursor: null },
-    };
+      if (params.filter === 'hosting') {
+        // Querying on hostId alone avoids requiring a Firestore composite index on (hostId, startAt).
+        const q = query(
+          base,
+          where('hostId', '==', uid),
+          fbLimit(pageSize * 3),
+        );
+        const snap = await getDocs(q);
+        events = (snap.docs as SnapshotLike[])
+          .map(d => mapDoc(d, uid))
+          .sort((a, b) => a.startAt - b.startAt);
+      } else if (params.filter === 'past') {
+        const q = query(
+          base,
+          where('endAt', '<', now),
+          orderBy('endAt', 'desc'),
+          fbLimit(pageSize + 1),
+        );
+        const snap = await getDocs(q);
+        events = (snap.docs as SnapshotLike[]).map(d => mapDoc(d, uid));
+      } else {
+        const q = query(
+          base,
+          where('endAt', '>=', now),
+          orderBy('endAt', 'asc'),
+          fbLimit(pageSize + 1),
+        );
+        const snap = await getDocs(q);
+        events = (snap.docs as SnapshotLike[]).map(d => mapDoc(d, uid));
+      }
+
+      const featured =
+        !params.cursor && params.filter === 'upcoming'
+          ? events.find(e => e.viewerRsvp === 'going') ?? events[0] ?? null
+          : null;
+      const list = featured ? events.filter(e => e.id !== featured.id) : events;
+      return {
+        featured,
+        page: { events: list.slice(0, pageSize), nextCursor: null },
+      };
+    } catch (error) {
+      appLogger.error('[events.getHomeFeed] Firestore query failed', error, {
+        filter: params.filter,
+        uid,
+      });
+      reportError(error, 'events.home-feed', { filter: params.filter, uid });
+      throw error;
+    }
   }
 
   async getEvent(id: string): Promise<LammaEvent | null> {
-    const snapshot = await getDoc(doc(this.db, COLLECTION, id));
-    return snapshot.exists() ? mapDoc(snapshot, currentUid()) : null;
+    const uid = currentUid();
+    try {
+      const snapshot = await getDoc(doc(this.db, COLLECTION, id));
+      return snapshot.exists() ? mapDoc(snapshot, uid) : null;
+    } catch (error) {
+      appLogger.error('[events.getEvent] Firestore query failed', error, { id, uid });
+      reportError(error, 'events.get-event', { id, uid });
+      throw error;
+    }
   }
 
   async listPublicEvents(params: {
@@ -137,21 +170,33 @@ export class FirebaseEventRepository implements EventRepository {
     const uid = currentUid();
     const pageSize = params.limit ?? 8;
     const base = collection(this.db, COLLECTION);
-    const q = query(
-      base,
-      where('visibility', '==', 'public'),
-      orderBy('startAt', 'asc'),
-      fbLimit(pageSize),
-    );
-    const snap = await getDocs(q);
-    const queryText = params.query?.trim().toLowerCase() ?? '';
-    const events = (snap.docs as SnapshotLike[])
-      .map(d => mapDoc(d, uid))
-      .filter(e =>
-        params.category ? e.category === params.category : true,
-      )
-      .filter(e => (queryText ? e.title.toLowerCase().includes(queryText) : true));
-    return { events, nextCursor: null };
+
+    try {
+      // Querying visibility alone avoids requiring a Firestore composite index on (visibility, startAt).
+      const q = query(
+        base,
+        where('visibility', '==', 'public'),
+        fbLimit(pageSize * 3),
+      );
+      const snap = await getDocs(q);
+      const queryText = params.query?.trim().toLowerCase() ?? '';
+      const events = (snap.docs as SnapshotLike[])
+        .map(d => mapDoc(d, uid))
+        .sort((a, b) => a.startAt - b.startAt)
+        .filter(e =>
+          params.category ? e.category === params.category : true,
+        )
+        .filter(e => (queryText ? e.title.toLowerCase().includes(queryText) : true));
+      return { events: events.slice(0, pageSize), nextCursor: null };
+    } catch (error) {
+      appLogger.error('[events.listPublicEvents] Firestore query failed', error, {
+        query: params.query,
+        category: params.category,
+        uid,
+      });
+      reportError(error, 'events.list-public', { uid });
+      throw error;
+    }
   }
 
   async setRsvp(eventId: string, status: RSVPStatus): Promise<LammaEvent> {
@@ -166,9 +211,11 @@ export class FirebaseEventRepository implements EventRepository {
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) {
-      throw new Error(
+      const error = new Error(
         'events/auth-required: sign in before creating an event',
       );
+      reportError(error, 'events.create-auth', { uid: null });
+      throw error;
     }
 
     // Force-refresh immediately before the protected write. This catches
@@ -177,11 +224,41 @@ export class FirebaseEventRepository implements EventRepository {
     const tokenResult = await user.getIdTokenResult(true);
     const expiresAt = Date.parse(tokenResult.expirationTime);
     if (!tokenResult.token || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
-      throw new Error('events/invalid-token: Firebase ID token is not valid');
+      const error = new Error(
+        'events/invalid-token: Firebase ID token is not valid',
+      );
+      reportError(error, 'events.create-auth', {
+        uid: user.uid,
+        tokenExpirationTime: tokenResult.expirationTime,
+      });
+      throw error;
     }
 
     const uid = user.uid;
-    const payload = {
+
+    let customCoverImageUrl: string | null = null;
+    if (input.customThemeUri) {
+      if (/^https?:\/\//i.test(input.customThemeUri)) {
+        customCoverImageUrl = input.customThemeUri;
+      } else {
+        try {
+          customCoverImageUrl = await uploadEventThemeImage(
+            uid,
+            input.customThemeUri,
+          );
+        } catch (error) {
+          appLogger.error(
+            '[events.create] Custom theme upload failed',
+            error,
+            { uid },
+          );
+          reportError(error, 'events.theme-upload', { uid });
+          throw error;
+        }
+      }
+    }
+
+    const payload: Record<string, unknown> = {
       title: input.title,
       description: input.description,
       category: input.category,
@@ -195,7 +272,9 @@ export class FirebaseEventRepository implements EventRepository {
       longitude: input.longitude ?? null,
       hostId: uid,
       ownerId: uid,
-      hostName: user.displayName ?? 'Host',
+      hostName:
+        (user.displayName?.trim() || null) ??
+        (user.isAnonymous ? 'Guest' : 'Host'),
       hostPhoto: user.photoURL ?? null,
       attendees: [],
       attendeeCount: 1,
@@ -204,20 +283,27 @@ export class FirebaseEventRepository implements EventRepository {
       visibility: input.visibility,
       updates: [],
       createdAt: Date.now(),
+      ...(customCoverImageUrl ? { coverImageUrl: customCoverImageUrl } : {}),
     };
 
     // Keep these diagnostics at the actual network boundary. They intentionally
     // exclude the token while recording the uid, expiry, exact payload, and
     // Firestore response/error needed to diagnose security-rule failures.
-    console.info('[events.create] Firestore write request', {
+    const requestDetails = {
       uid,
       tokenExpirationTime: tokenResult.expirationTime,
       payload,
-    });
+    };
+    appLogger.log('[events.create] Firestore write request', requestDetails);
+    appLogger.display(
+      'Firestore event create',
+      requestDetails,
+      `${uid}: ${input.title}`,
+    );
 
     try {
       const ref = await addDoc(collection(this.db, COLLECTION), payload);
-      console.info('[events.create] Firestore write response', {
+      appLogger.log('[events.create] Firestore write response', {
         id: ref.id,
         path: ref.path,
       });
@@ -230,11 +316,20 @@ export class FirebaseEventRepository implements EventRepository {
       return mapDoc(snapshot, uid);
     } catch (error) {
       const details = error as { code?: string; message?: string };
-      console.error('[events.create] Firestore write failed', {
+      const failureDetails = {
         uid,
         payload,
         code: details.code ?? 'unknown',
         message: details.message ?? String(error),
+      };
+      appLogger.error(
+        '[events.create] Firestore write failed',
+        error,
+        failureDetails,
+      );
+      reportError(error, 'events.firestore-create', {
+        uid,
+        code: failureDetails.code,
       });
       throw error;
     }

@@ -49,13 +49,13 @@ export function useEventDetailsController(eventId: string) {
     }
     const label = encodeURIComponent(event.venueName || event.areaAddress);
     const hasCoords = event.latitude !== null && event.longitude !== null;
-    const query = hasCoords
+    const mapTarget = hasCoords
       ? `${event.latitude},${event.longitude}`
       : encodeURIComponent(event.areaAddress || event.venueName);
     const url =
       Platform.OS === 'ios'
-        ? `https://maps.apple.com/?q=${label}&ll=${query}`
-        : `https://www.google.com/maps/search/?api=1&query=${query}`;
+        ? `https://maps.apple.com/?q=${label}&ll=${mapTarget}`
+        : `https://www.google.com/maps/search/?api=1&query=${mapTarget}`;
     void Linking.openURL(url);
   }, [event]);
 
@@ -69,7 +69,9 @@ export function useEventDetailsController(eventId: string) {
     : '';
   const goingStack = event ? goingAttendees(event).slice(0, 7) : [];
   const goingLabel = event
-    ? t('event.peopleGoing', { count: event.goingCount })
+    ? event.goingCount === 1
+      ? t('event.onePersonGoing')
+      : t('event.peopleGoing', { count: event.goingCount })
     : '';
   const attendeeSummary = event ? goingSummary(event.goingCount, language) : '';
 

@@ -24,17 +24,26 @@ export function EditProfileScreen(): React.ReactElement {
       edges={['top']}
       header={
         <AppScreenHeader
-          title={t('profile.editProfileTitle')}
+          title={c.isGuest ? t('auth.welcomeTitle') : t('profile.editProfileTitle')}
           onBack={c.goBack}
         />
       }
     >
       {c.isGuest ? (
         <View style={styles.section}>
-          <AppText variant="subheading">{t('profile.upgradeTitle')}</AppText>
-          <AppText variant="body" color="textMuted">
-            {t('profile.upgradeSubtitle')}
-          </AppText>
+          <View style={styles.heroBadge}>
+            <AppText variant="heading" style={styles.heroLetter}>
+              L
+            </AppText>
+          </View>
+          <View style={styles.headerBlock}>
+            <AppText variant="heading" align="center">
+              {t('profile.upgradeTitle')}
+            </AppText>
+            <AppText variant="body" color="textMuted" align="center">
+              {t('profile.upgradeSubtitle')}
+            </AppText>
+          </View>
           <View style={styles.socials}>
             <SocialButton
               label={t('auth.continueWithGoogle')}
@@ -54,6 +63,20 @@ export function EditProfileScreen(): React.ReactElement {
                 disabled={c.isSigningIn}
               />
             ) : null}
+            <AppButton
+              label={t('auth.continueAsGuest')}
+              variant="ghost"
+              style={styles.stayGuestButton}
+              onPress={c.goBack}
+            />
+          </View>
+          <View style={styles.noPhoneBlock}>
+            <AppText variant="subheading" color="primary">
+              {t('auth.noPhoneTitle')}
+            </AppText>
+            <AppText variant="caption" color="textMuted">
+              {t('auth.noPhoneSubtitle')}
+            </AppText>
           </View>
         </View>
       ) : (

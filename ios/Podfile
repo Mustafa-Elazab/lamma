@@ -8,15 +8,24 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+$RNFirebaseDisableSPM = true
+$RNFirebaseAsStaticFramework = true
+
+linkage = ENV.fetch('USE_FRAMEWORKS', 'static')
+Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+use_frameworks! :linkage => linkage.to_sym
 
 target 'Lamma' do
   config = use_native_modules!
   maps_path = '../node_modules/react-native-maps'
+  pod 'FirebaseABTesting', :modular_headers => true
+  pod 'FirebaseAppCheckInterop', :modular_headers => true
+  pod 'FirebaseAuthInterop', :modular_headers => true
+  pod 'FirebaseFirestoreInternal', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'GoogleDataTransport', :modular_headers => true
+  pod 'nanopb', :modular_headers => true
+  pod 'RecaptchaInterop', :modular_headers => true
   pod 'react-native-maps/Google', :path => maps_path
 
   use_react_native!(
@@ -32,5 +41,31 @@ target 'Lamma' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    dependency_header_paths = Dir[
+      "#{installer.sandbox.root}/ReactNativeDependencies/Headers",
+      "#{installer.sandbox.root}/ReactNativeDependencies/*/Headers",
+    ].map { |path| path.sub("#{installer.sandbox.root}/", '$(PODS_ROOT)/') }
+
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build_config|
+        header_search_paths = Array(build_config.build_settings['HEADER_SEARCH_PATHS'])
+        header_search_paths << '$(inherited)' if header_search_paths.empty?
+
+        if target.name == 'RNFBStorage'
+          storage_firebase_shim_path = '$(PODS_ROOT)/../PodOverrides/RNFBStorageFirebase'
+          header_search_paths.unshift(storage_firebase_shim_path) unless header_search_paths.include?(storage_firebase_shim_path)
+        elsif target.name.start_with?('RNFB')
+          firebase_shim_path = '$(PODS_ROOT)/../PodOverrides/RNFirebaseUmbrella'
+          header_search_paths.unshift(firebase_shim_path) unless header_search_paths.include?(firebase_shim_path)
+        end
+
+        dependency_header_paths.each do |path|
+          header_search_paths << path unless header_search_paths.include?(path)
+        end
+
+        build_config.build_settings['HEADER_SEARCH_PATHS'] = header_search_paths
+      end
+    end
   end
 end

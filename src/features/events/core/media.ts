@@ -26,8 +26,14 @@ export function eventCover(
   if (event.coverImageUrl) {
     return { uri: event.coverImageUrl };
   }
+  if (event.themeKey) {
+    const theme = themeSource(event.themeKey);
+    if (theme) {
+      return theme;
+    }
+  }
   return (
     eventCoverImages[event.coverKey as AssetCoverKey] ??
-    themeSource(event.themeKey)
+    eventThemeImages.theme_generic
   );
 }

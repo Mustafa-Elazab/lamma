@@ -29,7 +29,7 @@ function AppSectionHeaderComponent({
             {actionLabel}
           </AppText>
           <View style={styles.chevron}>
-            <AppIcon name="back" size={16} color="primary" strokeWidth={2} />
+            <AppIcon name="back" size={16} color="primary" strokeWidth={2} rtlMirror={false} />
           </View>
         </Pressable>
       ) : null}

@@ -19,7 +19,7 @@ coming — with first‑class Arabic + English (RTL) support and a warm, Egypt�
   `screens/<Name>/{index,styles,types,useController}`.
 - **i18n + RTL from the start** — `en` and `ar` resource bundles with a typed schema and
   parity tests; language toggle everywhere.
-- **Deep links** — invite links use `lamma.app/e/{id}` (`lamma://`, `https://lamma.app`).
+- **Deep links** — invite links use `https://lamma-app.vercel.app/e/{id}` (`lamma://` when the app is installed).
 - **Real assets** — onboarding art, event covers, theme art, share chrome and SVG icons all
   live in `src/assets` (no placeholder gradients for theme art).
 
@@ -39,7 +39,7 @@ themes, Help, Sign out).
 src/
   app/                  # providers, localization (i18n + LanguageProvider), query client, splash
   assets/               # branding, onboarding, event covers/themes, share, icons (+ index)
-  config/               # env flags (firebaseEnabled, googleWebClientId, deepLinkHost)
+  config/               # env flags (firebaseEnabled, googleWebClientId, publicWebUrl)
   design-system/        # theme, atoms, molecules, organisms, templates (barrel exports)
   features/
     auth/               # Google/Apple/Anonymous + account linking, onboarding
@@ -60,7 +60,7 @@ Requires Node >= 22.11 and a working React Native environment
 
 ```sh
 # 1. Install JS dependencies
-npm install --legacy-peer-deps
+yarn install --frozen-lockfile
 
 # 2. iOS only: install pods
 bundle install
@@ -89,9 +89,22 @@ exclusively by Jest and never bundled into the app.
 
 ```sh
 npm test           # Jest unit tests (repositories, hooks helpers, validators, i18n parity)
-npx tsc --noEmit   # TypeScript type-check (no `any`)
+yarn typecheck     # TypeScript type-check (no `any`)
 npm run lint       # ESLint
 ```
+
+## Development observability
+
+Development builds connect to Reactotron before the app is registered. Start Reactotron on
+the development machine to inspect structured application logs, errors, Firestore writes,
+analytics events, push notifications, and map startup. The import and connection are guarded
+by `__DEV__`; Reactotron is a development dependency and is removed from release bundles.
+Reactotron listens on port `9090`; for a USB-connected Android device, run
+`adb reverse tcp:9090 tcp:9090` if the app cannot reach the desktop client.
+
+The navigation root is wrapped in a global error boundary. Its branded fallback keeps the
+app usable with a **Try again** action, while non-fatal errors are sent to Firebase
+Crashlytics when the native Firebase app is available.
 
 ## Firebase (default backend)
 
@@ -101,8 +114,11 @@ npm run lint       # ESLint
    Anonymous. (Do **not** enable Phone — the app never uses it; there is no phone/OTP flow.)
 2. Enable **Cloud Firestore**.
 3. Add the platform apps and config files:
-   - Android: `android/app/google-services.json`
-   - iOS: `ios/GoogleService-Info.plist` (add to the Xcode project)
+   - Android: `android/app/google-services.json` for application id
+     `com.getlamma.app`
+   - iOS: `ios/GoogleService-Info.plist` for bundle id
+     `com.getlamma.app` (the Xcode project already includes this
+     path in the app resources)
 4. Google Sign-In: copy your **Web client ID** (OAuth 2.0) into `googleWebClientId` in
    `src/config/env.ts` (this id is passed to `GoogleSignin.configure`).
 5. Apple Sign-In: enable the *Sign in with Apple* capability in Xcode (iOS only).
@@ -112,14 +128,49 @@ npm run lint       # ESLint
 Guest → provider **account linking** preserves a guest's data when they upgrade, and
 `updateProfile` backs the Edit Profile screen.
 
+The native Firebase config files must be downloaded for the current app ids and
+are processed by the Google Services / Firebase SDK tooling. Analytics records
+navigation screen views plus `sign_in_method`, `event_created`,
+`event_published`, `rsvp_submitted`, and `invite_shared`.
+
+Messaging requests notification permission, stores the current FCM token in AsyncStorage
+and `/users/{uid}/devices/{tokenId}`, refreshes it when Firebase rotates it, detaches it on
+sign-out, and registers foreground/background/open handlers. Cold-start notification links
+are queued until authentication and onboarding have resolved.
+Notification data should contain `eventId` (or `event_id`); tapping it opens
+`lamma://e/{id}` (Event Details) after auth and onboarding. For iOS,
+enable **Push Notifications** and **Background Modes → Remote notifications** for the Lamma
+target and upload an APNs authentication key to Firebase. The project includes the required
+entitlements and Crashlytics dSYM upload phase; a matching Apple provisioning profile is
+still required.
+
+Remote Config fetches and activates at startup with safe in-code defaults for
+`event_discovery_enabled`, `messaging_enabled`, and `max_event_guest_count`.
+
 Suggested Firestore layout: `events/{eventId}` (with an `rsvps` map keyed by uid),
 `users/{uid}/drafts/{draftId}`, `users/{uid}/notifications/{id}`,
-`users/{uid}/meta/preferences`.
+`users/{uid}/meta/preferences`, `users/{uid}/devices/{tokenId}`.
 
 The repository includes `firestore.rules` and `firebase.json`. Deploy the reviewed rules
 with `firebase deploy --only firestore:rules`. Event creation requires both `hostId` and
 `ownerId` to equal the fresh Firebase ID token's `uid`; user subcollections are restricted
 to that same uid.
+
+The checked-in file does not change the rules already running in Firebase. If the Firebase
+Console rules differ, authenticated writes can still return `firestore/permission-denied`.
+Install and authenticate the CLI on a machine allowed to deploy, then deploy the repository
+rules explicitly:
+
+```sh
+npm install --global firebase-tools
+firebase login
+firebase use fos7a-357902
+firebase deploy --only firestore:rules
+```
+
+Firebase Anonymous Auth is authenticated: a guest receives a real
+`request.auth.uid`. The explicit `/users/{uid}/drafts/{draftId}` rule permits that guest to
+read, create, update, and delete drafts only when the path uid equals the token uid.
 
 The prior event-write failure had two concrete client/rules contract problems: no Firestore
 rules were versioned with the app, and the event repository silently substituted the string
@@ -131,28 +182,57 @@ and validates the ID token immediately before writing, writes matching `hostId` 
 repository logs the exact payload and sanitized Firestore result/error at the write
 boundary (never the token itself).
 
+## GitHub Actions and release secrets
+
+Pull requests to `main` run dependency installation, ESLint, TypeScript, Jest, and an Android
+debug assembly. Pushes to `main` assemble and upload a release APK.
+
+Configure these GitHub Actions secrets for a signed, map-enabled release:
+
+- `ANDROID_KEYSTORE_BASE64` — base64-encoded release keystore
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+- `GOOGLE_MAPS_API_KEY` — restricted Android Maps SDK key
+
+If any signing secret is absent, CI deliberately produces an **unsigned** release APK and
+prints a warning; it never falls back to the debug key. If the Maps key is absent, the build
+continues and the location picker shows a visible configuration error. Android Firebase does
+not need a CI secret while the repository's `google-services.json` remains committed. If that
+policy changes, provision the file as a secret before the Gradle step rather than inventing
+credentials.
+
 ### Cloud Functions decision
 
 Basic event creation remains a direct, awaited client Firestore write protected by security
 rules; a callable function adds no trust or consistency benefit for that operation.
 
-One server-side function is required by the current data model:
+Server-side functions required by the current data model:
 `updateEventRsvpCounters` in `functions/src/index.ts` recalculates `goingCount` and
 `attendeeCount` from the RSVP map after event writes. Rules prevent clients from changing
-those aggregate fields directly. Deploy it with:
+those aggregate fields directly.
+
+`sendEventStartNotifications` runs every minute, checks events whose `startAt` is in the
+recent polling window, leases each event to avoid overlapping scheduler double-sends, sends
+an FCM start alert to every user whose RSVP is `going`, and then sets
+`startNotificationSent: true` with delivery counts. The Android payload uses the
+`event-start-alarm` high-importance channel created by the app. This is intentionally a
+polling implementation; if exact-second delivery becomes important, replace the polling
+lease with a Cloud Tasks enqueue at each event's `startAt`.
+
+Deploy them with:
 
 ```sh
 npm --prefix functions install
 npm --prefix functions run build
-firebase deploy --only functions:updateEventRsvpCounters
+firebase deploy --only functions:updateEventRsvpCounters,functions:sendEventStartNotifications
 ```
 
 No invite-slug function is added because invite links currently use Firestore's unique
-event document ID, not a user-facing slug. No notification fan-out function is added
-because the current publish model has no invitee uid list or publish-state transition to
-fan out; adding one now would invent a production data contract. When either feature is
-introduced, unique slug allocation, invite notification fan-out, and any client-untrusted
-publish validation belong in callable functions/triggers rather than client code.
+event document ID, not a user-facing slug. When invite slugs or publish-time invite fan-out
+are introduced, unique slug allocation, invite notification fan-out, and any
+client-untrusted publish validation belong in callable functions/triggers rather than
+client code.
 
 To develop **without** native Firebase config, set `firebaseEnabled` to `false` — the app
 falls back to the empty in-memory dev repositories described above.
@@ -206,6 +286,11 @@ Configure a key with both **Maps SDK for Android** and **Maps SDK for iOS** enab
   Debug and Release. `Info.plist` expands that build setting and `AppDelegate.swift`
   supplies it to `GMSServices`.
 
+The property/build-setting **name** must remain the literal `GOOGLE_MAPS_API_KEY`. Do not put
+the key itself inside `getProperty("...")` or an Xcode placeholder: Android must call
+`getProperty("GOOGLE_MAPS_API_KEY")`, and iOS must use `$(GOOGLE_MAPS_API_KEY)`. The secret
+value belongs only in gitignored `android/local.properties`, the Xcode build setting, or CI.
+
 Restrict production keys by Android package/signing certificate and iOS bundle identifier.
 Nominatim requests use an identifying User-Agent and search is debounced to respect its
 public usage policy. Event Details' **Open in maps** opens the selected coordinates in the
@@ -217,32 +302,29 @@ device's local time, stores the resulting UTC epoch milliseconds, and Home/Event
 render those timestamps in the viewer's device-local time. There is intentionally no
 event-timezone field or picker.
 
-## Deep links & Android App Links
+## Deep links & invite URLs
 
-Invite links use `https://lamma.app/e/{id}` (and the `lamma://` scheme). React Navigation
-`linking` maps `e/:eventId` → Event Details, so cold/warm starts open the event in-app.
+Invite links are `https://lamma-app.vercel.app/e/{id}` (App Links / Universal Links).
+This is the Dynamic Links *behavior* without Firebase Dynamic Links (that product
+was shut down in August 2025):
 
-- **Android App Links**: `AndroidManifest.xml` declares an `autoVerify` intent filter for
-  `https://lamma.app/e/*` plus a `lamma://` scheme filter.
-- **iOS**: the `lamma://` URL scheme is registered in `Info.plist`. For universal links, add an
-  Associated Domains entitlement (`applinks:lamma.app`) in Xcode.
-- **Digital Asset Links**: to make Android verify the links (open in-app without a chooser),
-  host `https://lamma.app/.well-known/assetlinks.json`:
+- **Lamma installed** and the link is verified → OS opens Event Details. No browser.
+- **Lamma not installed** → `/e/{id}` 302-redirects to the Play Store (or App Store
+  on iOS). There is no event web page.
 
-```json
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.lamma",
-      "sha256_cert_fingerprints": ["<your app signing SHA-256 fingerprint>"]
-    }
-  }
-]
+The Next.js host in `web/` only serves Digital Asset Links, Apple App Site
+Association, and that store redirect. Set the Vercel **Root Directory** to `web`.
+
+```sh
+yarn web:dev
 ```
 
-For iOS universal links, host `https://lamma.app/.well-known/apple-app-site-association`.
+- **Android App Links**: `autoVerify` for `https://lamma-app.vercel.app/e/*` plus `lamma://`.
+- **iOS**: `lamma://` in `Info.plist` and Associated Domains `applinks:lamma-app.vercel.app`.
+- **Digital Asset Links**: `/.well-known/assetlinks.json`. Add Play App Signing
+  SHA-256 via `ANDROID_SHA256_CERT_FINGERPRINTS` on Vercel (comma-separated).
+- **Apple App Site Association**: `/.well-known/apple-app-site-association`.
+  Set `APPLE_TEAM_ID` on Vercel to your Apple Developer Team ID.
 
 ## Localization & RTL
 

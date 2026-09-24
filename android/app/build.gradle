@@ -9,6 +9,11 @@ if (localPropertiesFile.exists()) {
 }
 def googleMapsApiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY") ?:
     System.getenv("GOOGLE_MAPS_API_KEY") ?: ""
+def releaseKeystorePath = System.getenv("ANDROID_SIGNING_KEYSTORE_PATH")
+def hasReleaseSigning = releaseKeystorePath &&
+    System.getenv("ANDROID_KEYSTORE_PASSWORD") &&
+    System.getenv("ANDROID_KEY_ALIAS") &&
+    System.getenv("ANDROID_KEY_PASSWORD")
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -87,12 +92,14 @@ android {
 
     namespace "com.lamma"
     defaultConfig {
-        applicationId "com.lamma"
+        applicationId "com.getlamma.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         manifestPlaceholders = [GOOGLE_MAPS_API_KEY: googleMapsApiKey]
+        buildConfigField "boolean", "GOOGLE_MAPS_CONFIGURED",
+            (!googleMapsApiKey.trim().isEmpty()).toString()
     }
     signingConfigs {
         debug {
@@ -101,15 +108,23 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseKeystorePath)
+                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // CI intentionally emits an unsigned release APK when signing
+            // credentials are absent; debug credentials must never sign release.
+            signingConfig hasReleaseSigning ? signingConfigs.release : null
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
@@ -119,6 +134,7 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation("com.google.android.gms:play-services-nearby:19.3.0")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -128,3 +144,4 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'

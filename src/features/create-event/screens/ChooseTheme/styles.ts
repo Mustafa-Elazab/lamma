@@ -6,23 +6,27 @@ export function createStyles(theme: Theme) {
   return StyleSheet.create({
     hero: {
       width: '100%',
-      aspectRatio: 0.76,
+      maxWidth: 420,
+      aspectRatio: 1 / 1.35,
+      alignSelf: 'center',
       borderRadius: theme.radius.lg,
       overflow: 'hidden',
     },
-    heroImage: { borderRadius: theme.radius.lg },
+    heroImage: {
+      borderRadius: theme.radius.lg,
+    },
     heroOverlay: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'flex-end',
       padding: theme.spacing.xl,
       gap: theme.spacing.sm,
+      backgroundColor: theme.colors.overlay,
     },
     swatchRow: {
       gap: theme.spacing.md,
       paddingVertical: theme.spacing.xs,
     },
-    themesLabel: { marginBottom: theme.spacing.sm },
     metaRow: {
       flexDirection: 'row',
       alignItems: 'center',

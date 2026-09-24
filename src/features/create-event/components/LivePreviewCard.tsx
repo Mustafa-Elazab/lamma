@@ -7,8 +7,8 @@ import { AppIcon } from '../../../design-system/atoms/Icon';
 import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
-import { themeSource } from '../../events';
-import { resolveDraftTheme, type EventDraft } from '../core/draftEntity';
+import { type EventDraft } from '../core/draftEntity';
+import { draftThemeSource } from '../core/draftMedia';
 import { categoryLabelKey } from './categoryMeta';
 
 export type LivePreviewCardProps = {
@@ -29,8 +29,10 @@ export function LivePreviewCard({
   return (
     <View style={styles.card}>
       <Image
-        source={themeSource(resolveDraftTheme(draft))}
+        source={draftThemeSource(draft)}
         style={styles.cover}
+        resizeMode="cover"
+        
       />
       <View style={styles.body}>
         {draft.category ? (
@@ -77,7 +79,7 @@ export function LivePreviewCard({
 function createStyles(theme: Theme) {
   return StyleSheet.create({
     card: {
-      flexDirection: 'row',
+      flexDirection: 'column',
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       borderWidth: 1,
@@ -86,10 +88,8 @@ function createStyles(theme: Theme) {
       ...theme.shadows.soft,
     },
     cover: {
-      width: '43%',
-      alignSelf: 'stretch',
-      minHeight: 258,
-      resizeMode: 'cover',
+      height: 200,
+      width:"100%"
     },
     body: {
       flex: 1,

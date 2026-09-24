@@ -1,6 +1,6 @@
 
 Welcome to React Native v0.87
-Starting dev server on http://localhost:8081
+Starting dev server on http://0.0.0.0:8081
 
 
                         ▒▒▓▓▓▓▒▒
@@ -24,27 +24,5 @@ Starting dev server on http://localhost:8081
  INFO  Dev server ready. Press Ctrl+C to exit.
  INFO  Interactive mode is not supported in this environment
  BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0% (0/1)
-transform[stderr]: (node:32825) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
-transform[stderr]: (node:32828) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
-transform[stderr]: (node:32827) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
-transform[stderr]: (node:32826) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
-transform[stderr]: (node:32829) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
-transform[stderr]: (node:32830) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
- BUNDLE  ./index.js ▓▓▓▓▓░░░░░░░░░░░ 34% (182/329)
  WARN  Attempted to import the module "/Users/mostafamohamedelazab/Documents/lamma/node_modules/react-native/src/private/featureflags/ReactNativeFeatureFlags" which is not listed in the "exports" of "/Users/mostafamohamedelazab/Documents/lamma/node_modules/react-native" under the requested subpath "./src/private/featureflags/ReactNativeFeatureFlags". Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.
- BUNDLE  ./index.js ▓▓▓▓▓▓▓▓░░░░░░░░ 54% (526/781)
- BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0% (0/1)
- BUNDLE  ./index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 66% (848/1039)
- BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0% (0/1)
- BUNDLE  ./index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 91% (1214/1266)
- BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0% (0/1)
- BUNDLE  ./index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99% (1553/1554)
- BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0% (0/1)
- BUNDLE  ./index.js 
  BUNDLE  ./index.js 

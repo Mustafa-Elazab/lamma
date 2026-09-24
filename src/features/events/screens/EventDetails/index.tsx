@@ -21,10 +21,23 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
   const styles = useMemo(() => createStyles(theme), [theme]);
   const c = useEventDetailsController(route.params.eventId);
 
-  if (c.isError || (!c.isLoading && !c.event)) {
+  if (c.isError) {
     return (
       <SafeAreaView style={styles.safe}>
         <AppErrorState onRetry={() => void c.refetch()} />
+      </SafeAreaView>
+    );
+  }
+
+  if (!c.isLoading && !c.event) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <AppErrorState
+          title={c.t('event.notFoundTitle')}
+          message={c.t('event.notFoundMessage')}
+          retryLabel={c.t('common.back')}
+          onRetry={c.goBack}
+        />
       </SafeAreaView>
     );
   }

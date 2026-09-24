@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { I18nManager, Image, ImageBackground, StyleSheet, View } from 'react-native';
 
 import { branding, headerImages } from '../../../assets';
 import { AppAvatar } from '../../../design-system/atoms/Avatar';
@@ -77,11 +77,17 @@ function createStyles(theme: Theme) {
       alignItems: 'center',
       gap: theme.spacing.sm,
     },
-    greeting: { alignItems: 'flex-end' },
+    greeting: {
+      // Keep the name/greeting flush to the outer edge in both LTR and RTL.
+      alignItems: I18nManager.isRTL ? 'flex-start' : 'flex-end',
+    },
     tagline: {
       letterSpacing: 2,
       fontSize: 9,
       marginTop: theme.spacing.xs,
+      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+      alignSelf: 'stretch',
     },
   });
 }

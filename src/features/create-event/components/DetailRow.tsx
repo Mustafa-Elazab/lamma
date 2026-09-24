@@ -41,7 +41,7 @@ export function DetailRow({
         </AppText>
       </View>
       <View style={styles.chevron}>
-        <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} />
+        <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} rtlMirror={false} />
       </View>
     </Pressable>
   );

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: yarn
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-37.0 build-tools;37.0.0"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Install Functions dependencies
+        run: npm ci --prefix functions
+      - name: Lint
+        run: yarn lint
+      - name: Type-check
+        run: yarn typecheck
+      - name: Test
+        run: yarn test --runInBand
+      - name: Build Functions
+        run: npm --prefix functions run build
+      - name: Assemble Android debug
+        working-directory: android
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: ./gradlew assembleDebug

@@ -1,8 +1,9 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
+import ViewShot, { type ViewShotRef } from 'react-native-view-shot';
 
-import { footerImages, headerImages } from '../../../../assets';
+import { footerImages } from '../../../../assets';
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
@@ -10,14 +11,40 @@ import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTem
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { AppStackParamList } from '../../../../navigation/types';
 import { createStyles } from './styles';
-import { useShareInviteController } from './useController';
+import useShareInviteController from './useController';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ShareInvite'>;
 
 export function ShareInviteScreen({ route }: Props): React.ReactElement {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const c = useShareInviteController(route.params.eventId);
+  const cardRef = useRef<ViewShotRef>(null);
+  const [cardLayout, setCardLayout] = useState({ width: 0, height: 0 });
+  const [cardImageLoaded, setCardImageLoaded] = useState(false);
+  const inviteCardReady = {
+    isReady: cardLayout.width > 0 && cardLayout.height > 0 && cardImageLoaded,
+    imageLoaded: cardImageLoaded,
+    width: cardLayout.width,
+    height: cardLayout.height,
+  };
+  const c = useShareInviteController(
+    route.params.eventId,
+    cardRef,
+    inviteCardReady,
+  );
+
+  useEffect(() => {
+    setCardLayout({ width: 0, height: 0 });
+    setCardImageLoaded(false);
+  }, [route.params.eventId, c.heroImage]);
+
+  const handleInviteCardLayout = useCallback(
+    (event: { nativeEvent: { layout: { width: number; height: number } } }) => {
+      const { width, height } = event.nativeEvent.layout;
+      setCardLayout({ width, height });
+    },
+    [],
+  );
 
   if (c.isError || (!c.isLoading && !c.event)) {
     return (
@@ -44,16 +71,34 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
 
   return (
     <AppScreenTemplate edges={['top']} header={header}>
-      <Image
-        source={headerImages.share}
-        style={styles.banner}
-        resizeMode="cover"
-      />
-
       {c.heroImage ? (
-        <View style={styles.inviteCard}>
-          <Image source={c.heroImage} style={styles.inviteImage} />
-        </View>
+        <ViewShot
+          ref={cardRef}
+          onLayout={handleInviteCardLayout}
+          options={{ format: 'png', quality: 0.92, result: 'tmpfile' }}
+          style={styles.inviteCard}
+        >
+          <View collapsable={false} style={styles.inviteCardInner}>
+            <Image
+              source={c.heroImage}
+              style={styles.inviteImage}
+              resizeMode="cover"
+              onLoadEnd={() => setCardImageLoaded(true)}
+            />
+            <View style={styles.inviteOverlay} pointerEvents="none">
+              <AppText
+                variant="bodyStrong"
+                color="textInverse"
+                numberOfLines={1}
+              >
+                {c.event?.title ?? ''}
+              </AppText>
+              <AppText variant="caption" color="textInverse" numberOfLines={1}>
+                {c.event ? `${c.dateLabel} · ${c.event.venueName}` : ''}
+              </AppText>
+            </View>
+          </View>
+        </ViewShot>
       ) : null}
 
       <View style={styles.linkRow}>
@@ -69,7 +114,11 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
       </View>
 
       <View style={styles.actionsRow}>
-        <Pressable style={styles.action} onPress={() => void c.shareWhatsApp()}>
+        <Pressable
+          disabled={!c.canShareInvite}
+          style={[styles.action, !c.canShareInvite && styles.actionDisabled]}
+          onPress={() => void c.shareWhatsApp()}
+        >
           <View style={[styles.actionCircle, styles.whatsapp]}>
             <AppIcon name="whatsapp" size={26} color="textInverse" />
           </View>
@@ -85,7 +134,13 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
             {c.t('share.copyLink')}
           </AppText>
         </Pressable>
-        <Pressable style={styles.action} onPress={c.shareGeneric}>
+        <Pressable
+          disabled={!c.canShareInvite}
+          style={[styles.action, !c.canShareInvite && styles.actionDisabled]}
+          onPress={() => {
+            void c.shareGeneric();
+          }}
+        >
           <View style={[styles.actionCircle, styles.primaryCircle]}>
             <AppIcon name="share" size={24} color="textInverse" />
           </View>

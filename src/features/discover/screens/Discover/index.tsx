@@ -87,6 +87,7 @@ export function DiscoverScreen(): React.ReactElement {
 
       <ScrollView
         horizontal
+        style={styles.categoryScroll}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoryRow}
       >
@@ -97,6 +98,7 @@ export function DiscoverScreen(): React.ReactElement {
             icon={CATEGORY_ICON[cat]}
             selected={c.category === cat}
             onPress={() => c.toggleCategory(cat)}
+            style={styles.chip}
           />
         ))}
       </ScrollView>

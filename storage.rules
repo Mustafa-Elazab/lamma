@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Custom covers are uploaded at events/{uid}/themes/{timestamp}.jpg
+    // (uid = Firebase Auth uid, including anonymous guests who may publish).
+    // A rule on events/{eventId}/cover.jpg would never match this path and
+    // would produce storage/unauthorized on every custom-theme publish.
+    function signedInAs(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /events/{uid}/{allPaths=**} {
+      allow read: if true;
+      allow write: if signedInAs(uid);
+    }
+  }
+}

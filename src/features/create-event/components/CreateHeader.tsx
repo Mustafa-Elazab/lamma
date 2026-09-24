@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppIcon } from '../../../design-system/atoms/Icon';
 import { AppText } from '../../../design-system/atoms/Text';
@@ -55,7 +55,6 @@ function createStyles(theme: Theme) {
       height: 32,
       alignItems: 'center',
       justifyContent: 'center',
-      transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }],
     },
   });
 }

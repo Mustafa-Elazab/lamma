@@ -9,12 +9,13 @@ import {
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
-import { AppIcon } from '../../atoms/Icon';
+import { AppIcon, type IconName } from '../../atoms/Icon';
 import { AppText } from '../../atoms/Text';
 
 export type ThemeSwatchProps = {
   label: string;
-  image: ImageSourcePropType;
+  image?: ImageSourcePropType;
+  placeholderIcon?: IconName;
   selected?: boolean;
   onPress?: () => void;
   width?: number;
@@ -23,6 +24,7 @@ export type ThemeSwatchProps = {
 function AppThemeSwatchComponent({
   label,
   image,
+  placeholderIcon = 'plus',
   selected = false,
   onPress,
   width = 64,
@@ -44,7 +46,14 @@ function AppThemeSwatchComponent({
           selected && styles.imageWrapSelected,
         ]}
       >
-        <Image source={image} style={styles.image} />
+        {image ? (
+          <Image source={image} style={styles.image} resizeMode="cover" />
+        ) : (
+          <View style={styles.placeholder}>
+            <AppIcon name={placeholderIcon} size={22} color="primary" />
+            <AppIcon name="plus" size={14} color="primary" />
+          </View>
+        )}
         {selected ? (
           <View style={styles.check}>
             <AppIcon name="check" size={14} color="textInverse" />
@@ -75,7 +84,14 @@ function createStyles(theme: Theme) {
       borderColor: 'transparent',
     },
     imageWrapSelected: { borderColor: theme.colors.primary },
-    image: { width: '100%', height: '100%', resizeMode: 'cover' },
+    image: { width: '100%', height: '100%' },
+    placeholder: {
+      flex: 1,
+      backgroundColor: theme.colors.surfaceSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: theme.spacing.xs,
+    },
     check: {
       position: 'absolute',
       top: 4,

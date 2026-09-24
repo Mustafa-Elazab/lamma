@@ -6,6 +6,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function signedInAs(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
     function ownsNewEvent() {
       return signedIn()
         && request.resource.data.hostId == request.auth.uid
@@ -33,8 +37,11 @@ service cloud.firestore {
     }
 
     match /events/{eventId} {
-      // The signed-in app may open public events and private invitation links.
-      allow read: if signedIn();
+      // Invite links (`/e/{eventId}`) are the access token: anyone with the id
+      // may fetch that one document (Vercel event page). Listing still requires
+      // a signed-in app session.
+      allow get: if true;
+      allow list: if signedIn();
       allow create: if ownsNewEvent();
       allow update: if signedIn()
         && ownershipIsUnchanged()
@@ -47,8 +54,62 @@ service cloud.firestore {
         && resource.data.ownerId == request.auth.uid;
     }
 
-    match /users/{uid}/{document=**} {
-      allow read, write: if signedIn() && request.auth.uid == uid;
+    match /gameSessions/{sessionId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.hostId == request.auth.uid;
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.hostId
+        && request.resource.data.gameId == resource.data.gameId
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.hostId == resource.data.hostId;
+      allow delete: if signedIn()
+        && resource.data.hostId == request.auth.uid;
+
+      match /playerActions/{actionId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.id == actionId
+          && request.resource.data.playerId == request.auth.uid
+          && request.resource.data.createdAt is int;
+        allow update, delete: if false;
+      }
+    }
+
+    match /games/{gameId} {
+      allow read: if signedIn();
+      allow write: if false;
+
+      match /{document=**} {
+        allow read: if signedIn();
+        allow write: if false;
+      }
+    }
+
+    match /users/{uid} {
+      allow read, write: if signedInAs(uid);
+
+      // Anonymous Firebase Auth users have a real request.auth.uid and receive
+      // the same per-user draft access as linked Google/Apple accounts.
+      match /drafts/{draftId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      match /notifications/{notificationId} {
+        allow read: if signedInAs(uid);
+        allow update: if signedInAs(uid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['read']);
+        allow create, delete: if false;
+      }
+
+      match /meta/{documentId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      match /devices/{deviceId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
     }
 
     match /{document=**} {

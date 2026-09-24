@@ -13,13 +13,19 @@ export function createStyles(theme: Theme) {
     },
     titleBlock: { gap: 2 },
     categoryRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
       gap: theme.spacing.sm,
       paddingHorizontal: theme.spacing.lg,
       paddingBottom: theme.spacing.md,
     },
+    categoryScroll: {
+      flexGrow: 0,
+      flexShrink: 0,
+    },
+    chip: { flexShrink: 0 },
     listContent: {
       paddingHorizontal: theme.spacing.lg,
-      paddingBottom: 120,
       gap: theme.spacing.md,
     },
     sectionTitle: { marginBottom: theme.spacing.xs },

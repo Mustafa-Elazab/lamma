@@ -8,7 +8,7 @@ import {
   query,
   updateDoc,
   writeBatch,
-  type FirebaseFirestoreTypes,
+  type CollectionReference,
 } from '@react-native-firebase/firestore';
 
 import type { AppNotification } from './entity';
@@ -20,7 +20,7 @@ function uid(): string {
   return getAuth().currentUser?.uid ?? 'anonymous';
 }
 
-function base(): FirebaseFirestoreTypes.CollectionReference {
+function base(): CollectionReference {
   return collection(getFirestore(), 'users', uid(), 'notifications');
 }
 
