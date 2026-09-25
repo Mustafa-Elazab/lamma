@@ -20,14 +20,45 @@ a link, the app does not remember which event the link pointed to.
 web/
 ├── index.html                      # the root "/" page
 ├── event.html                      # page for /e/* and /g/* (via vercel.json rewrites)
+├── about.html, contact.html,       # /about /contact /terms /privacy (via vercel.json rewrites)
+│   terms.html, privacy.html
 ├── app.js                          # reads and validates the id; store URLs live here
-├── styles.css
+├── i18n.js                         # EN/AR strings + language toggle (see "Languages and themes")
+├── theme.js                        # light/dark toggle
+├── styles.css                      # colors are CSS custom properties (light + dark)
 ├── assets/                         # logo and icons copied from src/assets/branding
 ├── vercel.json                     # rewrites + JSON headers for .well-known
 └── .well-known/
     ├── assetlinks.json             # Android
     └── apple-app-site-association  # iOS (no file extension)
 ```
+
+## Languages and themes
+
+Every page is available in **English and Arabic** and in **light and dark** themes,
+with no build step.
+
+- **Strings** live in `i18n.js` (one `en` and one `ar` table). Elements are marked
+  with `data-i18n="key"` for text and `data-i18n-content` / `data-i18n-aria-label` /
+  `data-i18n-alt` for attributes. The English text also stays in the HTML so the page
+  still reads fine without JavaScript. To add text, add the key to **both** tables and
+  put `data-i18n="that.key"` on the element. The Arabic legal/about copy matches the
+  in-app strings in `src/app/localization/resources/ar.ts` (`info.*`); keep them in sync.
+- **Language order:** `?lang=ar|en`, then the saved choice (`localStorage["lamma-lang"]`),
+  then `navigator.language` (anything starting with `ar` means Arabic), then English.
+  A `?lang=` value is also saved. Arabic sets `<html lang="ar" dir="rtl">`, and the CSS
+  uses logical properties so the layout mirrors. Arabic uses the Cairo font (Google Fonts)
+  with a system Arabic fallback.
+- **Theme order:** `?theme=dark|light` (a testing override, **not** saved), then the saved
+  choice (`localStorage["lamma-theme"]`), then the OS `prefers-color-scheme`.
+- A tiny inline script in each page's `<head>` applies language and theme **before first
+  paint**, so there is no flash of the wrong theme or direction. Keep it identical across pages.
+- The header on every page has the **EN / عربي** switch and the sun/moon theme button.
+- The event page's Open Graph tags stay English on purpose. Link-preview crawlers
+  don't run JavaScript, so translating them client-side would do nothing.
+
+Handy URLs for testing: `/privacy?lang=ar&theme=dark`, `/e/test-event?lang=ar&theme=light`,
+`/?lang=en&theme=dark`. Clear site data (or use the toggles) to reset saved choices.
 
 ## Configuration (all in one place per platform)
 
@@ -124,8 +155,9 @@ cd web
 npx serve .     # or: python3 -m http.server 8080
 ```
 
-A plain static server won't apply the `/e/*` rewrite, so open
-`http://localhost:8080/event.html` to see the page. You can also run `vercel dev`, which
+A plain static server won't apply the rewrites, so open the `.html` files directly
+(for example `http://localhost:8080/event.html?lang=ar&theme=dark` or `/privacy.html`).
+On `/event.html` the id is missing, so the page shows its "broken link" state. You can also run `vercel dev`, which
 applies `vercel.json`. localhost can **never** verify App Links or Universal Links. Only the
 public HTTPS production domain can.
 

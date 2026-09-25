@@ -1,26 +1,84 @@
+/*
+ * Lamma site styles. Light is the default palette; dark applies when the OS
+ * prefers it (and the user did not pick light) or when <html data-theme="dark">.
+ * Layout uses logical properties so Arabic (dir="rtl") mirrors cleanly.
+ */
 :root {
   --primary: #f34f68;
   --primary-dark: #d93a55;
+  --on-primary: #ffffff;
+  --link: #c7334d;
   --bg: #fff7f4;
+  --bg-glow: #ffe3e3;
   --surface: #ffffff;
+  --surface-2: #ffffff;
   --text: #1c1d26;
-  --muted: #6b6e7b;
+  --muted: #62656f;
   --border: #f0e2dd;
+  --error: #c62828;
+  --shadow: 0 12px 40px rgba(243, 79, 104, 0.12);
+  --toggle-bg: rgba(255, 255, 255, 0.75);
   --radius: 20px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
+  --font-ar: "Cairo", "Noto Sans Arabic", "Geeza Pro", "Segoe UI", Tahoma, sans-serif;
   color-scheme: light;
 }
+
+/* Dark palette: shared by the explicit choice and the OS preference. */
+:root[data-theme="dark"] {
+  --primary: #f34f68;
+  --primary-dark: #ff6b81;
+  --on-primary: #ffffff;
+  --link: #ff8fa1;
+  --bg: #15131b;
+  --bg-glow: #3a1a26;
+  --surface: #211d29;
+  --surface-2: #2b2634;
+  --text: #f5f1f4;
+  --muted: #b9b3c2;
+  --border: #3a3445;
+  --error: #ff8a80;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --toggle-bg: rgba(33, 29, 41, 0.8);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #f34f68;
+    --primary-dark: #ff6b81;
+    --on-primary: #ffffff;
+    --link: #ff8fa1;
+    --bg: #15131b;
+    --bg-glow: #3a1a26;
+    --surface: #211d29;
+    --surface-2: #2b2634;
+    --text: #f5f1f4;
+    --muted: #b9b3c2;
+    --border: #3a3445;
+    --error: #ff8a80;
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    --toggle-bg: rgba(33, 29, 41, 0.8);
+    color-scheme: dark;
+  }
+}
+
+/* Arabic is hidden for a moment until i18n.js swaps the strings in. */
+html.i18n-pending body { visibility: hidden; }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
-  background: radial-gradient(circle at top, #ffe3e3 0%, var(--bg) 55%);
+  font-family: var(--font);
+  background: radial-gradient(circle at top, var(--bg-glow) 0%, var(--bg) 55%) no-repeat, var(--bg);
+  background-color: var(--bg);
   color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
+  padding: 16px 16px 24px;
   min-height: 100vh;
 }
+:root[lang="ar"] body { font-family: var(--font-ar); }
 .card {
   width: 100%;
   max-width: 420px;
@@ -29,9 +87,9 @@ body {
   border-radius: var(--radius);
   padding: 32px 24px;
   text-align: center;
-  box-shadow: 0 12px 40px rgba(243, 79, 104, 0.12);
+  box-shadow: var(--shadow);
 }
-.logo { width: 160px; height: auto; margin: 0 auto 16px; display: block; }
+.logo { width: 160px; height: auto; margin: 0 auto 16px; display: block; border-radius: 16px; }
 h1 { font-size: 26px; margin: 0 0 8px; }
 .muted { color: var(--muted); margin: 0 0 24px; line-height: 1.5; }
 .actions { display: flex; flex-direction: column; gap: 12px; }
@@ -45,28 +103,103 @@ h1 { font-size: 26px; margin: 0 0 8px; }
   transition: transform 0.05s ease, background 0.2s ease;
 }
 .btn:active { transform: scale(0.98); }
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover { background: var(--primary-dark); }
-.btn-secondary { background: #fff; color: var(--text); border: 1px solid var(--border); }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-primary:hover { background: #d93a55; }
+.btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
 .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
-.error { color: #c62828; margin: 16px 0 0; }
+.error { color: var(--error); margin: 16px 0 0; }
 .meta { color: var(--muted); font-size: 13px; margin: 24px 0 0; word-break: break-all; }
 code { font-family: ui-monospace, Menlo, monospace; }
 [hidden] { display: none !important; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+/* Page chrome: header (language + theme toggles), content, footer */
+body.page-body { flex-direction: column; justify-content: flex-start; }
+body.page-body > main { margin-block: auto; }
+.site-header {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-end: 20px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 17px;
+}
+.brand img { width: 28px; height: 28px; border-radius: 8px; display: block; }
+.header-tools { display: flex; align-items: center; gap: 8px; }
+.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--toggle-bg);
+}
+.lang-switch button,
+.theme-toggle {
+  font: inherit;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.lang-switch button {
+  min-width: 48px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.lang-switch button[lang="ar"] { font-family: var(--font-ar); }
+/* Active language is styled from <html lang> so it is right before JS runs. */
+:root[lang="en"] .lang-switch [data-set-lang="en"],
+:root[lang="ar"] .lang-switch [data-set-lang="ar"] {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--toggle-bg);
+  color: var(--text);
+}
+.theme-toggle:hover { color: var(--primary); }
+.theme-toggle svg { width: 20px; height: 20px; }
+/* Moon in light mode (tap for dark), sun in dark mode (tap for light). */
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+}
 
 /* Info pages (about / contact / terms / privacy) and shared footer */
-body.page-body { flex-direction: column; }
-.page { max-width: 720px; text-align: left; }
-.page .logo { margin-bottom: 8px; }
-.page h1 { text-align: center; margin-bottom: 16px; }
+.page { max-width: 720px; text-align: start; }
+.page .logo { margin-block-end: 8px; }
+.page h1 { text-align: center; margin-block-end: 16px; }
 .page h2 { font-size: 18px; margin: 0 0 6px; }
-.page section { border-top: 1px solid var(--border); padding: 16px 0 4px; }
+.page section { border-block-start: 1px solid var(--border); padding-block: 16px 4px; }
 .page p { line-height: 1.6; margin: 0 0 12px; }
 .page .lead { color: var(--muted); font-size: 17px; }
 .page .actions { margin: 8px 0 12px; }
-.page a:not(.btn) { color: var(--primary-dark); }
+.page a:not(.btn) { color: var(--link); }
+:root[lang="ar"] .page p { line-height: 1.8; }
 .meta-line { color: var(--muted); font-size: 14px; text-align: center; }
-.site-footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+.site-footer { margin-block-start: 24px; text-align: center; color: var(--muted); font-size: 14px; }
 .site-footer nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; }
 .site-footer a { color: var(--muted); text-decoration: none; font-weight: 600; }
 .site-footer a:hover { color: var(--primary); }
