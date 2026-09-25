@@ -10,6 +10,7 @@ import {
 } from '@react-native-firebase/firestore';
 
 import type { GameSession, GameSessionPlayerAction } from '../types';
+import { stripUndefined } from './firestoreData';
 import type { GameSessionTransportAdapter } from './transport';
 
 const COLLECTION = 'gameSessions';
@@ -53,7 +54,7 @@ export class FirestoreRoomCodeSessionAdapter
 
   async host(session: GameSession): Promise<void> {
     this.codesBySessionId.set(session.id, normalizeCode(session.code));
-    await setDoc(this.ref(session.code), session);
+    await setDoc(this.ref(session.code), stripUndefined(session));
   }
 
   async join(code: string): Promise<GameSession | null> {
@@ -94,7 +95,7 @@ export class FirestoreRoomCodeSessionAdapter
 
   async publish(session: GameSession): Promise<void> {
     this.codesBySessionId.set(session.id, normalizeCode(session.code));
-    await setDoc(this.ref(session.code), session);
+    await setDoc(this.ref(session.code), stripUndefined(session));
   }
 
   subscribe(
@@ -114,7 +115,7 @@ export class FirestoreRoomCodeSessionAdapter
     code: string,
     action: GameSessionPlayerAction,
   ): Promise<void> {
-    await setDoc(this.actionRef(code, action.id), action);
+    await setDoc(this.actionRef(code, action.id), stripUndefined(action));
   }
 
   subscribePlayerActions(

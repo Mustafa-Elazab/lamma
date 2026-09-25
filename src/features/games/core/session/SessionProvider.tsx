@@ -18,6 +18,7 @@ import type {
   GameSession,
   GameSessionPlayerAction,
 } from '../types';
+import { reportError } from '../../../../services/crashReporting';
 import { roomCodeForGame } from './code';
 import {
   initialSessionState,
@@ -53,6 +54,19 @@ const GameSessionContext = createContext<GameSessionContextValue | undefined>(
   undefined,
 );
 
+/** Host writes are fire-and-forget; report failures instead of leaving an unhandled rejection. */
+function publishSafely(
+  transport: { publish: (session: GameSession) => Promise<void> },
+  session: GameSession,
+): void {
+  transport.publish(session).catch(error =>
+    reportError(error, 'games.session-publish', {
+      code: session.code,
+      gameId: session.gameId,
+    }),
+  );
+}
+
 function playerFromName(id: string, name: string, isHost = false): GamePlayer {
   return { id, name, isHost, connected: true };
 }
@@ -81,13 +95,15 @@ export function GameSessionProvider({
         return;
       }
       const createdAt = Date.now();
-      void transport.submitPlayerAction(currentCode, {
-        id: `${currentPlayerId}-connection-${createdAt}`,
-        kind: 'connection',
-        playerId: currentPlayerId,
-        connected,
-        createdAt,
-      });
+      transport
+        .submitPlayerAction(currentCode, {
+          id: `${currentPlayerId}-connection-${createdAt}`,
+          kind: 'connection',
+          playerId: currentPlayerId,
+          connected,
+          createdAt,
+        })
+        .catch(error => reportError(error, 'games.presence', { connected }));
     },
     [currentCode, currentPlayerId, transport],
   );
@@ -199,7 +215,7 @@ export function GameSessionProvider({
     ).current;
     if (next) {
       dispatch({ type: 'hydrate', session: next });
-      void transport.publish(next);
+      publishSafely(transport, next);
     }
   }, [localPlayerId, playerActions, state, transport]);
 
@@ -236,7 +252,7 @@ export function GameSessionProvider({
       dispatch({ type: 'join', player, now });
       const next = sessionReducer(state, { type: 'join', player, now }).current;
       if (next) {
-        void transport.publish(next);
+        publishSafely(transport, next);
       }
     },
     [state, transport],
@@ -248,7 +264,7 @@ export function GameSessionProvider({
     dispatch(action);
     const next = sessionReducer(state, action).current;
     if (next) {
-      void transport.publish(next);
+      publishSafely(transport, next);
     }
   }, [state, transport]);
 
@@ -268,7 +284,7 @@ export function GameSessionProvider({
       dispatch(action);
       const next = sessionReducer(state, action).current;
       if (next) {
-        void transport.publish(next);
+        publishSafely(transport, next);
       }
     },
     [state, transport],
@@ -295,7 +311,7 @@ export function GameSessionProvider({
       dispatch({ type: 'disconnect', playerId, now });
       const next = sessionReducer(state, { type: 'disconnect', playerId, now }).current;
       if (next) {
-        void transport.publish(next);
+        publishSafely(transport, next);
       }
     },
     [state, transport],
@@ -307,7 +323,7 @@ export function GameSessionProvider({
       dispatch({ type: 'reconnect', playerId, now });
       const next = sessionReducer(state, { type: 'reconnect', playerId, now }).current;
       if (next) {
-        void transport.publish(next);
+        publishSafely(transport, next);
       }
     },
     [state, transport],

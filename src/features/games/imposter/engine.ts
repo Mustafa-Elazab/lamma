@@ -163,7 +163,9 @@ export function revealImposterVote(
   const top = ranked[0];
   const tie = !top || (ranked[1] !== undefined && ranked[1][1] === top[1]);
   if (tie) {
-    return finish({ ...state, tie: true, votedOutId: undefined }, 'imposter');
+    const tied: ImposterState = { ...state, tie: true };
+    delete tied.votedOutId;
+    return finish(tied, 'imposter');
   }
   const votedOutId = top[0];
   if (votedOutId !== state.imposterId) {
