@@ -32,6 +32,9 @@ import type {
 } from './repository';
 import { uploadEventThemeImage } from './uploadThemeImage';
 
+/** Inline covers must leave room in the 1 MB Firestore document limit. */
+const MAX_INLINE_COVER_CHARS = 900_000;
+
 type DocData = DocumentData;
 
 /** Minimal structural shape shared by document and query snapshots. */
@@ -278,7 +281,14 @@ export class FirebaseEventRepository implements EventRepository {
 
     let customCoverImageUrl: string | null = null;
     if (input.customThemeUri) {
-      if (/^https?:\/\//i.test(input.customThemeUri)) {
+      if (
+        /^https?:\/\//i.test(input.customThemeUri) ||
+        input.customThemeUri.startsWith('data:image/')
+      ) {
+        // Shrunk photos are saved inline as a data URI (free plan, no Storage).
+        if (input.customThemeUri.length > MAX_INLINE_COVER_CHARS) {
+          throw new Error('events/cover-too-large: pick a smaller photo');
+        }
         customCoverImageUrl = input.customThemeUri;
       } else {
         try {
