@@ -53,3 +53,21 @@ h1 { font-size: 26px; margin: 0 0 8px; }
 .meta { color: var(--muted); font-size: 13px; margin: 24px 0 0; word-break: break-all; }
 code { font-family: ui-monospace, Menlo, monospace; }
 [hidden] { display: none !important; }
+
+/* Info pages (about / contact / terms / privacy) and shared footer */
+body.page-body { flex-direction: column; }
+.page { max-width: 720px; text-align: left; }
+.page .logo { margin-bottom: 8px; }
+.page h1 { text-align: center; margin-bottom: 16px; }
+.page h2 { font-size: 18px; margin: 0 0 6px; }
+.page section { border-top: 1px solid var(--border); padding: 16px 0 4px; }
+.page p { line-height: 1.6; margin: 0 0 12px; }
+.page .lead { color: var(--muted); font-size: 17px; }
+.page .actions { margin: 8px 0 12px; }
+.page a:not(.btn) { color: var(--primary-dark); }
+.meta-line { color: var(--muted); font-size: 14px; text-align: center; }
+.site-footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+.site-footer nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; }
+.site-footer a { color: var(--muted); text-decoration: none; font-weight: 600; }
+.site-footer a:hover { color: var(--primary); }
+.site-footer p { margin: 10px 0 0; }
