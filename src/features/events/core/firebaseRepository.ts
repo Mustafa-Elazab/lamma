@@ -240,11 +240,19 @@ export class FirebaseEventRepository implements EventRepository {
 
     try {
       // Querying visibility alone avoids requiring a Firestore composite index on (visibility, startAt).
-      const q = query(
-        base,
-        where('visibility', '==', 'public'),
-        fbLimit(pageSize * 3),
-      );
+      // Equality-only filters (visibility + category) need no composite index.
+      const q = params.category
+        ? query(
+            base,
+            where('visibility', '==', 'public'),
+            where('category', '==', params.category),
+            fbLimit(pageSize * 3),
+          )
+        : query(
+            base,
+            where('visibility', '==', 'public'),
+            fbLimit(pageSize * 3),
+          );
       const snap = await getDocs(q);
       const queryText = params.query?.trim().toLowerCase() ?? '';
       const events = (snap.docs as SnapshotLike[])

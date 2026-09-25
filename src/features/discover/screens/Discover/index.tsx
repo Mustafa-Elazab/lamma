@@ -91,6 +91,13 @@ export function DiscoverScreen(): React.ReactElement {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoryRow}
       >
+        <AppChip
+          label={c.t('discover.all')}
+          icon="search"
+          selected={c.category === null}
+          onPress={c.selectAll}
+          style={styles.chip}
+        />
         {CATEGORY_ORDER.map(cat => (
           <AppChip
             key={cat}
