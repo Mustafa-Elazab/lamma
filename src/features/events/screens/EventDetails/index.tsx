@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppAvatar } from '../../../../design-system/atoms/Avatar';
 import { AppBadge } from '../../../../design-system/atoms/Badge';
+import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
@@ -68,7 +69,7 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
         {event ? (
           <View style={styles.sheet}>
             <View style={styles.titleBlock}>
-              {event.viewerRsvp === 'going' ? (
+              {event.viewerRsvp === 'going' && !c.isOwner ? (
                 <AppBadge
                   label={c.t('home.youreGoing')}
                   tone="primary"
@@ -127,26 +128,57 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
               </Pressable>
             </View>
 
-            <View style={styles.rsvpRow}>
-              <AppRsvpButton
-                label={c.t('event.going')}
-                icon="check"
-                active={event.viewerRsvp === 'going'}
-                onPress={() => c.setRsvp('going')}
-              />
-              <AppRsvpButton
-                label={c.t('event.maybe')}
-                icon="help"
-                active={event.viewerRsvp === 'maybe'}
-                onPress={() => c.setRsvp('maybe')}
-              />
-              <AppRsvpButton
-                label={c.t('event.cantGo')}
-                icon="close"
-                active={event.viewerRsvp === 'declined'}
-                onPress={() => c.setRsvp('declined')}
-              />
-            </View>
+            {c.isOwner ? (
+              <View style={styles.ownerBlock}>
+                <View style={styles.ownerBadge}>
+                  <AppBadge
+                    label={c.t('event.youAreHosting')}
+                    tone="primary"
+                    icon="crown"
+                  />
+                </View>
+                <View style={styles.rsvpRow}>
+                  <AppButton
+                    label={c.t('event.shareInvite')}
+                    leftIcon="share"
+                    size="md"
+                    fullWidth={false}
+                    style={styles.ownerButton}
+                    onPress={c.openShare}
+                  />
+                  <AppButton
+                    label={c.t('event.manageGuests')}
+                    leftIcon="guests"
+                    variant="outline"
+                    size="md"
+                    fullWidth={false}
+                    style={styles.ownerButton}
+                    onPress={c.openGuests}
+                  />
+                </View>
+              </View>
+            ) : (
+              <View style={styles.rsvpRow}>
+                <AppRsvpButton
+                  label={c.t('event.going')}
+                  icon="check"
+                  active={event.viewerRsvp === 'going'}
+                  onPress={() => c.setRsvp('going')}
+                />
+                <AppRsvpButton
+                  label={c.t('event.maybe')}
+                  icon="help"
+                  active={event.viewerRsvp === 'maybe'}
+                  onPress={() => c.setRsvp('maybe')}
+                />
+                <AppRsvpButton
+                  label={c.t('event.cantGo')}
+                  icon="close"
+                  active={event.viewerRsvp === 'declined'}
+                  onPress={() => c.setRsvp('declined')}
+                />
+              </View>
+            )}
 
             <View style={styles.goingCard}>
               <View style={styles.goingHeader}>

@@ -51,6 +51,9 @@ export function createStyles(theme: Theme) {
     },
     infoText: { flex: 1, gap: 2 },
     rsvpRow: { flexDirection: 'row', gap: theme.spacing.sm },
+    ownerBlock: { gap: theme.spacing.sm },
+    ownerBadge: { alignSelf: 'flex-start' },
+    ownerButton: { flex: 1 },
     rsvpButton: {
       flex: 1,
       flexDirection: 'row',

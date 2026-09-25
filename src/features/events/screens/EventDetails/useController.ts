@@ -13,6 +13,7 @@ import {
   formatTime,
   goingSummary,
 } from '../../../../utils/format';
+import { useAuth } from '../../../auth';
 import { goingAttendees, type RSVPStatus } from '../../core/entity';
 import { useEvent, useRsvpMutation } from '../../core/hooks';
 import { eventCover } from '../../core/media';
@@ -24,7 +25,12 @@ export function useEventDetailsController(eventId: string) {
   const query = useEvent(eventId);
   const rsvp = useRsvpMutation();
 
+  const { user } = useAuth();
   const event = query.data ?? null;
+  // The creator never RSVPs to their own event: they get host actions instead.
+  const isOwner = Boolean(
+    event && (event.isHosting || (user?.uid && event.hostId === user.uid)),
+  );
 
   const setRsvp = useCallback(
     (status: RSVPStatus) => {
@@ -82,6 +88,7 @@ export function useEventDetailsController(eventId: string) {
     isError: query.isError,
     refetch: query.refetch,
     heroImage,
+    isOwner,
     dateLabel,
     timeRange,
     goingStack,
