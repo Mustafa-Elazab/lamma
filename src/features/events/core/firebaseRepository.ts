@@ -30,6 +30,11 @@ import type {
   EventRepository,
   HomeFeed,
 } from './repository';
+import {
+  attendeesFromRsvps,
+  countRsvps,
+  type GuestProfile,
+} from './rsvpAttendees';
 import { uploadEventThemeImage } from './uploadThemeImage';
 
 /** Inline covers must leave room in the 1 MB Firestore document limit. */
@@ -53,6 +58,19 @@ function currentUid(): string {
 function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
   const data = (snapshot.data() ?? {}) as DocData;
   const rsvps = (data.rsvps ?? {}) as Record<string, RSVPStatus>;
+  const hostId = (data.hostId as string) ?? '';
+  const storedAttendees = (data.attendees as LammaEvent['attendees']) ?? [];
+  // RSVPs live in the `rsvps` map (the stored `attendees` array is legacy and
+  // normally empty), so derive the guest list and counts from it.
+  const attendees =
+    storedAttendees.length > 0
+      ? storedAttendees
+      : attendeesFromRsvps({
+          rsvps,
+          guests: (data.guests ?? {}) as Record<string, GuestProfile>,
+          hostId,
+        });
+  const rsvpCount = Object.keys(rsvps).length;
   return {
     id: snapshot.id,
     title: (data.title as string) ?? '',
@@ -74,9 +92,15 @@ function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
         ? (getAuth().currentUser?.displayName ?? 'Host')
         : 'Host'),
     hostPhoto: (data.hostPhoto as string | null) ?? null,
-    attendees: (data.attendees as LammaEvent['attendees']) ?? [],
-    attendeeCount: (data.attendeeCount as number) ?? 0,
-    goingCount: (data.goingCount as number) ?? 0,
+    attendees,
+    attendeeCount:
+      rsvpCount > 0
+        ? rsvpCount - countRsvps(rsvps, 'none')
+        : (data.attendeeCount as number) ?? 0,
+    goingCount:
+      rsvpCount > 0
+        ? countRsvps(rsvps, 'going')
+        : (data.goingCount as number) ?? 0,
     viewerRsvp: rsvps[uid] ?? 'none',
     isHosting: (data.hostId as string) === uid,
     visibility: (data.visibility as LammaEvent['visibility']) ?? 'public',
@@ -244,8 +268,17 @@ export class FirebaseEventRepository implements EventRepository {
 
   async setRsvp(eventId: string, status: RSVPStatus): Promise<LammaEvent> {
     const uid = currentUid();
+    const user = getAuth().currentUser;
     const ref = doc(this.db, COLLECTION, eventId);
-    await updateDoc(ref, { [`rsvps.${uid}`]: status });
+    const photo = user?.photoURL ?? null;
+    // The public guest card lets the host's guest list show names per status.
+    await updateDoc(ref, {
+      [`rsvps.${uid}`]: status,
+      [`guests.${uid}`]: {
+        name: user?.displayName?.trim() || null,
+        photoURL: photo && /^https?:\/\//i.test(photo) ? photo : null,
+      },
+    });
     const snapshot = await getDoc(ref);
     return mapDoc(snapshot, uid);
   }

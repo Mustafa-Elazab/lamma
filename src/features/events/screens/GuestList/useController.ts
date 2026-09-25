@@ -7,7 +7,7 @@ import { formatDateShort } from '../../../../utils/format';
 import type { RSVPStatus } from '../../core/entity';
 import { useEvent } from '../../core/hooks';
 import { eventCover } from '../../core/media';
-import { groupGuests } from '../../guestPresenter';
+import { countGroupPeople, groupGuests } from '../../guestPresenter';
 
 type GuestTab = Extract<RSVPStatus, 'going' | 'maybe' | 'declined'>;
 
@@ -24,6 +24,29 @@ export function useGuestListController(eventId: string) {
     [event, tab],
   );
 
+  const tabCount = groups ? countGroupPeople(groups) : 0;
+  const isEmpty = Boolean(groups) && tabCount === 0;
+  const copy = {
+    going: {
+      summary: t('guests.summaryGoing', { count: tabCount }),
+      emptyTitle: t('guests.emptyGoingTitle'),
+      emptyMessage: t('guests.emptyGoingMessage'),
+    },
+    maybe: {
+      summary: t('guests.summaryMaybe', { count: tabCount }),
+      emptyTitle: t('guests.emptyMaybeTitle'),
+      emptyMessage: t('guests.emptyMaybeMessage'),
+    },
+    declined: {
+      summary: t('guests.summaryDeclined', { count: tabCount }),
+      emptyTitle: t('guests.emptyDeclinedTitle'),
+      emptyMessage: t('guests.emptyDeclinedMessage'),
+    },
+  }[tab];
+  const summaryLabel = copy.summary;
+  const emptyTitle = copy.emptyTitle;
+  const emptyMessage = copy.emptyMessage;
+
   const tabs = useMemo(
     () => [
       { key: 'going' as const, label: t('event.going') },
@@ -34,7 +57,16 @@ export function useGuestListController(eventId: string) {
   );
 
   const dateLabel = event ? formatDateShort(event.startAt, language) : '';
-  const cover = event ? eventCover(event) : undefined;
+  const coverUrl = event?.coverImageUrl ?? null;
+  const coverKey = event?.coverKey;
+  const themeKey = event?.themeKey;
+  const cover = useMemo(
+    () =>
+      coverKey && themeKey
+        ? eventCover({ coverImageUrl: coverUrl, coverKey, themeKey })
+        : undefined,
+    [coverUrl, coverKey, themeKey],
+  );
 
   const goBack = useCallback(() => navigation.goBack(), [navigation]);
 
@@ -48,6 +80,11 @@ export function useGuestListController(eventId: string) {
     setTab,
     tabs,
     groups,
+    tabCount,
+    isEmpty,
+    summaryLabel,
+    emptyTitle,
+    emptyMessage,
     dateLabel,
     cover,
     goBack,

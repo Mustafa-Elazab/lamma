@@ -4,6 +4,7 @@ import { Image, Pressable, View } from 'react-native';
 
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
+import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
 import { AppSegmentedTabs } from '../../../../design-system/molecules/SegmentedTabs';
@@ -69,9 +70,7 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
             <AppIcon name="guests" size={22} color="primary" />
           </View>
           <View style={styles.summaryText}>
-            <AppText variant="subheading">
-              {`${event.goingCount} ${c.t('home.going')}`}
-            </AppText>
+            <AppText variant="subheading">{c.summaryLabel}</AppText>
             <AppText variant="caption" color="textMuted" numberOfLines={1}>
               {event.description}
             </AppText>
@@ -79,7 +78,15 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
         </View>
       ) : null}
 
-      {c.groups ? (
+      {c.isEmpty ? (
+        <AppEmptyState
+          title={c.emptyTitle}
+          message={c.emptyMessage}
+          icon="guests"
+        />
+      ) : null}
+
+      {c.groups && !c.isEmpty ? (
         <>
           {c.groups.hosts.length > 0 ? (
             <View style={styles.section}>
