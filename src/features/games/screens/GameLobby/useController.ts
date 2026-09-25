@@ -9,6 +9,7 @@ import { useLanguage } from '../../../../app/localization';
 import { buildGameRoomLink } from '../../../../navigation/linking';
 import type { GamesStackParamList } from '../../../../navigation/types';
 import { trackEvent } from '../../../../services/analytics';
+import { labelValueLine, ltrIsolate } from '../../../../utils/bidi';
 import { appLogger } from '../../../../services/logger';
 import { useGameContent } from '../../core/hooks';
 import { localizeText } from '../../core/localized';
@@ -196,6 +197,10 @@ export function useGameLobbyController(gameId: GameId) {
   const gameplay = isGameplayState(session.current?.gameState)
     ? session.current.gameState
     : null;
+  const quarterMileUnit = quarterMilePackUnit(
+    quarterMilePacks,
+    gameplay?.kind === 'quarter-mile' ? gameplay.state?.packId : undefined,
+  );
   const summary = gameplaySummary(gameplay);
   const gameFinished = summary?.finished ?? false;
   const wasFinished = useRef(gameFinished);
@@ -945,13 +950,15 @@ export function useGameLobbyController(gameId: GameId) {
     quarterMilePacks,
     selectedQuarterMilePackId: selectedQuarterMilePack?.id ?? null,
     selectQuarterMilePack: setQuarterMilePackId,
+    // LRI…PDI keeps "$120k" left-to-right inside Arabic text.
     formatQuarterMileScore: (score: number | null | undefined) =>
-      formatQuarterMileScore(
-        score,
-        quarterMilePackUnit(
-          quarterMilePacks,
-          gameplay?.kind === 'quarter-mile' ? gameplay.state?.packId : undefined,
-        ),
+      ltrIsolate(formatQuarterMileScore(score, quarterMileUnit)),
+    /** "name: $12k" that lays out correctly for Arabic names in either UI language. */
+    quarterMileScoreLine: (name: string, score: number | null | undefined) =>
+      labelValueLine(
+        name,
+        formatQuarterMileScore(score, quarterMileUnit),
+        language,
       ),
     quarterMileCurrentPackName:
       gameplay?.kind === 'quarter-mile'

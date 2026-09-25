@@ -542,9 +542,11 @@ export function GameLobbyScreen({
               </AppText>
               {c.quarterMileScores.map(row => (
                 <AppText key={row.playerId} variant="body" color="textMuted">
-                  {c.players.find(p => p.id === row.playerId)?.name ??
-                    row.playerId}
-                  : {c.formatQuarterMileScore(row.score)}
+                  {c.quarterMileScoreLine(
+                    c.players.find(p => p.id === row.playerId)?.name ??
+                      row.playerId,
+                    row.score,
+                  )}
                 </AppText>
               ))}
             </AppCard>
