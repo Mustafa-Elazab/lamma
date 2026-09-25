@@ -31,11 +31,6 @@ export function displayNameOrGuest(
   user: AuthUser | null,
   guestLabel: string,
 ): string {
-  if (!user) {
-    return guestLabel;
-  }
-  if (user.isAnonymous || !user.displayName) {
-    return guestLabel;
-  }
-  return user.displayName;
+  // Guests can pick a name during profile setup, so use it when present.
+  return user?.displayName?.trim() || guestLabel;
 }

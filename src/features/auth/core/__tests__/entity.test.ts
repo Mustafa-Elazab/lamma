@@ -29,5 +29,8 @@ describe('auth entity helpers', () => {
     expect(displayNameOrGuest(guest, 'Guest')).toBe('Guest');
     expect(displayNameOrGuest(null, 'Guest')).toBe('Guest');
     expect(displayNameOrGuest(member, 'Guest')).toBe('Mostafa Elazab');
+    expect(
+      displayNameOrGuest({ ...guest, displayName: 'Nour' }, 'Guest'),
+    ).toBe('Nour');
   });
 });

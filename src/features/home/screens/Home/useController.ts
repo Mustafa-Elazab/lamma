@@ -15,11 +15,13 @@ import {
 } from '../../../events';
 import { usePreferences } from '../../../settings/core';
 import type { HomeTab, HomeTabItem } from './types';
+import { useUserProfile } from '../../../profile/core';
 
 export function useHomeController() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { profile } = useUserProfile();
   const { preferences } = usePreferences();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const [filter, setFilter] = useState<HomeTab>('upcoming');
@@ -104,13 +106,19 @@ export function useHomeController() {
     };
   }, [filter, t]);
 
+  const avatarUri = profile.photoDataUrl ?? user?.photoURL ?? null;
+  const avatar = useMemo(
+    () => (avatarUri ? { uri: avatarUri } : undefined),
+    [avatarUri],
+  );
+
   return {
     t,
     filter,
     setFilter,
     tabs,
     greetingName,
-    avatar: user?.photoURL ? { uri: user.photoURL } : undefined,
+    avatar,
     featuredCard,
     featured,
     events,
