@@ -3,6 +3,7 @@ import {
   buildGuestSession,
   GUEST_SESSION_KEY,
   isGuestSession,
+  readRefreshToken,
   type GuestSession,
 } from './guestSession';
 
@@ -25,7 +26,7 @@ export async function saveGuestSession(user: TokenUser): Promise<GuestSession | 
     uid: user.uid,
     idToken: result.token,
     expirationTime: result.expirationTime,
-    refreshToken: user.refreshToken ?? null,
+    refreshToken: readRefreshToken(user),
   });
   await secureSetJSON(GUEST_SESSION_KEY, session);
   return session;

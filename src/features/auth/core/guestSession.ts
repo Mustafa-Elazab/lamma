@@ -54,3 +54,18 @@ export function isGuestTokenExpired(
 ): boolean {
   return session.expiresAt <= now;
 }
+
+/**
+ * RNFB's native User throws on `refreshToken` ("unsupported by the native
+ * Firebase SDKs"), so read it defensively; the web SDK / tests may have it.
+ */
+export function readRefreshToken(user: {
+  refreshToken?: string | null;
+}): string | null {
+  try {
+    const value = user.refreshToken;
+    return typeof value === 'string' && value ? value : null;
+  } catch {
+    return null;
+  }
+}
