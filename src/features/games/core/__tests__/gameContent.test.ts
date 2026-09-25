@@ -104,5 +104,6 @@ describe('quarter mile price formatting', () => {
     expect(formatQuarterMileScore(1250, 'usd-k')).toBe('$1.25M');
     expect(formatQuarterMileScore(1100, 'usd-k')).toBe('$1.1M');
     expect(formatQuarterMileScore(80)).toBe('80');
+    expect(formatQuarterMileScore(57, 'usd-k')).toBe('$57k');
   });
 });

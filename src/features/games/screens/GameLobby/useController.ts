@@ -49,6 +49,7 @@ import {
 import {
   QUARTER_MILE_PACKS,
   formatQuarterMileScore,
+  quarterMilePackUnit,
 } from '../../quarter-mile/content/packs';
 import {
   advanceTriviaQuestion,
@@ -891,12 +892,13 @@ export function useGameLobbyController(gameId: GameId) {
     quarterMilePacks,
     selectedQuarterMilePackId: selectedQuarterMilePack?.id ?? null,
     selectQuarterMilePack: setQuarterMilePackId,
-    formatQuarterMileScore: (score: number) =>
+    formatQuarterMileScore: (score: number | null | undefined) =>
       formatQuarterMileScore(
         score,
-        gameplay?.kind === 'quarter-mile'
-          ? quarterMilePacks.find(pack => pack.id === gameplay.state.packId)?.unit
-          : undefined,
+        quarterMilePackUnit(
+          quarterMilePacks,
+          gameplay?.kind === 'quarter-mile' ? gameplay.state?.packId : undefined,
+        ),
       ),
     quarterMileCurrentPackName:
       gameplay?.kind === 'quarter-mile'
