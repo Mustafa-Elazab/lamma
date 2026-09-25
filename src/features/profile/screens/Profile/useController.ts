@@ -54,8 +54,11 @@ export function useProfileController() {
     goNotifications: () => go('NotificationSettings'),
     goAppearance: () => go('Appearance'),
     goDrafts: () => go('MyDrafts'),
-    goSavedThemes: () => go('SavedThemes'),
     goHelp: () => go('HelpSupport'),
+    goAbout: () => go('About'),
+    goContact: () => go('ContactUs'),
+    goTerms: () => go('TermsOfService'),
+    goPrivacy: () => go('PrivacyPolicy'),
     goEditProfile: () => go('EditProfile'),
     signOut,
   };

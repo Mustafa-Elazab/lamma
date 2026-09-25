@@ -34,8 +34,11 @@ export type AppStackParamList = {
   NotificationSettings: undefined;
   Appearance: undefined;
   MyDrafts: undefined;
-  SavedThemes: undefined;
   HelpSupport: undefined;
+  About: undefined;
+  ContactUs: undefined;
+  TermsOfService: undefined;
+  PrivacyPolicy: undefined;
 };
 
 export type AuthStackParamList = {

@@ -73,6 +73,9 @@ export const en = {
     emptyPastMessage: 'Your memories will show up here.',
   },
   event: {
+    youAreHosting: "YOU'RE HOSTING",
+    shareInvite: 'Share invite',
+    manageGuests: 'Guest list',
     notFoundTitle: 'Event not found',
     notFoundMessage: 'This invite link may be wrong, or the event was removed.',
     hostedBy: 'Hosted by',
@@ -207,6 +210,7 @@ export const en = {
     footer: 'TOGETHER · A BRIGHTER EGYPT',
   },
   discover: {
+    all: 'All',
     title: 'Discover',
     subtitle: 'Find public events near you',
     searchPlaceholder: 'Search events, hosts, places',
@@ -373,8 +377,6 @@ export const en = {
     darkMode: 'Dark mode',
     myDrafts: 'My drafts',
     myDraftsHint: 'Continue building your events',
-    savedThemes: 'Saved themes',
-    savedThemesHint: 'Your favorite event ideas',
     help: 'Help & support',
     helpHint: 'FAQs, contact us, and more',
     signOut: 'Sign out',
@@ -418,9 +420,126 @@ export const en = {
     terms: 'Terms of service',
     privacy: 'Privacy policy',
     appVersion: 'Lamma v{{version}}',
-    savedThemesTitle: 'Saved themes',
-    savedThemesHint: 'Tap the heart to save your favorites',
-    savedThemesEmpty: 'No saved themes yet',
+  },
+  guests: {
+    summaryGoing: '{{count}} going',
+    summaryMaybe: '{{count}} maybe',
+    summaryDeclined: '{{count}} declined',
+    emptyGoingTitle: 'No one is going yet',
+    emptyGoingMessage: 'Share the invite so your guests can RSVP.',
+    emptyMaybeTitle: 'No maybes yet',
+    emptyMaybeMessage: 'Guests who answer Maybe will show up here.',
+    emptyDeclinedTitle: 'No one declined',
+    emptyDeclinedMessage: "Guests who can't make it will show up here.",
+  },
+  profileSetup: {
+    title: 'Set up your profile',
+    subtitle:
+      "Add your name and a photo so friends know it's you. You can skip this and do it later.",
+    addPhoto: 'Add photo',
+    changePhoto: 'Change photo',
+    removePhoto: 'Remove',
+    save: 'Save and continue',
+    skip: 'Skip for now',
+    photoError: 'Could not open your photos. Please try again.',
+    saveError:
+      'Could not save your profile. Check your connection and try again.',
+  },
+  info: {
+    sectionTitle: 'About Lamma',
+    aboutTitle: 'About Lamma',
+    aboutHint: 'What Lamma is and who makes it',
+    contactTitle: 'Contact us',
+    contactHint: 'Questions, feedback or support',
+    termsTitle: 'Terms of Service',
+    termsHint: 'The rules for using Lamma',
+    privacyTitle: 'Privacy Policy',
+    privacyHint: 'What we collect and why',
+    lastUpdated: 'Last updated: September 2026',
+    openWebsite: 'Open lamma-links.vercel.app',
+    version: 'Version {{version}}',
+    about: {
+      tagline: 'Gather your people.',
+      intro:
+        'Lamma (لمّة, "a gathering") helps you plan events and bring friends and family together, from birthdays and weddings to dinners, trips and Iftar.',
+      s1Title: 'Plan events',
+      s1Body:
+        'Create an event in a few steps, pick a theme or your own cover photo, and share a beautiful invite link on WhatsApp or anywhere else.',
+      s2Title: 'Know who is coming',
+      s2Body:
+        "Guests answer Going, Maybe or Can't go, and hosts see the whole guest list in one place.",
+      s3Title: 'Play together',
+      s3Body:
+        'Start a party game such as Trivia, Imposter, Icebreakers or Quarter Mile, and everyone plays on their own phone.',
+      s4Title: 'Made in Egypt',
+      s4Body:
+        'Lamma is built in Egypt, in Arabic and English, for the way we celebrate.',
+    },
+    contact: {
+      intro:
+        'We would love to hear from you. Send us your questions, ideas or problems and we will reply as soon as we can.',
+      emailLabel: 'Email',
+      sendEmail: 'Send us an email',
+      responseTime: 'We usually reply within 2 to 3 business days.',
+      reportTitle: 'Reporting a problem',
+      reportBody:
+        'Tell us what happened, which screen you were on and your phone model. Screenshots help a lot.',
+      emailSubject: 'Lamma support',
+      emailError: 'No email app found. Write to us at {{email}}.',
+    },
+    terms: {
+      intro:
+        'By using Lamma you agree to these terms. Please read them carefully.',
+      s1Title: '1. Using Lamma',
+      s1Body:
+        'You can use Lamma as a guest or with a Google or Apple account. You are responsible for the activity on your account and for keeping your device secure.',
+      s2Title: '2. Your content',
+      s2Body:
+        'You own the events, photos, names and messages you add. You allow Lamma to store them and show them to the people you share them with, only to run the service.',
+      s3Title: '3. Acceptable use',
+      s3Body:
+        'Do not use Lamma for anything illegal, hateful, harassing or misleading, and do not upload content you do not have the right to share. We may remove content or suspend accounts that break these rules.',
+      s4Title: '4. Events and invites',
+      s4Body:
+        'Hosts are responsible for their events. Anyone with an invite link can view that event, so only share links with people you trust. Lamma does not organise and is not responsible for events created in the app.',
+      s5Title: '5. Games',
+      s5Body:
+        'Party games are for fun. Any prize mentioned in a game is arranged by the host, not by Lamma.',
+      s6Title: '6. Availability',
+      s6Body:
+        'Lamma is provided "as is". We work to keep it running, but we cannot promise it will always be available or error-free. Events are deleted automatically after they end.',
+      s7Title: '7. Changes',
+      s7Body:
+        'We may update these terms. If a change is important we will tell you in the app. Using Lamma after a change means you accept the updated terms.',
+      s8Title: '8. Contact',
+      s8Body: 'Questions about these terms? Email {{email}}.',
+    },
+    privacy: {
+      intro:
+        'Your privacy matters to us. This policy explains what Lamma collects, why, and the choices you have.',
+      s1Title: 'What we collect',
+      s1Body:
+        'Account data (an anonymous ID for guests, or your name, email and photo from Google or Apple), the profile name and photo you choose, the events you create and your RSVPs, game activity, and basic device data such as the notification token, app version and crash reports.',
+      s2Title: 'How we use it',
+      s2Body:
+        'Only to run the app: show your events and invites, sync RSVPs and games, send the reminders and notifications you enabled, fix crashes and improve Lamma. We do not sell your data and we do not show ads.',
+      s3Title: 'Who can see it',
+      s3Body:
+        'Event details are visible to people who have the invite link. Your name and RSVP are visible to the event host and guests. Your profile photo stays in your account.',
+      s4Title: 'Service providers',
+      s4Body:
+        'Lamma uses Google Firebase (sign-in, database, notifications, analytics and crash reports) to store and process data for us.',
+      s5Title: 'Security',
+      s5Body:
+        'Data is sent over encrypted connections. On your phone, the guest session token is kept in encrypted storage protected by the device keychain.',
+      s6Title: 'Your choices',
+      s6Body:
+        'You can change your name, turn notifications off in Settings, delete your events or sign out at any time. To delete your account and data, email us and we will do it.',
+      s7Title: 'Children',
+      s7Body: 'Lamma is not meant for children under 13.',
+      s8Title: 'Contact',
+      s8Body: 'Questions about privacy? Email {{email}}.',
+    },
   },
 };
 

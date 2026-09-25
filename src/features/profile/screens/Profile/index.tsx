@@ -105,13 +105,40 @@ export function ProfileScreen(): React.ReactElement {
             showChevron
             onPress={c.goDrafts}
           />
-          <View style={styles.divider} />
+        </View>
+
+        <View style={styles.group}>
           <AppListItem
-            title={c.t('profile.savedThemes')}
-            subtitle={c.t('profile.savedThemesHint')}
+            title={c.t('info.aboutTitle')}
+            subtitle={c.t('info.aboutHint')}
             leadingIcon="heart"
             showChevron
-            onPress={c.goSavedThemes}
+            onPress={c.goAbout}
+          />
+          <View style={styles.divider} />
+          <AppListItem
+            title={c.t('info.contactTitle')}
+            subtitle={c.t('info.contactHint')}
+            leadingIcon="comment"
+            showChevron
+            onPress={c.goContact}
+          />
+          <View style={styles.divider} />
+          <AppListItem
+            title={c.t('info.termsTitle')}
+            subtitle={c.t('info.termsHint')}
+            leadingIcon="draft"
+            showChevron
+            onPress={c.goTerms}
+          />
+          <View style={styles.divider} />
+          <AppListItem
+            title={c.t('info.privacyTitle')}
+            subtitle={c.t('info.privacyHint')}
+            leadingIcon="shield"
+            leadingIconColor="success"
+            showChevron
+            onPress={c.goPrivacy}
           />
         </View>
 
