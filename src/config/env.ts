@@ -15,6 +15,12 @@
 export const env = {
   firebaseEnabled: true,
   /**
+   * Crashlytics collects in release builds only. Flip this to `true` locally
+   * to test Crashlytics from a debug build (reports appear in the console
+   * after the app is relaunched). Never commit it as `true`.
+   */
+  crashlyticsInDev: false as boolean,
+  /**
    * PUBLIC_SHARE_BASE_URL: the free Vercel production domain that serves the
    * `web/` link site (`/e/{eventId}`, `/g/{code}`, `/.well-known/*`).
    * Change it here ONLY; if Vercel gives you a different project URL also

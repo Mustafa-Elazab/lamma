@@ -16,7 +16,7 @@ import { OnboardingScreen } from '../features/auth/screens/Onboarding';
 import { ProfileSetupScreen } from '../features/profile/screens/ProfileSetup';
 import { useProfileSetupGate } from '../features/profile/useProfileSetupGate';
 import { trackScreen } from '../services/analytics';
-import { reportError } from '../services/crashReporting';
+import { crashBreadcrumb, reportError } from '../services/crashReporting';
 import { setNotificationOpenHandler } from '../services/messaging';
 import { AppNavigator } from './AppNavigator';
 import { AuthNavigator } from './AuthNavigator';
@@ -129,6 +129,7 @@ export function RootNavigator(): React.ReactElement {
         const routeName = navigationRef.getCurrentRoute()?.name;
         routeNameRef.current = routeName;
         if (routeName) {
+          crashBreadcrumb(`screen: ${routeName}`);
           void trackScreen(routeName);
         }
       }}
@@ -136,6 +137,7 @@ export function RootNavigator(): React.ReactElement {
         const previousRouteName = routeNameRef.current;
         const currentRouteName = navigationRef.getCurrentRoute()?.name;
         if (currentRouteName && previousRouteName !== currentRouteName) {
+          crashBreadcrumb(`screen: ${previousRouteName ?? '-'} -> ${currentRouteName}`);
           void trackScreen(currentRouteName);
         }
         routeNameRef.current = currentRouteName;

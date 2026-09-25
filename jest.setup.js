@@ -7,6 +7,8 @@ jest.mock('@react-native-firebase/analytics', () => ({
   getAnalytics: jest.fn(() => ({})),
   logEvent: jest.fn(() => Promise.resolve()),
   logScreenView: jest.fn(() => Promise.resolve()),
+  setUserId: jest.fn(() => Promise.resolve()),
+  setUserProperties: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('@react-native-firebase/crashlytics', () => ({
@@ -14,6 +16,8 @@ jest.mock('@react-native-firebase/crashlytics', () => ({
   log: jest.fn(),
   recordError: jest.fn(),
   setAttributes: jest.fn(() => Promise.resolve(null)),
+  setCrashlyticsCollectionEnabled: jest.fn(() => Promise.resolve(null)),
+  setUserId: jest.fn(() => Promise.resolve(null)),
 }));
 
 jest.mock('@react-native-firebase/messaging', () => ({

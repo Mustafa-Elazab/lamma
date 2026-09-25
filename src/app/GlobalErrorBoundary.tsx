@@ -5,7 +5,7 @@ import { StyleSheet } from 'react-native';
 
 import { AppErrorState } from '../design-system/molecules/ErrorState';
 import { AppScreenTemplate } from '../design-system/templates/ScreenTemplate';
-import { reportError } from '../services/crashReporting';
+import { crashBreadcrumb, reportError } from '../services/crashReporting';
 
 function ErrorFallback({ onReset }: { onReset: () => void }) {
   const { t } = useTranslation();
@@ -40,8 +40,12 @@ export class GlobalErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
+    const componentStack = (info.componentStack ?? '').trim();
+    crashBreadcrumb(`error boundary component stack:\n${componentStack}`);
     reportError(error, 'react.error-boundary', {
-      componentStack: info.componentStack ?? '',
+      fatal: false,
+      componentStack,
+      topComponent: componentStack.split('\n')[0]?.trim() ?? '',
     });
   }
 
