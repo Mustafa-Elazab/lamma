@@ -183,9 +183,9 @@ function useShareInviteController(
     Clipboard.setString(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    void trackEvent('invite_shared', {
+    void trackEvent('event_share', {
       event_id: eventId,
-      method: 'clipboard',
+      method: 'copy',
     });
   }, [eventId, link]);
 
@@ -209,9 +209,9 @@ function useShareInviteController(
         failOnCancel: false,
       });
       if (result.success) {
-        await trackEvent('invite_shared', {
+        await trackEvent('event_share', {
           event_id: eventId,
-          method: 'system',
+          method: 'share',
         });
       }
     } catch (error) {
@@ -250,7 +250,7 @@ function useShareInviteController(
         openStore: () => openStoreListing(whatsappStoreUrls(Platform.OS)),
       });
       if (outcome === 'shared') {
-        await trackEvent('invite_shared', {
+        await trackEvent('event_share', {
           event_id: eventId,
           method: 'whatsapp',
         });

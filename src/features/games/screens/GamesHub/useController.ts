@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { displayNameOrGuest, useAuth } from '../../../auth';
 import { useLanguage } from '../../../../app/localization';
 import type { GamesStackParamList } from '../../../../navigation/types';
+import { trackEvent } from '../../../../services/analytics';
 import { localizeText } from '../../core/localized';
 import { useGamesContent } from '../../core/hooks';
 import { useGameSession } from '../../core/session';
@@ -71,6 +72,7 @@ export function useGamesHubController() {
       setJoinError(t('games.joinCodeNotFound'));
       return;
     }
+    void trackEvent('join_room', { game_id: joined.gameId, source: 'code' });
     navigation.navigate('GameLobby', { gameId: joined.gameId });
   }, [joinCode, navigation, playerName, session, t, user]);
 

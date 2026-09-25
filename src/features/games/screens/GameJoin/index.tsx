@@ -8,6 +8,7 @@ import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
 import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import type { GamesStackParamList } from '../../../../navigation/types';
+import { trackEvent } from '../../../../services/analytics';
 import { useGameSession } from '../../core/session';
 
 type Props = NativeStackScreenProps<GamesStackParamList, 'GameJoin'>;
@@ -36,6 +37,7 @@ export function GameJoinScreen({
       setFailed(true);
       return;
     }
+    void trackEvent('join_room', { game_id: joined.gameId, source: 'link' });
     navigation.replace('GameLobby', { gameId: joined.gameId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);

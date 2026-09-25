@@ -70,12 +70,12 @@ export function useRsvpMutation() {
     { eventId: string; status: RSVPStatus }
   >({
     mutationFn: ({ eventId, status }) => repository.setRsvp(eventId, status),
-    onSuccess: updated => {
+    onSuccess: (updated, variables) => {
       queryClient.setQueryData(eventKeys.detail(updated.id), updated);
       void queryClient.invalidateQueries({ queryKey: eventKeys.all });
-      void trackEvent('rsvp_submitted', {
+      void trackEvent('rsvp', {
         event_id: updated.id,
-        status: updated.viewerRsvp,
+        status: String(updated.viewerRsvp ?? variables.status),
       });
       const remindersEnabled =
         queryClient.getQueryData<{
@@ -99,7 +99,7 @@ export function useCreateEvent() {
     mutationFn: input => repository.createEvent(input),
     onSuccess: event => {
       void queryClient.invalidateQueries({ queryKey: eventKeys.all });
-      void trackEvent('event_created', {
+      void trackEvent('event_create', {
         event_id: event.id,
         visibility: event.visibility,
       });

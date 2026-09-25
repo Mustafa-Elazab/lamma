@@ -1,13 +1,14 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Alert, Share } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../../auth';
 import { useLanguage } from '../../../../app/localization';
 import { buildGameRoomLink } from '../../../../navigation/linking';
 import type { GamesStackParamList } from '../../../../navigation/types';
+import { trackEvent } from '../../../../services/analytics';
 import { appLogger } from '../../../../services/logger';
 import { useGameContent } from '../../core/hooks';
 import { localizeText } from '../../core/localized';
@@ -103,6 +104,33 @@ type GameplayState =
   | { kind: 'quarter-mile'; state: QuarterMileState }
   | { kind: 'icebreakers'; current: IcebreakerRound | null };
 
+/** Pack id and "finished" flag of the running game, for analytics. */
+function gameplaySummary(
+  gameplay: GameplayState | null,
+): { packId?: string; finished: boolean; players: number } | null {
+  switch (gameplay?.kind) {
+    case 'imposter':
+      return {
+        finished: gameplay.state.phase === 'result',
+        players: gameplay.state.playerIds?.length ?? 0,
+      };
+    case 'trivia-time':
+      return {
+        packId: gameplay.round.settings?.packId,
+        finished: gameplay.round.phase === 'finished',
+        players: gameplay.round.scores?.length ?? 0,
+      };
+    case 'quarter-mile':
+      return {
+        packId: gameplay.state.packId,
+        finished: gameplay.state.phase === 'finished',
+        players: gameplay.state.playerOrder?.length ?? 0,
+      };
+    default:
+      return null;
+  }
+}
+
 function isGameplayState(value: unknown): value is GameplayState {
   if (!value || typeof value !== 'object') {
     return false;
@@ -168,6 +196,21 @@ export function useGameLobbyController(gameId: GameId) {
   const gameplay = isGameplayState(session.current?.gameState)
     ? session.current.gameState
     : null;
+  const summary = gameplaySummary(gameplay);
+  const gameFinished = summary?.finished ?? false;
+  const wasFinished = useRef(gameFinished);
+  useEffect(() => {
+    if (gameFinished && !wasFinished.current && summary) {
+      void trackEvent('game_end', {
+        game_id: gameId,
+        pack_id: summary.packId,
+        players: summary.players,
+      });
+    }
+    wasFinished.current = gameFinished;
+    // Only the finished transition matters, not every state update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameFinished]);
   const currentTriviaSettings =
     gameplay?.kind === 'trivia-setup' ? gameplay.settings : triviaSettings;
   // Always identify the local player by their own auth uid. Never fall back to
@@ -380,6 +423,12 @@ export function useGameLobbyController(gameId: GameId) {
     if (!isHost || connectedPlayers.length < requiredConnectedPlayers) {
       return;
     }
+    const logStart = (packId: string | undefined, playerCount: number) =>
+      void trackEvent('game_start', {
+        game_id: gameId,
+        pack_id: packId,
+        players: playerCount,
+      });
     if (gameId === 'imposter') {
       session.startCurrent({
         kind: 'imposter',
@@ -388,6 +437,7 @@ export function useGameLobbyController(gameId: GameId) {
           previous: gameplay?.kind === 'imposter' ? gameplay.state : undefined,
         }),
       });
+      logStart(undefined, connectedPlayers.length);
       return;
     }
     if (gameId === 'trivia-time') {
@@ -406,6 +456,7 @@ export function useGameLobbyController(gameId: GameId) {
           now: Date.now(),
         }),
       });
+      logStart(pack.id, connectedPlayers.length);
       return;
     }
     if (gameId === 'quarter-mile') {
@@ -420,6 +471,7 @@ export function useGameLobbyController(gameId: GameId) {
           players: connectedPlayers.slice(0, 2),
         }),
       });
+      logStart(pack.id, 2);
       return;
     }
     if (icebreakerPrompts.length === 0) {
@@ -432,6 +484,7 @@ export function useGameLobbyController(gameId: GameId) {
         prompts: icebreakerPrompts,
       }),
     });
+    logStart(undefined, connectedPlayers.length);
   }, [
     connectedPlayers,
     currentTriviaSettings,

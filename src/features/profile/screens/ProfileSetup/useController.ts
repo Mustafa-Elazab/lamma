@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { trackEvent } from '../../../../services/analytics';
 import { reportError } from '../../../../services/crashReporting';
 import { useAuth } from '../../../auth';
 import {
@@ -47,6 +48,11 @@ export function useProfileSetupController(onDone: () => void) {
         setupCompleted: true,
       });
       await markProfileSetupCompleted(uid);
+      void trackEvent('profile_setup_complete', {
+        has_name: Boolean(displayName),
+        has_photo: Boolean(photo),
+        skipped: false,
+      });
       if (displayName) {
         await updateProfile({ displayName });
       }
@@ -66,6 +72,11 @@ export function useProfileSetupController(onDone: () => void) {
       reportError(err, 'profile.setup-skip', { uid }),
     );
     saveProfile.mutate({ setupCompleted: true });
+    void trackEvent('profile_setup_complete', {
+      has_name: false,
+      has_photo: false,
+      skipped: true,
+    });
     onDone();
   }, [onDone, saveProfile, uid]);
 
