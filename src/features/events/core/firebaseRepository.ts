@@ -2,6 +2,7 @@ import { getAuth } from '@react-native-firebase/auth';
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -9,6 +10,7 @@ import {
   limit as fbLimit,
   orderBy,
   query,
+  Timestamp,
   updateDoc,
   where,
   type DocumentData,
@@ -28,7 +30,15 @@ import type {
   EventRepository,
   HomeFeed,
 } from './repository';
+import {
+  attendeesFromRsvps,
+  countRsvps,
+  type GuestProfile,
+} from './rsvpAttendees';
 import { uploadEventThemeImage } from './uploadThemeImage';
+
+/** Inline covers must leave room in the 1 MB Firestore document limit. */
+const MAX_INLINE_COVER_CHARS = 900_000;
 
 type DocData = DocumentData;
 
@@ -48,6 +58,19 @@ function currentUid(): string {
 function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
   const data = (snapshot.data() ?? {}) as DocData;
   const rsvps = (data.rsvps ?? {}) as Record<string, RSVPStatus>;
+  const hostId = (data.hostId as string) ?? '';
+  const storedAttendees = (data.attendees as LammaEvent['attendees']) ?? [];
+  // RSVPs live in the `rsvps` map (the stored `attendees` array is legacy and
+  // normally empty), so derive the guest list and counts from it.
+  const attendees =
+    storedAttendees.length > 0
+      ? storedAttendees
+      : attendeesFromRsvps({
+          rsvps,
+          guests: (data.guests ?? {}) as Record<string, GuestProfile>,
+          hostId,
+        });
+  const rsvpCount = Object.keys(rsvps).length;
   return {
     id: snapshot.id,
     title: (data.title as string) ?? '',
@@ -69,9 +92,15 @@ function mapDoc(snapshot: SnapshotLike, uid: string): LammaEvent {
         ? (getAuth().currentUser?.displayName ?? 'Host')
         : 'Host'),
     hostPhoto: (data.hostPhoto as string | null) ?? null,
-    attendees: (data.attendees as LammaEvent['attendees']) ?? [],
-    attendeeCount: (data.attendeeCount as number) ?? 0,
-    goingCount: (data.goingCount as number) ?? 0,
+    attendees,
+    attendeeCount:
+      rsvpCount > 0
+        ? rsvpCount - countRsvps(rsvps, 'none')
+        : (data.attendeeCount as number) ?? 0,
+    goingCount:
+      rsvpCount > 0
+        ? countRsvps(rsvps, 'going')
+        : (data.goingCount as number) ?? 0,
     viewerRsvp: rsvps[uid] ?? 'none',
     isHosting: (data.hostId as string) === uid,
     visibility: (data.visibility as LammaEvent['visibility']) ?? 'public',
@@ -86,6 +115,43 @@ export class FirebaseEventRepository implements EventRepository {
     return getFirestore();
   }
 
+  private purgeStarted = false;
+
+  /**
+   * Events are deleted once they end. Firestore TTL (expireAt) needs the Blaze
+   * plan, so every app session also removes a small batch of ended events
+   * itself (rules allow anyone signed in to delete an event that has ended).
+   */
+  private purgeEndedEvents(): void {
+    if (this.purgeStarted) {
+      return;
+    }
+    this.purgeStarted = true;
+    const run = async () => {
+      const snap = await getDocs(
+        query(
+          collection(this.db, COLLECTION),
+          where('endAt', '<', Date.now()),
+          fbLimit(25),
+        ),
+      );
+      await Promise.all(
+        (snap.docs as Array<SnapshotLike & { ref: unknown }>).map(d =>
+          deleteDoc(d.ref as Parameters<typeof deleteDoc>[0]).catch(() => undefined),
+        ),
+      );
+      if (snap.docs.length > 0) {
+        appLogger.log('[events.purge] removed ended events', {
+          count: snap.docs.length,
+        });
+      }
+    };
+    run().catch(error => {
+      this.purgeStarted = false;
+      appLogger.error('[events.purge] failed', error);
+    });
+  }
+
   async getHomeFeed(params: {
     filter: EventListFilter;
     cursor?: string | null;
@@ -95,6 +161,7 @@ export class FirebaseEventRepository implements EventRepository {
     const pageSize = params.limit ?? 5;
     const now = Date.now();
     const base = collection(this.db, COLLECTION);
+    this.purgeEndedEvents();
 
     try {
       let events: LammaEvent[] = [];
@@ -173,11 +240,19 @@ export class FirebaseEventRepository implements EventRepository {
 
     try {
       // Querying visibility alone avoids requiring a Firestore composite index on (visibility, startAt).
-      const q = query(
-        base,
-        where('visibility', '==', 'public'),
-        fbLimit(pageSize * 3),
-      );
+      // Equality-only filters (visibility + category) need no composite index.
+      const q = params.category
+        ? query(
+            base,
+            where('visibility', '==', 'public'),
+            where('category', '==', params.category),
+            fbLimit(pageSize * 3),
+          )
+        : query(
+            base,
+            where('visibility', '==', 'public'),
+            fbLimit(pageSize * 3),
+          );
       const snap = await getDocs(q);
       const queryText = params.query?.trim().toLowerCase() ?? '';
       const events = (snap.docs as SnapshotLike[])
@@ -201,8 +276,17 @@ export class FirebaseEventRepository implements EventRepository {
 
   async setRsvp(eventId: string, status: RSVPStatus): Promise<LammaEvent> {
     const uid = currentUid();
+    const user = getAuth().currentUser;
     const ref = doc(this.db, COLLECTION, eventId);
-    await updateDoc(ref, { [`rsvps.${uid}`]: status });
+    const photo = user?.photoURL ?? null;
+    // The public guest card lets the host's guest list show names per status.
+    await updateDoc(ref, {
+      [`rsvps.${uid}`]: status,
+      [`guests.${uid}`]: {
+        name: user?.displayName?.trim() || null,
+        photoURL: photo && /^https?:\/\//i.test(photo) ? photo : null,
+      },
+    });
     const snapshot = await getDoc(ref);
     return mapDoc(snapshot, uid);
   }
@@ -238,7 +322,14 @@ export class FirebaseEventRepository implements EventRepository {
 
     let customCoverImageUrl: string | null = null;
     if (input.customThemeUri) {
-      if (/^https?:\/\//i.test(input.customThemeUri)) {
+      if (
+        /^https?:\/\//i.test(input.customThemeUri) ||
+        input.customThemeUri.startsWith('data:image/')
+      ) {
+        // Shrunk photos are saved inline as a data URI (free plan, no Storage).
+        if (input.customThemeUri.length > MAX_INLINE_COVER_CHARS) {
+          throw new Error('events/cover-too-large: pick a smaller photo');
+        }
         customCoverImageUrl = input.customThemeUri;
       } else {
         try {
@@ -266,6 +357,8 @@ export class FirebaseEventRepository implements EventRepository {
       themeKey: input.themeKey,
       startAt: input.startAt,
       endAt: input.endAt,
+      // Firestore TTL deletes the doc after this time (once Blaze is enabled).
+      expireAt: Timestamp.fromMillis(input.endAt),
       venueName: input.venueName,
       areaAddress: input.areaAddress,
       latitude: input.latitude ?? null,

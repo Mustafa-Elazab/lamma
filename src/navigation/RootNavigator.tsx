@@ -13,8 +13,10 @@ import { SplashScreen } from '../app/SplashScreen';
 import { useTheme } from '../design-system/theme/ThemeProvider';
 import { useAuth, useOnboardingContext } from '../features/auth';
 import { OnboardingScreen } from '../features/auth/screens/Onboarding';
+import { ProfileSetupScreen } from '../features/profile/screens/ProfileSetup';
+import { useProfileSetupGate } from '../features/profile/useProfileSetupGate';
 import { trackScreen } from '../services/analytics';
-import { reportError } from '../services/crashReporting';
+import { crashBreadcrumb, reportError } from '../services/crashReporting';
 import { setNotificationOpenHandler } from '../services/messaging';
 import { AppNavigator } from './AppNavigator';
 import { AuthNavigator } from './AuthNavigator';
@@ -25,9 +27,13 @@ import { usePendingLink } from './usePendingLink';
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 function RootContent(): React.ReactElement {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const { checked, completed } = useOnboardingContext();
-  const gateReady = status !== 'loading' && checked;
+  const profileGate = useProfileSetupGate(
+    status === 'authenticated' ? user : null,
+  );
+  const gateReady =
+    status !== 'loading' && checked && profileGate.status !== 'checking';
 
   useEffect(() => {
     if (gateReady) {
@@ -49,7 +55,16 @@ function RootContent(): React.ReactElement {
     return <OnboardingScreen />;
   }
 
-  return status === 'authenticated' ? <AppNavigator /> : <AuthNavigator />;
+  if (status !== 'authenticated') {
+    return <AuthNavigator />;
+  }
+
+  // First sign-in without a display name: optional name + photo, skippable.
+  if (profileGate.status === 'needed') {
+    return <ProfileSetupScreen onDone={profileGate.complete} />;
+  }
+
+  return <AppNavigator />;
 }
 
 export function RootNavigator(): React.ReactElement {
@@ -114,6 +129,7 @@ export function RootNavigator(): React.ReactElement {
         const routeName = navigationRef.getCurrentRoute()?.name;
         routeNameRef.current = routeName;
         if (routeName) {
+          crashBreadcrumb(`screen: ${routeName}`);
           void trackScreen(routeName);
         }
       }}
@@ -121,6 +137,7 @@ export function RootNavigator(): React.ReactElement {
         const previousRouteName = routeNameRef.current;
         const currentRouteName = navigationRef.getCurrentRoute()?.name;
         if (currentRouteName && previousRouteName !== currentRouteName) {
+          crashBreadcrumb(`screen: ${previousRouteName ?? '-'} -> ${currentRouteName}`);
           void trackScreen(currentRouteName);
         }
         routeNameRef.current = currentRouteName;

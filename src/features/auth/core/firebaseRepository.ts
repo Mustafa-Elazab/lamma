@@ -12,6 +12,7 @@ import {
   getAuth,
   linkWithCredential,
   onAuthStateChanged,
+  onIdTokenChanged,
   signInAnonymously,
   signInWithCredential,
   signOut,
@@ -21,7 +22,15 @@ import {
 } from '@react-native-firebase/auth';
 import { Linking, Platform } from 'react-native';
 
+import { reportError } from '../../../services/crashReporting';
+import { appLogger } from '../../../services/logger';
 import { AuthError, type AuthProviderId, type AuthUser } from './entity';
+import { isGuestTokenExpired } from './guestSession';
+import {
+  clearGuestSession,
+  readGuestSession,
+  saveGuestSession,
+} from './guestSessionStore';
 import type { AuthRepository } from './repository';
 
 function mapProviders(
@@ -83,8 +92,50 @@ export class FirebaseAuthRepository implements AuthRepository {
     });
   }
 
+  private launchChecked = false;
+
+  /**
+   * Keeps the encrypted guest session in sync with Firebase's own persisted
+   * user. On the first auth callback after launch the stored session is read
+   * back and compared with the restored Firebase user.
+   */
+  private async syncGuestSession(user: User | null): Promise<void> {
+    if (!this.launchChecked) {
+      this.launchChecked = true;
+      const stored = await readGuestSession();
+      if (stored) {
+        appLogger.log('[auth.guest-session] Restored encrypted guest session', {
+          uid: stored.uid,
+          matchesFirebaseUser: stored.uid === user?.uid,
+          tokenExpired: isGuestTokenExpired(stored),
+        });
+      }
+    }
+    if (user?.isAnonymous) {
+      await saveGuestSession(user);
+    } else {
+      // Signed out, or upgraded to Google/Apple: no guest token to keep.
+      await clearGuestSession();
+    }
+  }
+
+  private syncGuestSessionSafely(user: User | null): void {
+    this.syncGuestSession(user).catch(error => {
+      reportError(error, 'auth.guest-session-sync');
+    });
+  }
+
   subscribe(listener: (user: AuthUser | null) => void): () => void {
-    return onAuthStateChanged(getAuth(), user => listener(mapUser(user)));
+    const auth = getAuth();
+    // ID token changes cover sign-in, sign-out and hourly token refreshes.
+    const stopTokenSync = onIdTokenChanged(auth, user =>
+      this.syncGuestSessionSafely(user),
+    );
+    const stopAuth = onAuthStateChanged(auth, user => listener(mapUser(user)));
+    return () => {
+      stopTokenSync();
+      stopAuth();
+    };
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
@@ -93,6 +144,12 @@ export class FirebaseAuthRepository implements AuthRepository {
 
   async signInAnonymously(): Promise<AuthUser> {
     const result = await signInAnonymously(getAuth());
+    try {
+      await saveGuestSession(result.user);
+    } catch (error) {
+      // Never block sign-in on the encrypted cache; Firebase still persists.
+      reportError(error, 'auth.guest-session-save');
+    }
     return mapUser(result.user) as AuthUser;
   }
 
@@ -186,6 +243,9 @@ export class FirebaseAuthRepository implements AuthRepository {
       // Native Google session may not exist (guest / Apple-only).
     }
     await signOut(getAuth());
+    await clearGuestSession().catch(error => {
+      reportError(error, 'auth.guest-session-clear');
+    });
   }
 
   isAppleSupported(): boolean {

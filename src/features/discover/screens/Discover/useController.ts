@@ -47,9 +47,11 @@ export function useDiscoverController() {
     }
   }, [request]);
 
+  // `null` is the "All" chip, which is first and selected when the screen opens.
   const toggleCategory = useCallback((next: EventCategory) => {
     setCategory(prev => (prev === next ? null : next));
   }, []);
+  const selectAll = useCallback(() => setCategory(null), []);
 
   return {
     t,
@@ -57,6 +59,7 @@ export function useDiscoverController() {
     setRawQuery,
     category,
     toggleCategory,
+    selectAll,
     events,
     toCard,
     openEvent,

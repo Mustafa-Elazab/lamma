@@ -1,7 +1,7 @@
 import type { IconName } from '../../../assets/icons';
 import type { LocalizedText } from './localized';
 
-export type GameId = 'mafioso' | 'trivia-time' | 'icebreakers' | 'quarter-mile';
+export type GameId = 'imposter' | 'trivia-time' | 'icebreakers' | 'quarter-mile';
 export type GameSyncType = 'host-led';
 
 export type GamePlayer = {
@@ -20,17 +20,6 @@ export type GameDefinition = {
   maxPlayers: number;
   syncType: GameSyncType;
   accent: 'rose' | 'sky' | 'mint';
-};
-
-export type MafiosoRoleContent = {
-  id: string;
-  label: LocalizedText;
-  description: LocalizedText;
-};
-
-export type MafiosoContent = {
-  phases: LocalizedText[];
-  roles: Record<string, MafiosoRoleContent>;
 };
 
 export type TriviaQuestion = {
@@ -63,17 +52,13 @@ export type QuarterMileItem = {
 export type QuarterMilePack = {
   id: string;
   name: LocalizedText;
+  /** When 'usd-k', item scores are approximate prices in thousands of US dollars. */
+  unit?: 'usd-k';
   items: QuarterMileItem[];
-};
-
-export type MafiosoClue = {
-  id: string;
-  text: LocalizedText;
 };
 
 export type GameContent = {
   definition: GameDefinition;
-  mafioso?: MafiosoContent & { clues?: MafiosoClue[] };
   triviaPacks?: TriviaPack[];
   icebreakerPrompts?: IcebreakerPrompt[];
   quarterMilePacks?: QuarterMilePack[];
@@ -115,10 +100,25 @@ export type GameSessionPlayerAction =
     }
   | {
       id: string;
-      kind: 'mafioso-vote';
+      kind: 'imposter-vote';
       playerId: string;
       targetPlayerId: string;
-      phaseIndex: number;
+      round: number;
+      createdAt: number;
+    }
+  | {
+      id: string;
+      kind: 'imposter-guess';
+      playerId: string;
+      wordId: string;
+      round: number;
+      createdAt: number;
+    }
+  | {
+      id: string;
+      kind: 'icebreaker-next';
+      playerId: string;
+      round: number;
       createdAt: number;
     }
   | {

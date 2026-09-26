@@ -10,6 +10,8 @@ import React, {
 import { I18nManager } from 'react-native';
 import RNRestart from 'react-native-restart';
 
+import { needsDirectionRestart } from '../../utils/direction';
+
 import {
   createI18n,
   isRTLLanguage,
@@ -18,6 +20,13 @@ import {
 } from './i18n';
 
 const STORAGE_KEY = 'lamma.language';
+/** Language we already restarted once for, so a failed forceRTL can't loop. */
+const DIRECTION_SYNC_KEY = 'lamma.directionSync';
+
+function applyNativeDirection(rtl: boolean): void {
+  I18nManager.allowRTL(rtl);
+  I18nManager.forceRTL(rtl);
+}
 
 type LanguageContextValue = {
   language: AppLanguage;
@@ -56,9 +65,20 @@ export function LanguageProvider({
           : resolveInitialLanguage();
       createI18n(initial);
       const shouldBeRTL = isRTLLanguage(initial);
-      if (I18nManager.isRTL !== shouldBeRTL) {
-        I18nManager.allowRTL(shouldBeRTL);
-        I18nManager.forceRTL(shouldBeRTL);
+      if (needsDirectionRestart(shouldBeRTL, I18nManager.isRTL)) {
+        // The running layout direction doesn't match the stored language
+        // (reinstall, restored backup, a forceRTL that didn't persist). The
+        // new direction only applies after a restart; do it once, otherwise
+        // Arabic would render in an LTR layout until the next cold start.
+        applyNativeDirection(shouldBeRTL);
+        const synced = await AsyncStorage.getItem(DIRECTION_SYNC_KEY);
+        if (synced !== initial) {
+          await AsyncStorage.setItem(DIRECTION_SYNC_KEY, initial);
+          RNRestart.Restart(`direction-sync:${initial}`);
+          return;
+        }
+      } else {
+        await AsyncStorage.removeItem(DIRECTION_SYNC_KEY);
       }
       if (active) {
         setLanguageState(initial);
@@ -76,9 +96,7 @@ export function LanguageProvider({
         return;
       }
       await AsyncStorage.setItem(STORAGE_KEY, next);
-      const shouldBeRTL = isRTLLanguage(next);
-      I18nManager.allowRTL(shouldBeRTL);
-      I18nManager.forceRTL(shouldBeRTL);
+      applyNativeDirection(isRTLLanguage(next));
       // Yoga and native navigation only rebuild every mounted screen in the
       // new direction after a full process-level React Native restart.
       RNRestart.Restart(`language:${next}`);

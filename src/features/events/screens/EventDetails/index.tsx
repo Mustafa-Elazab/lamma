@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppAvatar } from '../../../../design-system/atoms/Avatar';
 import { AppBadge } from '../../../../design-system/atoms/Badge';
+import { AppButton } from '../../../../design-system/atoms/Button';
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
@@ -11,6 +12,7 @@ import { AppRsvpButton } from '../../../../design-system/molecules/RsvpButton';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
 import { AppAvatarStack } from '../../../../design-system/organisms/AvatarStack';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
+import { autoIsolate } from '../../../../utils/bidi';
 import { formatDateShort } from '../../../../utils/format';
 import { createStyles } from './styles';
 import type { EventDetailsScreenProps } from './types';
@@ -68,16 +70,16 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
         {event ? (
           <View style={styles.sheet}>
             <View style={styles.titleBlock}>
-              {event.viewerRsvp === 'going' ? (
+              {event.viewerRsvp === 'going' && !c.isOwner ? (
                 <AppBadge
                   label={c.t('home.youreGoing')}
                   tone="primary"
                   icon="check"
                 />
               ) : null}
-              <AppText variant="heading">{event.title}</AppText>
+              <AppText variant="heading">{autoIsolate(event.title)}</AppText>
               <AppText variant="body" color="textMuted">
-                {event.description}
+                {autoIsolate(event.description)}
               </AppText>
             </View>
 
@@ -93,7 +95,7 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
                 <AppText variant="label" color="textMuted">
                   {c.t('event.contactHost')}
                 </AppText>
-                <AppIcon name="back" size={16} color="textMuted" />
+                <AppIcon name="back" size={16} color="textMuted" forward />
               </View>
             </View>
 
@@ -127,26 +129,57 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
               </Pressable>
             </View>
 
-            <View style={styles.rsvpRow}>
-              <AppRsvpButton
-                label={c.t('event.going')}
-                icon="check"
-                active={event.viewerRsvp === 'going'}
-                onPress={() => c.setRsvp('going')}
-              />
-              <AppRsvpButton
-                label={c.t('event.maybe')}
-                icon="help"
-                active={event.viewerRsvp === 'maybe'}
-                onPress={() => c.setRsvp('maybe')}
-              />
-              <AppRsvpButton
-                label={c.t('event.cantGo')}
-                icon="close"
-                active={event.viewerRsvp === 'declined'}
-                onPress={() => c.setRsvp('declined')}
-              />
-            </View>
+            {c.isOwner ? (
+              <View style={styles.ownerBlock}>
+                <View style={styles.ownerBadge}>
+                  <AppBadge
+                    label={c.t('event.youAreHosting')}
+                    tone="primary"
+                    icon="crown"
+                  />
+                </View>
+                <View style={styles.rsvpRow}>
+                  <AppButton
+                    label={c.t('event.shareInvite')}
+                    leftIcon="share"
+                    size="md"
+                    fullWidth={false}
+                    style={styles.ownerButton}
+                    onPress={c.openShare}
+                  />
+                  <AppButton
+                    label={c.t('event.manageGuests')}
+                    leftIcon="guests"
+                    variant="outline"
+                    size="md"
+                    fullWidth={false}
+                    style={styles.ownerButton}
+                    onPress={c.openGuests}
+                  />
+                </View>
+              </View>
+            ) : (
+              <View style={styles.rsvpRow}>
+                <AppRsvpButton
+                  label={c.t('event.going')}
+                  icon="check"
+                  active={event.viewerRsvp === 'going'}
+                  onPress={() => c.setRsvp('going')}
+                />
+                <AppRsvpButton
+                  label={c.t('event.maybe')}
+                  icon="help"
+                  active={event.viewerRsvp === 'maybe'}
+                  onPress={() => c.setRsvp('maybe')}
+                />
+                <AppRsvpButton
+                  label={c.t('event.cantGo')}
+                  icon="close"
+                  active={event.viewerRsvp === 'declined'}
+                  onPress={() => c.setRsvp('declined')}
+                />
+              </View>
+            )}
 
             <View style={styles.goingCard}>
               <View style={styles.goingHeader}>
@@ -189,9 +222,9 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
                         ) : null}
                       </View>
                       <AppText variant="caption" color="textMuted">
-                        {formatDateShort(update.createdAt)}
+                        {formatDateShort(update.createdAt, c.language)}
                       </AppText>
-                      <AppText variant="body">{update.message}</AppText>
+                      <AppText variant="body">{autoIsolate(update.message)}</AppText>
                     </View>
                   </View>
                 ))}

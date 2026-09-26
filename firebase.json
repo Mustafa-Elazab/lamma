@@ -7,5 +7,13 @@
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "react-native": {
+    "crashlytics_auto_collection_enabled": true,
+    "crashlytics_debug_enabled": true,
+    "crashlytics_is_error_generation_on_js_crash_enabled": false,
+    "crashlytics_javascript_exception_handler_chaining_enabled": true,
+    "analytics_auto_collection_enabled": true,
+    "google_analytics_automatic_screen_reporting_enabled": false
   }
 }

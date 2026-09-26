@@ -120,14 +120,16 @@ export function advanceQuarterMileTurn(state: QuarterMileState): QuarterMileStat
   const remaining = [...state.remaining];
   const known = remaining.shift() ?? null;
   const hidden = remaining.shift() ?? null;
+  // Omit lastChoice instead of setting it to undefined (Firestore rejects undefined).
+  const rest: QuarterMileState = { ...state };
+  delete rest.lastChoice;
   return {
-    ...state,
+    ...rest,
     remaining,
     known,
     hidden,
     turnIndex: state.turnIndex + 1,
     phase: known && hidden ? 'choose' : 'finished',
-    lastChoice: undefined,
   };
 }
 

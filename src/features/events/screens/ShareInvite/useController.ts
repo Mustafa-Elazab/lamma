@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useNavigation } from '@react-navigation/native';
-import { useCallback, useState, type RefObject } from 'react';
+import { useCallback, useMemo, useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, NativeModules, Platform } from 'react-native';
 import type { ViewShotRef } from 'react-native-view-shot';
@@ -106,6 +106,25 @@ async function captureInviteFile(
   return asFileUrl(path);
 }
 
+/**
+ * Captures the invite card when it is ready; returns null (text-only share)
+ * instead of failing when the snapshot is not available.
+ */
+async function tryCaptureInviteFile(
+  cardRef: RefObject<InviteCardHandle | null>,
+  captureReady: CaptureReadyState,
+): Promise<string | null> {
+  if (!cardRef.current || !captureReady.isReady) {
+    return null;
+  }
+  try {
+    return await captureInviteFile(cardRef, captureReady);
+  } catch (error) {
+    appLogger.error('[invite.share] Card capture failed, sharing text', error);
+    return null;
+  }
+}
+
 function useShareInviteController(
   eventId: string,
   cardRef: RefObject<InviteCardHandle | null>,
@@ -119,7 +138,22 @@ function useShareInviteController(
 
   const event = query.data ?? null;
   const link = buildEventDeepLink(eventId);
-  const heroImage = event ? eventCover(event) : undefined;
+  const coverImageUrl = event?.coverImageUrl ?? null;
+  const coverKey = event?.coverKey;
+  const themeKey = event?.themeKey;
+  const hasEvent = Boolean(event);
+  // Stable identity: eventCover() returns a new `{ uri }` object for photo
+  // covers, which must not change on every render (effects depend on it).
+  const heroImage = useMemo(
+    () =>
+      hasEvent && coverKey && themeKey
+        ? eventCover({ coverImageUrl, coverKey, themeKey })
+        : undefined,
+    [hasEvent, coverImageUrl, coverKey, themeKey],
+  );
+  const heroKey = hasEvent
+    ? `${coverImageUrl ? `photo:${coverImageUrl.length}:${coverImageUrl.slice(-32)}` : ''}|${themeKey}|${coverKey}`
+    : '';
 
   const inviteMessage = event
     ? `${t('share.invitedTo', { title: event.title })}\n${formatDateShort(
@@ -127,7 +161,9 @@ function useShareInviteController(
         language,
       )} · ${event.venueName}\n${link}`
     : link;
-  const canShareInvite = Boolean(event && heroImage && captureReady.isReady);
+  // Sharing never waits on the card snapshot: when the card image is ready it
+  // is attached, otherwise the invite text + link is shared on its own.
+  const canShareInvite = Boolean(event);
 
   const logShareError = useCallback(
     (error: unknown, method: 'system' | 'whatsapp') => {
@@ -147,9 +183,9 @@ function useShareInviteController(
     Clipboard.setString(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    void trackEvent('invite_shared', {
+    void trackEvent('event_share', {
       event_id: eventId,
-      method: 'clipboard',
+      method: 'copy',
     });
   }, [eventId, link]);
 
@@ -165,18 +201,17 @@ function useShareInviteController(
         method: 'system',
         captureReady,
       });
-      const url = await captureInviteFile(cardRef, captureReady);
+      const url = await tryCaptureInviteFile(cardRef, captureReady);
       const result = await Share.open({
         title: t('share.title'),
         message: inviteMessage,
-        url,
-        type: 'image/png',
+        ...(url ? { url, type: 'image/png' } : {}),
         failOnCancel: false,
       });
       if (result.success) {
-        await trackEvent('invite_shared', {
+        await trackEvent('event_share', {
           event_id: eventId,
-          method: 'system',
+          method: 'share',
         });
       }
     } catch (error) {
@@ -200,23 +235,22 @@ function useShareInviteController(
         method: 'whatsapp',
         captureReady,
       });
-      const url = await captureInviteFile(cardRef, captureReady);
+      const url = await tryCaptureInviteFile(cardRef, captureReady);
       const social = whatsappSocial(Share);
       const outcome = await shareWhatsAppNative({
         shareSingle: options =>
           Share.shareSingle({
             social,
             message: options.message,
-            url: options.url,
-            type: 'image/png',
+            ...(options.url ? { url: options.url, type: 'image/png' } : {}),
           }),
         social,
         message: inviteMessage,
-        url,
+        url: url ?? '',
         openStore: () => openStoreListing(whatsappStoreUrls(Platform.OS)),
       });
       if (outcome === 'shared') {
-        await trackEvent('invite_shared', {
+        await trackEvent('event_share', {
           event_id: eventId,
           method: 'whatsapp',
         });
@@ -237,6 +271,7 @@ function useShareInviteController(
     refetch: query.refetch,
     link,
     heroImage,
+    heroKey,
     canShareInvite,
     copied,
     dateLabel: event ? formatDateShort(event.startAt, language) : '',

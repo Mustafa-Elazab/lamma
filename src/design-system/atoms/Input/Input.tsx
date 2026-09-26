@@ -24,6 +24,11 @@ export type InputProps = TextInputProps & {
   onPressRightIcon?: () => void;
   counterMax?: number;
   containerStyle?: StyleProp<ViewStyle>;
+  /**
+   * Content that is always left-to-right (room codes, emails, phone numbers,
+   * links): typed text stays LTR and left-aligned even in the Arabic UI.
+   */
+  ltr?: boolean;
 };
 
 function AppInputComponent({
@@ -35,6 +40,7 @@ function AppInputComponent({
   onPressRightIcon,
   counterMax,
   containerStyle,
+  ltr = false,
   value,
   onFocus,
   onBlur,
@@ -74,7 +80,9 @@ function AppInputComponent({
           value={value}
           multiline={multiline}
           placeholderTextColor={theme.colors.textMuted}
-          textAlign={I18nManager.isRTL ? 'right' : 'left'}
+          // Physical on both platforms for TextInput (unlike <Text>), so the
+          // leading edge has to be picked by hand here.
+          textAlign={ltr || !I18nManager.isRTL ? 'left' : 'right'}
           onFocus={e => {
             setFocused(true);
             onFocus?.(e);
@@ -83,7 +91,12 @@ function AppInputComponent({
             setFocused(false);
             onBlur?.(e);
           }}
-          style={[styles.input, multiline && styles.inputMultiline, style]}
+          style={[
+            styles.input,
+            multiline && styles.inputMultiline,
+            ltr && styles.inputLtr,
+            style,
+          ]}
           {...rest}
         />
         {rightIcon ? (
@@ -137,6 +150,7 @@ function createStyles(theme: Theme) {
       paddingVertical: theme.spacing.md,
     },
     inputMultiline: { minHeight: 88, textAlignVertical: 'top' },
+    inputLtr: { writingDirection: 'ltr' },
     helper: { marginTop: theme.spacing.xs },
   });
 }

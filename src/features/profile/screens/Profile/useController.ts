@@ -7,12 +7,14 @@ import type { AppStackParamList } from '../../../../navigation/types';
 import { displayNameOrGuest, useAuth } from '../../../auth';
 import { useHomeFeed } from '../../../events';
 import { usePreferences } from '../../../settings/core';
+import { useUserProfile } from '../../core';
 
 export function useProfileController() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const { user, signOut } = useAuth();
+  const { profile } = useUserProfile();
   const hosting = useHomeFeed('hosting');
   const { preferences } = usePreferences();
 
@@ -41,12 +43,18 @@ export function useProfileController() {
     [navigation],
   );
 
+  const avatarUri = profile.photoDataUrl ?? user?.photoURL ?? null;
+  const avatar = useMemo(
+    () => (avatarUri ? { uri: avatarUri } : undefined),
+    [avatarUri],
+  );
+
   return {
     t,
     name,
     email,
     isGuest,
-    avatar: user?.photoURL ? { uri: user.photoURL } : undefined,
+    avatar,
     hostedCount,
     languageLabel,
     appearanceLabel,
@@ -54,8 +62,11 @@ export function useProfileController() {
     goNotifications: () => go('NotificationSettings'),
     goAppearance: () => go('Appearance'),
     goDrafts: () => go('MyDrafts'),
-    goSavedThemes: () => go('SavedThemes'),
     goHelp: () => go('HelpSupport'),
+    goAbout: () => go('About'),
+    goContact: () => go('ContactUs'),
+    goTerms: () => go('TermsOfService'),
+    goPrivacy: () => go('PrivacyPolicy'),
     goEditProfile: () => go('EditProfile'),
     signOut,
   };

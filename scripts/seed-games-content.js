@@ -153,8 +153,8 @@ async function deleteQueryBatch(db, querySnap) {
     id: 'quarter-mile',
     name: l('Quarter Mile', 'ربع ميل'),
     description: l(
-      'Take the known car or risk the hidden one — best garage wins.',
-      'خد العربية الظاهرة أو غامض المخفية — أقوى جراج يفوز.',
+      'Cars, footballers, fighters: keep the pick you see or risk the hidden one. Strongest team wins.',
+      'عربيات، لاعيبة كورة، مقاتلين: خد اللي قدامك أو غامر بالمخفي. أقوى فريق يكسب.',
     ),
     icon: 'diamond',
     minPlayers: 2,
@@ -199,8 +199,8 @@ async function clearTriviaContent(db) {
     id: 'quarter-mile',
     name: l('Quarter Mile', 'ربع ميل'),
     description: l(
-      'Take the known car or risk the hidden one — best garage wins.',
-      'خد العربية الظاهرة أو غامض المخفية — أقوى جراج يفوز.',
+      'Cars, footballers, fighters: keep the pick you see or risk the hidden one. Strongest team wins.',
+      'عربيات، لاعيبة كورة، مقاتلين: خد اللي قدامك أو غامر بالمخفي. أقوى فريق يكسب.',
     ),
     icon: 'diamond',
     minPlayers: 2,
@@ -349,8 +349,8 @@ async function main() {
     id: 'quarter-mile',
     name: l('Quarter Mile', 'ربع ميل'),
     description: l(
-      'Take the known car or risk the hidden one — best garage wins.',
-      'خد العربية الظاهرة أو غامض المخفية — أقوى جراج يفوز.',
+      'Cars, footballers, fighters: keep the pick you see or risk the hidden one. Strongest team wins.',
+      'عربيات، لاعيبة كورة، مقاتلين: خد اللي قدامك أو غامر بالمخفي. أقوى فريق يكسب.',
     ),
     icon: 'diamond',
     minPlayers: 2,

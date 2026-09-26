@@ -1,0 +1,969 @@
+[
+  {
+    "id": "cars",
+    "name": {
+      "en": "Cars",
+      "ar": "عربيات"
+    },
+    "unit": "usd-k",
+    "items": [
+      {
+        "id": "car-bugatti-chiron",
+        "name": {
+          "en": "Bugatti Chiron",
+          "ar": "بوجاتي شيرون"
+        },
+        "score": 3000
+      },
+      {
+        "id": "car-lambo-revuelto",
+        "name": {
+          "en": "Lamborghini Revuelto",
+          "ar": "لامبورجيني ريفويلتو"
+        },
+        "score": 610
+      },
+      {
+        "id": "car-ferrari-sf90",
+        "name": {
+          "en": "Ferrari SF90",
+          "ar": "فيراري SF90"
+        },
+        "score": 525
+      },
+      {
+        "id": "car-rolls-cullinan",
+        "name": {
+          "en": "Rolls-Royce Cullinan",
+          "ar": "رولز رويس كولينان"
+        },
+        "score": 350
+      },
+      {
+        "id": "car-mclaren-750s",
+        "name": {
+          "en": "McLaren 750S",
+          "ar": "ماكلارين 750S"
+        },
+        "score": 330
+      },
+      {
+        "id": "car-aston-db12",
+        "name": {
+          "en": "Aston Martin DB12",
+          "ar": "أستون مارتن DB12"
+        },
+        "score": 250
+      },
+      {
+        "id": "car-bentley-gt",
+        "name": {
+          "en": "Bentley Continental GT",
+          "ar": "بنتلي كونتيننتال GT"
+        },
+        "score": 240
+      },
+      {
+        "id": "car-911-turbo-s",
+        "name": {
+          "en": "Porsche 911 Turbo S",
+          "ar": "بورشه ٩١١ توربو إس"
+        },
+        "score": 230
+      },
+      {
+        "id": "car-g63",
+        "name": {
+          "en": "Mercedes G63",
+          "ar": "مرسيدس G63"
+        },
+        "score": 180
+      },
+      {
+        "id": "car-bmw-m5",
+        "name": {
+          "en": "BMW M5",
+          "ar": "بي إم دبليو M5"
+        },
+        "score": 120
+      },
+      {
+        "id": "car-nissan-gtr",
+        "name": {
+          "en": "Nissan GT-R",
+          "ar": "نيسان GT-R"
+        },
+        "score": 120
+      },
+      {
+        "id": "car-range-rover",
+        "name": {
+          "en": "Range Rover",
+          "ar": "رينج روفر"
+        },
+        "score": 110
+      },
+      {
+        "id": "car-taycan",
+        "name": {
+          "en": "Porsche Taycan",
+          "ar": "بورشه تايكان"
+        },
+        "score": 100
+      },
+      {
+        "id": "car-tesla-model-s",
+        "name": {
+          "en": "Tesla Model S",
+          "ar": "تسلا موديل S"
+        },
+        "score": 75
+      },
+      {
+        "id": "car-hellcat",
+        "name": {
+          "en": "Dodge Challenger Hellcat",
+          "ar": "دودج تشالنجر هيلكات"
+        },
+        "score": 65
+      },
+      {
+        "id": "car-land-cruiser",
+        "name": {
+          "en": "Toyota Land Cruiser",
+          "ar": "تويوتا لاند كروزر"
+        },
+        "score": 58
+      },
+      {
+        "id": "car-supra",
+        "name": {
+          "en": "Toyota Supra",
+          "ar": "تويوتا سوبرا"
+        },
+        "score": 57
+      },
+      {
+        "id": "car-civic-type-r",
+        "name": {
+          "en": "Honda Civic Type R",
+          "ar": "هوندا سيفيك Type R"
+        },
+        "score": 45
+      },
+      {
+        "id": "car-mustang-gt",
+        "name": {
+          "en": "Ford Mustang GT",
+          "ar": "فورد موستانج GT"
+        },
+        "score": 45
+      },
+      {
+        "id": "car-wrangler",
+        "name": {
+          "en": "Jeep Wrangler",
+          "ar": "جيب رانجلر"
+        },
+        "score": 33
+      },
+      {
+        "id": "car-golf-gti",
+        "name": {
+          "en": "VW Golf GTI",
+          "ar": "فولكس جولف GTI"
+        },
+        "score": 33
+      },
+      {
+        "id": "car-camry",
+        "name": {
+          "en": "Toyota Camry",
+          "ar": "تويوتا كامري"
+        },
+        "score": 29
+      },
+      {
+        "id": "car-corolla",
+        "name": {
+          "en": "Toyota Corolla",
+          "ar": "تويوتا كورولا"
+        },
+        "score": 23
+      },
+      {
+        "id": "car-elantra",
+        "name": {
+          "en": "Hyundai Elantra",
+          "ar": "هيونداي إلنترا"
+        },
+        "score": 22
+      },
+      {
+        "id": "car-sunny",
+        "name": {
+          "en": "Nissan Sunny",
+          "ar": "نيسان صني"
+        },
+        "score": 15
+      },
+      {
+        "id": "car-verna",
+        "name": {
+          "en": "Hyundai Verna",
+          "ar": "هيونداي فيرنا"
+        },
+        "score": 12
+      }
+    ]
+  },
+  {
+    "id": "football-stars",
+    "name": {
+      "en": "Football stars",
+      "ar": "نجوم الكورة"
+    },
+    "items": [
+      {
+        "id": "fs-kylian-mbappe",
+        "name": {
+          "en": "Kylian Mbappé",
+          "ar": "كيليان مبابي"
+        },
+        "score": 96
+      },
+      {
+        "id": "fs-erling-haaland",
+        "name": {
+          "en": "Erling Haaland",
+          "ar": "إيرلينج هالاند"
+        },
+        "score": 95
+      },
+      {
+        "id": "fs-lionel-messi",
+        "name": {
+          "en": "Lionel Messi",
+          "ar": "ليونيل ميسي"
+        },
+        "score": 93
+      },
+      {
+        "id": "fs-mohamed-salah",
+        "name": {
+          "en": "Mohamed Salah",
+          "ar": "محمد صلاح"
+        },
+        "score": 93
+      },
+      {
+        "id": "fs-vinicius-jr",
+        "name": {
+          "en": "Vinícius Jr",
+          "ar": "فينيسيوس جونيور"
+        },
+        "score": 92
+      },
+      {
+        "id": "fs-lamine-yamal",
+        "name": {
+          "en": "Lamine Yamal",
+          "ar": "لامين يامال"
+        },
+        "score": 92
+      },
+      {
+        "id": "fs-harry-kane",
+        "name": {
+          "en": "Harry Kane",
+          "ar": "هاري كين"
+        },
+        "score": 92
+      },
+      {
+        "id": "fs-jude-bellingham",
+        "name": {
+          "en": "Jude Bellingham",
+          "ar": "جود بيلينجهام"
+        },
+        "score": 91
+      },
+      {
+        "id": "fs-rodri",
+        "name": {
+          "en": "Rodri",
+          "ar": "رودري"
+        },
+        "score": 90
+      },
+      {
+        "id": "fs-virgil-van-dijk",
+        "name": {
+          "en": "Virgil van Dijk",
+          "ar": "فيرجيل فان دايك"
+        },
+        "score": 89
+      },
+      {
+        "id": "fs-bukayo-saka",
+        "name": {
+          "en": "Bukayo Saka",
+          "ar": "بوكايو ساكا"
+        },
+        "score": 89
+      },
+      {
+        "id": "fs-pedri",
+        "name": {
+          "en": "Pedri",
+          "ar": "بيدري"
+        },
+        "score": 88
+      },
+      {
+        "id": "fs-kevin-de-bruyne",
+        "name": {
+          "en": "Kevin De Bruyne",
+          "ar": "كيفين دي بروين"
+        },
+        "score": 86
+      },
+      {
+        "id": "fs-cristiano-ronaldo",
+        "name": {
+          "en": "Cristiano Ronaldo",
+          "ar": "كريستيانو رونالدو"
+        },
+        "score": 86
+      },
+      {
+        "id": "fs-robert-lewandowski",
+        "name": {
+          "en": "Robert Lewandowski",
+          "ar": "روبرت ليفاندوفسكي"
+        },
+        "score": 85
+      },
+      {
+        "id": "fs-son-heung-min",
+        "name": {
+          "en": "Son Heung-min",
+          "ar": "سون هيونج مين"
+        },
+        "score": 84
+      },
+      {
+        "id": "fs-neymar",
+        "name": {
+          "en": "Neymar",
+          "ar": "نيمار"
+        },
+        "score": 80
+      },
+      {
+        "id": "fs-riyad-mahrez",
+        "name": {
+          "en": "Riyad Mahrez",
+          "ar": "رياض محرز"
+        },
+        "score": 78
+      }
+    ]
+  },
+  {
+    "id": "football-legends",
+    "name": {
+      "en": "Football legends",
+      "ar": "أساطير الكورة"
+    },
+    "items": [
+      {
+        "id": "fl-pele",
+        "name": {
+          "en": "Pelé",
+          "ar": "بيليه"
+        },
+        "score": 98
+      },
+      {
+        "id": "fl-diego-maradona",
+        "name": {
+          "en": "Diego Maradona",
+          "ar": "دييجو مارادونا"
+        },
+        "score": 98
+      },
+      {
+        "id": "fl-zinedine-zidane",
+        "name": {
+          "en": "Zinedine Zidane",
+          "ar": "زين الدين زيدان"
+        },
+        "score": 96
+      },
+      {
+        "id": "fl-ronaldo-nazario",
+        "name": {
+          "en": "Ronaldo Nazário",
+          "ar": "رونالدو الظاهرة"
+        },
+        "score": 96
+      },
+      {
+        "id": "fl-johan-cruyff",
+        "name": {
+          "en": "Johan Cruyff",
+          "ar": "يوهان كرويف"
+        },
+        "score": 95
+      },
+      {
+        "id": "fl-ronaldinho",
+        "name": {
+          "en": "Ronaldinho",
+          "ar": "رونالدينيو"
+        },
+        "score": 94
+      },
+      {
+        "id": "fl-franz-beckenbauer",
+        "name": {
+          "en": "Franz Beckenbauer",
+          "ar": "فرانز بيكنباور"
+        },
+        "score": 94
+      },
+      {
+        "id": "fl-paolo-maldini",
+        "name": {
+          "en": "Paolo Maldini",
+          "ar": "باولو مالديني"
+        },
+        "score": 93
+      },
+      {
+        "id": "fl-andres-iniesta",
+        "name": {
+          "en": "Andrés Iniesta",
+          "ar": "أندريس إنييستا"
+        },
+        "score": 92
+      },
+      {
+        "id": "fl-thierry-henry",
+        "name": {
+          "en": "Thierry Henry",
+          "ar": "تيري هنري"
+        },
+        "score": 92
+      },
+      {
+        "id": "fl-xavi",
+        "name": {
+          "en": "Xavi",
+          "ar": "تشافي"
+        },
+        "score": 91
+      },
+      {
+        "id": "fl-gianluigi-buffon",
+        "name": {
+          "en": "Gianluigi Buffon",
+          "ar": "جانلويجي بوفون"
+        },
+        "score": 91
+      },
+      {
+        "id": "fl-kaka",
+        "name": {
+          "en": "Kaká",
+          "ar": "كاكا"
+        },
+        "score": 90
+      },
+      {
+        "id": "fl-andrea-pirlo",
+        "name": {
+          "en": "Andrea Pirlo",
+          "ar": "أندريا بيرلو"
+        },
+        "score": 90
+      },
+      {
+        "id": "fl-francesco-totti",
+        "name": {
+          "en": "Francesco Totti",
+          "ar": "فرانشيسكو توتي"
+        },
+        "score": 88
+      },
+      {
+        "id": "fl-steven-gerrard",
+        "name": {
+          "en": "Steven Gerrard",
+          "ar": "ستيفن جيرارد"
+        },
+        "score": 88
+      },
+      {
+        "id": "fl-didier-drogba",
+        "name": {
+          "en": "Didier Drogba",
+          "ar": "ديدييه دروجبا"
+        },
+        "score": 87
+      },
+      {
+        "id": "fl-david-beckham",
+        "name": {
+          "en": "David Beckham",
+          "ar": "ديفيد بيكهام"
+        },
+        "score": 86
+      }
+    ]
+  },
+  {
+    "id": "egyptian-football",
+    "name": {
+      "en": "Egyptian football",
+      "ar": "الكورة المصرية"
+    },
+    "items": [
+      {
+        "id": "eg-mohamed-salah",
+        "name": {
+          "en": "Mohamed Salah",
+          "ar": "محمد صلاح"
+        },
+        "score": 95
+      },
+      {
+        "id": "eg-mahmoud-el-khatib",
+        "name": {
+          "en": "Mahmoud El Khatib",
+          "ar": "محمود الخطيب"
+        },
+        "score": 93
+      },
+      {
+        "id": "eg-mohamed-aboutrika",
+        "name": {
+          "en": "Mohamed Aboutrika",
+          "ar": "محمد أبو تريكة"
+        },
+        "score": 92
+      },
+      {
+        "id": "eg-essam-el-hadary",
+        "name": {
+          "en": "Essam El Hadary",
+          "ar": "عصام الحضري"
+        },
+        "score": 89
+      },
+      {
+        "id": "eg-ahmed-hassan",
+        "name": {
+          "en": "Ahmed Hassan",
+          "ar": "أحمد حسن"
+        },
+        "score": 88
+      },
+      {
+        "id": "eg-omar-marmoush",
+        "name": {
+          "en": "Omar Marmoush",
+          "ar": "عمر مرموش"
+        },
+        "score": 88
+      },
+      {
+        "id": "eg-hossam-hassan",
+        "name": {
+          "en": "Hossam Hassan",
+          "ar": "حسام حسن"
+        },
+        "score": 87
+      },
+      {
+        "id": "eg-hany-ramzy",
+        "name": {
+          "en": "Hany Ramzy",
+          "ar": "هاني رمزي"
+        },
+        "score": 85
+      },
+      {
+        "id": "eg-wael-gomaa",
+        "name": {
+          "en": "Wael Gomaa",
+          "ar": "وائل جمعة"
+        },
+        "score": 84
+      },
+      {
+        "id": "eg-hazem-emam",
+        "name": {
+          "en": "Hazem Emam",
+          "ar": "حازم إمام"
+        },
+        "score": 83
+      },
+      {
+        "id": "eg-shikabala",
+        "name": {
+          "en": "Shikabala",
+          "ar": "شيكابالا"
+        },
+        "score": 83
+      },
+      {
+        "id": "eg-mohamed-zidan",
+        "name": {
+          "en": "Mohamed Zidan",
+          "ar": "محمد زيدان"
+        },
+        "score": 82
+      },
+      {
+        "id": "eg-emad-moteab",
+        "name": {
+          "en": "Emad Moteab",
+          "ar": "عماد متعب"
+        },
+        "score": 82
+      },
+      {
+        "id": "eg-amr-zaki",
+        "name": {
+          "en": "Amr Zaki",
+          "ar": "عمرو زكي"
+        },
+        "score": 82
+      },
+      {
+        "id": "eg-trezeguet",
+        "name": {
+          "en": "Trezeguet",
+          "ar": "تريزيجيه"
+        },
+        "score": 80
+      },
+      {
+        "id": "eg-mido",
+        "name": {
+          "en": "Mido",
+          "ar": "ميدو"
+        },
+        "score": 80
+      },
+      {
+        "id": "eg-mostafa-mohamed",
+        "name": {
+          "en": "Mostafa Mohamed",
+          "ar": "مصطفى محمد"
+        },
+        "score": 79
+      },
+      {
+        "id": "eg-mohamed-elneny",
+        "name": {
+          "en": "Mohamed Elneny",
+          "ar": "محمد النني"
+        },
+        "score": 78
+      }
+    ]
+  },
+  {
+    "id": "ufc-fighters",
+    "name": {
+      "en": "UFC fighters",
+      "ar": "أبطال UFC"
+    },
+    "items": [
+      {
+        "id": "ufc-jon-jones",
+        "name": {
+          "en": "Jon Jones",
+          "ar": "جون جونز"
+        },
+        "score": 98
+      },
+      {
+        "id": "ufc-khabib-nurmagomedov",
+        "name": {
+          "en": "Khabib Nurmagomedov",
+          "ar": "حبيب نورمحمدوف"
+        },
+        "score": 97
+      },
+      {
+        "id": "ufc-georges-st-pierre",
+        "name": {
+          "en": "Georges St-Pierre",
+          "ar": "جورج سان بيير"
+        },
+        "score": 96
+      },
+      {
+        "id": "ufc-islam-makhachev",
+        "name": {
+          "en": "Islam Makhachev",
+          "ar": "إسلام ماخاتشيف"
+        },
+        "score": 95
+      },
+      {
+        "id": "ufc-anderson-silva",
+        "name": {
+          "en": "Anderson Silva",
+          "ar": "أندرسون سيلفا"
+        },
+        "score": 94
+      },
+      {
+        "id": "ufc-alex-pereira",
+        "name": {
+          "en": "Alex Pereira",
+          "ar": "أليكس بيريرا"
+        },
+        "score": 93
+      },
+      {
+        "id": "ufc-ilia-topuria",
+        "name": {
+          "en": "Ilia Topuria",
+          "ar": "إيليا توبوريا"
+        },
+        "score": 93
+      },
+      {
+        "id": "ufc-daniel-cormier",
+        "name": {
+          "en": "Daniel Cormier",
+          "ar": "دانيال كورمييه"
+        },
+        "score": 92
+      },
+      {
+        "id": "ufc-israel-adesanya",
+        "name": {
+          "en": "Israel Adesanya",
+          "ar": "إسرائيل أديسانيا"
+        },
+        "score": 91
+      },
+      {
+        "id": "ufc-francis-ngannou",
+        "name": {
+          "en": "Francis Ngannou",
+          "ar": "فرانسيس نغانو"
+        },
+        "score": 91
+      },
+      {
+        "id": "ufc-jose-aldo",
+        "name": {
+          "en": "José Aldo",
+          "ar": "جوزيه ألدو"
+        },
+        "score": 91
+      },
+      {
+        "id": "ufc-kamaru-usman",
+        "name": {
+          "en": "Kamaru Usman",
+          "ar": "كامارو عثمان"
+        },
+        "score": 90
+      },
+      {
+        "id": "ufc-max-holloway",
+        "name": {
+          "en": "Max Holloway",
+          "ar": "ماكس هولواي"
+        },
+        "score": 90
+      },
+      {
+        "id": "ufc-conor-mcgregor",
+        "name": {
+          "en": "Conor McGregor",
+          "ar": "كونور ماكجريجور"
+        },
+        "score": 89
+      },
+      {
+        "id": "ufc-charles-oliveira",
+        "name": {
+          "en": "Charles Oliveira",
+          "ar": "تشارلز أوليفيرا"
+        },
+        "score": 89
+      },
+      {
+        "id": "ufc-khamzat-chimaev",
+        "name": {
+          "en": "Khamzat Chimaev",
+          "ar": "خمزات تشيماييف"
+        },
+        "score": 88
+      },
+      {
+        "id": "ufc-dustin-poirier",
+        "name": {
+          "en": "Dustin Poirier",
+          "ar": "داستن بوارييه"
+        },
+        "score": 87
+      },
+      {
+        "id": "ufc-nate-diaz",
+        "name": {
+          "en": "Nate Diaz",
+          "ar": "نيت دياز"
+        },
+        "score": 80
+      }
+    ]
+  },
+  {
+    "id": "boxing-legends",
+    "name": {
+      "en": "Boxing legends",
+      "ar": "أساطير الملاكمة"
+    },
+    "items": [
+      {
+        "id": "box-muhammad-ali",
+        "name": {
+          "en": "Muhammad Ali",
+          "ar": "محمد علي"
+        },
+        "score": 99
+      },
+      {
+        "id": "box-floyd-mayweather",
+        "name": {
+          "en": "Floyd Mayweather",
+          "ar": "فلويد مايويذر"
+        },
+        "score": 97
+      },
+      {
+        "id": "box-sugar-ray-leonard",
+        "name": {
+          "en": "Sugar Ray Leonard",
+          "ar": "شوجر راي ليونارد"
+        },
+        "score": 96
+      },
+      {
+        "id": "box-mike-tyson",
+        "name": {
+          "en": "Mike Tyson",
+          "ar": "مايك تايسون"
+        },
+        "score": 95
+      },
+      {
+        "id": "box-manny-pacquiao",
+        "name": {
+          "en": "Manny Pacquiao",
+          "ar": "ماني باكياو"
+        },
+        "score": 94
+      },
+      {
+        "id": "box-oleksandr-usyk",
+        "name": {
+          "en": "Oleksandr Usyk",
+          "ar": "أولكسندر أوسيك"
+        },
+        "score": 94
+      },
+      {
+        "id": "box-terence-crawford",
+        "name": {
+          "en": "Terence Crawford",
+          "ar": "تيرينس كروفورد"
+        },
+        "score": 94
+      },
+      {
+        "id": "box-naoya-inoue",
+        "name": {
+          "en": "Naoya Inoue",
+          "ar": "ناويا إينوي"
+        },
+        "score": 94
+      },
+      {
+        "id": "box-canelo-alvarez",
+        "name": {
+          "en": "Canelo Álvarez",
+          "ar": "كانيلو ألفاريز"
+        },
+        "score": 93
+      },
+      {
+        "id": "box-lennox-lewis",
+        "name": {
+          "en": "Lennox Lewis",
+          "ar": "لينوكس لويس"
+        },
+        "score": 93
+      },
+      {
+        "id": "box-evander-holyfield",
+        "name": {
+          "en": "Evander Holyfield",
+          "ar": "إيفاندر هوليفيلد"
+        },
+        "score": 93
+      },
+      {
+        "id": "box-joe-frazier",
+        "name": {
+          "en": "Joe Frazier",
+          "ar": "جو فريزر"
+        },
+        "score": 92
+      },
+      {
+        "id": "box-tyson-fury",
+        "name": {
+          "en": "Tyson Fury",
+          "ar": "تايسون فيوري"
+        },
+        "score": 91
+      },
+      {
+        "id": "box-gervonta-davis",
+        "name": {
+          "en": "Gervonta Davis",
+          "ar": "جيرفونتا ديفيس"
+        },
+        "score": 88
+      },
+      {
+        "id": "box-anthony-joshua",
+        "name": {
+          "en": "Anthony Joshua",
+          "ar": "أنتوني جوشوا"
+        },
+        "score": 86
+      },
+      {
+        "id": "box-deontay-wilder",
+        "name": {
+          "en": "Deontay Wilder",
+          "ar": "ديونتاي وايلدر"
+        },
+        "score": 84
+      }
+    ]
+  }
+]

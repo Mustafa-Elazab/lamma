@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  I18nManager,
   type FlatList,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
 
 import { onboardingImages } from '../../../../assets';
+import { logicalScrollOffset } from '../../../../utils/direction';
 import { useOnboardingContext } from '../../OnboardingProvider';
 import type { OnboardingSlide } from './types';
 
@@ -44,7 +46,9 @@ export function useOnboardingController(width: number) {
 
   const onScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const next = Math.round(event.nativeEvent.contentOffset.x / width);
+      // Offsets are physical; in RTL the first slide is on the right.
+      const offset = logicalScrollOffset(event.nativeEvent, I18nManager.isRTL);
+      const next = Math.round(offset / width);
       if (next !== index) {
         setIndex(next);
       }

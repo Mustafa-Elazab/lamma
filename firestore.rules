@@ -24,10 +24,15 @@ service cloud.firestore {
         && request.resource.data.ownerId == resource.data.ownerId;
     }
 
+    // Guests may only change their own entry in `rsvps` (status) and in
+    // `guests` (their public name/photo card shown on the guest list).
     function changesOnlyOwnRsvp() {
       return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['rsvps'])
+        .hasOnly(['rsvps', 'guests'])
         && request.resource.data.rsvps.diff(resource.data.rsvps)
+          .affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.get('guests', {})
+          .diff(resource.data.get('guests', {}))
           .affectedKeys().hasOnly([request.auth.uid]);
     }
 
@@ -50,8 +55,13 @@ service cloud.firestore {
           resource.data.ownerId == request.auth.uid
           || changesOnlyOwnRsvp()
         );
+      // Owners can delete anytime; anyone signed in may clean up an event
+      // that has already ended (the app purges ended events on load).
       allow delete: if signedIn()
-        && resource.data.ownerId == request.auth.uid;
+        && (
+          resource.data.ownerId == request.auth.uid
+          || resource.data.endAt < request.time.toMillis()
+        );
     }
 
     match /gameSessions/{sessionId} {

@@ -4,6 +4,7 @@ import { Image, Pressable, View } from 'react-native';
 
 import { AppIcon } from '../../../../design-system/atoms/Icon';
 import { AppText } from '../../../../design-system/atoms/Text';
+import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
 import { AppSegmentedTabs } from '../../../../design-system/molecules/SegmentedTabs';
@@ -14,6 +15,7 @@ import type { AppStackParamList } from '../../../../navigation/types';
 import type { Attendee } from '../../core/entity';
 import { createStyles } from './styles';
 import { useGuestListController } from './useController';
+import { autoIsolate, ltrIsolate } from '../../../../utils/bidi';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'GuestList'>;
 
@@ -37,7 +39,7 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
       return c.t('event.eventCreator');
     }
     if (guest.plusOnes > 0) {
-      return `+${guest.plusOnes}`;
+      return ltrIsolate(`+${guest.plusOnes}`);
     }
     return undefined;
   };
@@ -69,17 +71,23 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
             <AppIcon name="guests" size={22} color="primary" />
           </View>
           <View style={styles.summaryText}>
-            <AppText variant="subheading">
-              {`${event.goingCount} ${c.t('home.going')}`}
-            </AppText>
+            <AppText variant="subheading">{c.summaryLabel}</AppText>
             <AppText variant="caption" color="textMuted" numberOfLines={1}>
-              {event.description}
+              {autoIsolate(event.description)}
             </AppText>
           </View>
         </View>
       ) : null}
 
-      {c.groups ? (
+      {c.isEmpty ? (
+        <AppEmptyState
+          title={c.emptyTitle}
+          message={c.emptyMessage}
+          icon="guests"
+        />
+      ) : null}
+
+      {c.groups && !c.isEmpty ? (
         <>
           {c.groups.hosts.length > 0 ? (
             <View style={styles.section}>

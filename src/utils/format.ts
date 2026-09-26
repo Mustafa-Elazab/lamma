@@ -85,6 +85,11 @@ const MONTHS: Record<SupportedLocale, string[]> = {
   ],
 };
 
+/** Arabic uses its own comma (U+060C) between weekday and date. */
+function listComma(locale: SupportedLocale): string {
+  return locale === 'ar' ? '\u060C' : ',';
+}
+
 function toDate(input: Date | number | string): Date {
   return input instanceof Date ? input : new Date(input);
 }
@@ -97,7 +102,7 @@ export function formatDateShort(
   const date = toDate(input);
   const weekday = WEEKDAYS[locale][date.getDay()];
   const month = MONTHS[locale][date.getMonth()];
-  return `${weekday}, ${date.getDate()} ${month}`;
+  return `${weekday}${listComma(locale)} ${date.getDate()} ${month}`;
 }
 
 /** "Friday, 18 December 2026" style long date. */
@@ -108,7 +113,7 @@ export function formatDateLong(
   const date = toDate(input);
   const weekday = FULL_WEEKDAYS[locale][date.getDay()];
   const month = FULL_MONTHS[locale][date.getMonth()];
-  return `${weekday}, ${date.getDate()} ${month} ${date.getFullYear()}`;
+  return `${weekday}${listComma(locale)} ${date.getDate()} ${month} ${date.getFullYear()}`;
 }
 
 /** "8:00 PM" (12-hour). */

@@ -10,6 +10,7 @@ import type { Theme } from '../../../design-system/theme/tokens';
 import { type EventDraft } from '../core/draftEntity';
 import { draftThemeSource } from '../core/draftMedia';
 import { categoryLabelKey } from './categoryMeta';
+import { autoIsolate } from '../../../utils/bidi';
 
 export type LivePreviewCardProps = {
   draft: EventDraft;
@@ -68,7 +69,7 @@ export function LivePreviewCard({
         </View>
         {draft.description.trim() ? (
           <AppText variant="caption" color="textMuted" numberOfLines={2}>
-            {draft.description.trim()}
+            {autoIsolate(draft.description.trim())}
           </AppText>
         ) : null}
       </View>

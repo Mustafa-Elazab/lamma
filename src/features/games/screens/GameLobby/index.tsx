@@ -13,6 +13,7 @@ import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeade
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { GamesStackParamList } from '../../../../navigation/types';
+import { autoIsolate, directionMark, isolateValues } from '../../../../utils/bidi';
 import { localizeText } from '../../core/localized';
 import { createStyles } from './styles';
 import { useGameLobbyController } from './useController';
@@ -124,7 +125,8 @@ export function GameLobbyScreen({
         {c.players.map(player => (
           <View key={player.id} style={styles.playerRow}>
             <AppText variant="bodyStrong">
-              {player.name}
+              {directionMark(language)}
+              {autoIsolate(player.name)}
               {player.isHost ? ` · ${c.t('games.host')}` : ''}
               {!player.connected ? ` · ${c.t('games.disconnected')}` : ''}
             </AppText>
@@ -137,97 +139,192 @@ export function GameLobbyScreen({
 
       {c.current?.phase === 'in-game' && c.gameplay ? (
         <>
-          {c.gameplay.kind === 'mafioso' ? (
+          {c.gameplay.kind === 'imposter' && c.imposter ? (
             <AppCard style={styles.card}>
-              <AppText variant="subheading">
-                {c.t('games.mafiosoPhase', { phase: c.mafiosoPhase })}
-              </AppText>
-              <View style={styles.resultBox}>
+              <View style={styles.rowBetween}>
                 <AppText variant="caption" color="textMuted">
-                  {c.t('games.yourSecretRole')}
+                  {c.t('games.imposterRound', { round: c.imposter.round })}
                 </AppText>
-                <AppText variant="heading">
-                  {c.myMafiosoAssignment
-                    ? c.mafiosoRoleLabel(c.myMafiosoAssignment.role)
-                    : c.t('games.noRoleYet')}
+                <AppText variant="caption" color="textMuted">
+                  {c.t('games.imposterCategory', isolateValues({
+                    category: localizeText(c.imposter.categoryName, language),
+                  }))}
                 </AppText>
-                {c.myMafiosoAssignment ? (
-                  <AppText variant="body" color="textMuted">
-                    {c.mafiosoRoleDescription(c.myMafiosoAssignment.role)}
-                  </AppText>
-                ) : null}
               </View>
-              {c.mafiosoPhaseIndex === 1 && c.mafiosoClueText ? (
-                <View style={styles.resultBox}>
-                  <AppText variant="bodyStrong">
-                    {c.t('games.mafiosoClue', {
-                      n:
-                        (c.gameplay && c.gameplay.kind === 'mafioso'
-                          ? c.gameplay.state.clueIndex
-                          : 0) + 1,
-                      clue: c.mafiosoClueText,
-                    })}
+              <View style={styles.promptBox}>
+                {!c.amInImposterRound ? (
+                  <AppText variant="subheading" align="center">
+                    {c.t('games.imposterNotIn')}
                   </AppText>
-                </View>
-              ) : null}
-              {c.mafiosoWinner ? (
-                <View style={styles.resultBox}>
-                  <AppText variant="subheading">
-                    {c.mafiosoWinner === 'town'
-                      ? c.t('games.mafiosoTownWins')
-                      : c.t('games.mafiosoMafiaWins')}
-                  </AppText>
-                </View>
-              ) : null}
-              {c.mafiosoPhaseIndex === 3 ? (
+                ) : c.amImposter ? (
+                  <>
+                    <AppText variant="heading" align="center">
+                      {c.t('games.imposterYouAre')}
+                    </AppText>
+                    <AppText variant="body" color="textMuted" align="center">
+                      {c.t('games.imposterYouAreHint')}
+                    </AppText>
+                  </>
+                ) : (
+                  <>
+                    <AppText variant="caption" color="textMuted" align="center">
+                      {c.t('games.imposterYourWord')}
+                    </AppText>
+                    <AppText variant="heading" align="center">
+                      {localizeText(c.imposter.word, language)}
+                    </AppText>
+                  </>
+                )}
+              </View>
+
+              {c.imposter.phase === 'clues' ? (
                 <View style={styles.setupLines}>
-                  <AppText variant="bodyStrong">
-                    {c.t('games.mafiosoVotePrompt')}
+                  <AppText variant="bodyStrong">{c.t('games.imposterCluesTitle')}</AppText>
+                  <AppText variant="body" color="textMuted">
+                    {c.t('games.imposterCluesHint')}
                   </AppText>
-                  {c.mafiosoVoteTargets.map(target => (
-                    <AppButton
-                      key={target.playerId}
-                      label={target.playerName}
-                      variant={
-                        c.myMafiosoVote === target.playerId
-                          ? 'primary'
-                          : 'secondary'
-                      }
-                      disabled={
-                        Boolean(c.myMafiosoVote) ||
-                        Boolean(c.myPendingMafiosoVote)
-                      }
-                      onPress={() => c.voteMafioso(target.playerId)}
-                    />
+                  {c.imposter.playerIds.map((id, index) => (
+                    <AppText key={id} variant="body">
+                      {directionMark(language)}
+                      {index + 1}. {autoIsolate(c.imposter?.playerNames[id] ?? id)}
+                      {id === c.localPlayerId ? ' ⭐' : ''}
+                    </AppText>
                   ))}
+                  {c.isHost ? (
+                    <AppButton label={c.t('games.imposterStartVote')} onPress={c.openImposterVote} />
+                  ) : (
+                    <AppText variant="body" color="textMuted">
+                      {c.t('games.waitingForHost')}
+                    </AppText>
+                  )}
                 </View>
               ) : null}
-              {c.mafiosoPhaseIndex === 4 ? (
+
+              {c.imposter.phase === 'vote' ? (
+                <View style={styles.setupLines}>
+                  <AppText variant="bodyStrong">{c.t('games.imposterVoteTitle')}</AppText>
+                  {c.amInImposterRound && !c.myImposterVote && !c.myPendingImposterVote ? (
+                    c.imposter.playerIds
+                      .filter(id => id !== c.localPlayerId)
+                      .map(id => (
+                        <AppButton
+                          key={id}
+                          label={c.imposter?.playerNames[id] ?? id}
+                          variant="secondary"
+                          onPress={() => c.voteImposter(id)}
+                        />
+                      ))
+                  ) : (
+                    <AppText variant="body" color="textMuted">
+                      {c.t('games.imposterVoted', {
+                        count: Object.keys(c.imposter.votes).length,
+                        total: c.imposter.playerIds.length,
+                      })}
+                    </AppText>
+                  )}
+                  {c.isHost ? (
+                    <AppButton
+                      label={c.t('games.imposterRevealVotes')}
+                      variant="outline"
+                      onPress={c.revealImposter}
+                    />
+                  ) : null}
+                </View>
+              ) : null}
+
+              {c.imposter.phase === 'guess' ? (
+                <View style={styles.setupLines}>
+                  {c.amImposter ? (
+                    <>
+                      <AppText variant="bodyStrong">{c.t('games.imposterGuessYou')}</AppText>
+                      {(c.imposter.guessOptions ?? []).map(option => (
+                        <AppButton
+                          key={option.id}
+                          label={localizeText(option.word, language)}
+                          variant="secondary"
+                          disabled={c.myPendingImposterGuess}
+                          onPress={() => c.guessImposterWord(option.id)}
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    <AppText variant="bodyStrong">
+                      {c.t('games.imposterGuessWaiting', isolateValues({
+                        name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
+                      }))}
+                    </AppText>
+                  )}
+                  {c.isHost && !c.amImposter ? (
+                    <AppButton
+                      label={c.t('games.imposterSkipGuess')}
+                      variant="outline"
+                      onPress={c.skipGuess}
+                    />
+                  ) : null}
+                </View>
+              ) : null}
+
+              {c.imposter.phase === 'result' ? (
                 <View style={styles.resultBox}>
-                  <AppText variant="caption" color="textMuted">
-                    {c.t('games.mafiosoReveal')}
-                  </AppText>
                   <AppText variant="subheading">
-                    {c.mafiosoRevealedAssignment
-                      ? c.t('games.mafiosoRevealedPlayer', {
-                          name: c.mafiosoRevealedAssignment.playerName,
-                          role: c.mafiosoRoleLabel(
-                            c.mafiosoRevealedAssignment.role,
-                          ),
-                        })
-                      : c.t('games.mafiosoNoVotes')}
+                    {c.imposter.winner === 'players'
+                      ? c.t('games.imposterPlayersWin', isolateValues({
+                          name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
+                        }))
+                      : c.t('games.imposterWins', isolateValues({
+                          name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
+                        }))}
                   </AppText>
+                  <AppText variant="body" color="textMuted">
+                    {c.imposter.tie
+                      ? c.t('games.imposterTie')
+                      : c.imposter.votedOutId && c.imposter.votedOutId !== c.imposter.imposterId
+                        ? c.t('games.imposterWrongOut', isolateValues({
+                            name: c.imposter.playerNames[c.imposter.votedOutId] ?? '',
+                          }))
+                        : c.imposter.guessWordId
+                          ? c.imposter.guessWordId === c.imposter.wordId
+                            ? c.t('games.imposterGuessedRight', isolateValues({
+                                name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
+                              }))
+                            : c.t('games.imposterGuessedWrong', isolateValues({
+                                name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
+                              }))
+                          : ''}
+                  </AppText>
+                  <AppText variant="bodyStrong">
+                    {c.t('games.imposterWordWas', isolateValues({
+                      word: localizeText(c.imposter.word, language),
+                    }))}
+                  </AppText>
+                  {c.imposterVoteCounts.map(row => (
+                    <AppText key={row.playerId} variant="body" color="textMuted">
+                      {c.t('games.imposterVotesFor', isolateValues({ name: row.name, count: row.count }))}
+                    </AppText>
+                  ))}
+                  {c.isHost ? (
+                    <AppButton
+                      label={c.t('games.imposterNextRound')}
+                      disabled={!c.canStartNext}
+                      onPress={c.start}
+                    />
+                  ) : (
+                    <AppText variant="body" color="textMuted">
+                      {c.t('games.waitingForHost')}
+                    </AppText>
+                  )}
                 </View>
               ) : null}
-              <AppButton
-                label={
-                  c.mafiosoPhaseIndex === 3
-                    ? c.t('games.revealVote')
-                    : c.t('games.nextPhase')
-                }
-                disabled={!c.isHost}
-                onPress={c.advanceMafioso}
-              />
+
+              <View style={styles.setupLines}>
+                <AppText variant="bodyStrong">{c.t('games.imposterScores')}</AppText>
+                {c.imposterLeaderboard.map(row => (
+                  <View key={row.playerId} style={styles.playerRow}>
+                    <AppText variant="body">{row.name}</AppText>
+                    <AppText variant="bodyStrong">{row.score}</AppText>
+                  </View>
+                ))}
+              </View>
             </AppCard>
           ) : null}
 
@@ -243,9 +340,12 @@ export function GameLobbyScreen({
                       })}
                     </AppText>
                     <AppText variant="caption" color="textMuted">
-                      {c.t('games.triviaTimer', {
-                        seconds: c.gameplay.round.settings.secondsPerQuestion,
-                      })}
+                      {c.triviaSecondsLeft !== null
+                        ? c.t('games.triviaTimeLeft', { seconds: c.triviaSecondsLeft })
+                        : c.t('games.triviaAnswered', {
+                            count: c.triviaAnsweredCount,
+                            total: c.connectedPlayers.length,
+                          })}
                     </AppText>
                   </View>
                   <AppText variant="subheading">
@@ -273,18 +373,22 @@ export function GameLobbyScreen({
                       );
                     })}
                   </View>
-                  {c.gameplay.round.phase === 'question' ? (
+                  {c.gameplay.round.phase === 'question' &&
+                  (myTriviaAnswer || c.myPendingTriviaAnswer) ? (
+                    <AppText variant="body" color="textMuted">
+                      {c.t('games.triviaYouAnswered')}
+                    </AppText>
+                  ) : null}
+                  {c.isHost && c.gameplay.round.phase === 'question' ? (
                     <AppButton
                       label={c.t('games.revealAnswer')}
                       variant="outline"
-                      disabled={!c.isHost}
                       onPress={c.revealTrivia}
                     />
-                  ) : c.gameplay.round.phase === 'reveal' ? (
+                  ) : c.isHost && c.gameplay.round.phase === 'reveal' ? (
                     <AppButton
                       label={c.t('games.nextQuestion')}
                       variant="outline"
-                      disabled={!c.isHost}
                       onPress={c.nextTrivia}
                     />
                   ) : null}
@@ -304,17 +408,28 @@ export function GameLobbyScreen({
               {c.gameplay.round.phase === 'finished' && c.triviaWinner ? (
                 <View style={styles.resultBox}>
                   <AppText variant="subheading">
-                    {c.t('games.triviaWinner', {
+                    {c.t('games.triviaWinner', isolateValues({
                       name: c.triviaWinner.name,
-                    })}
+                    }))}
                   </AppText>
                   {c.gameplay.round.settings.prize ? (
                     <AppText variant="body" color="textMuted">
-                      {c.t('games.triviaPrizeAward', {
+                      {c.t('games.triviaPrizeAward', isolateValues({
                         prize: c.gameplay.round.settings.prize,
-                      })}
+                      }))}
                     </AppText>
                   ) : null}
+                  {c.isHost ? (
+                    <AppButton
+                      label={c.t('games.playAgain')}
+                      disabled={!c.canStartNext}
+                      onPress={c.start}
+                    />
+                  ) : (
+                    <AppText variant="body" color="textMuted">
+                      {c.t('games.waitingForHost')}
+                    </AppText>
+                  )}
                 </View>
               ) : null}
             </AppCard>
@@ -324,8 +439,13 @@ export function GameLobbyScreen({
           {c.gameplay.kind === 'quarter-mile' ? (
             <AppCard style={styles.card}>
               <AppText variant="subheading">
-                {c.t('games.quarterMileSetup')}
+                {c.quarterMileCurrentPackName || c.t('games.quarterMileSetup')}
               </AppText>
+              {c.quarterMileSpectator ? (
+                <AppText variant="body" color="textMuted">
+                  {c.t('games.spectatorQuarterMile')}
+                </AppText>
+              ) : null}
               {c.gameplay.state.phase === 'choose' && c.gameplay.state.known ? (
                 <View style={styles.setupLines}>
                   <AppText variant="bodyStrong">
@@ -349,12 +469,12 @@ export function GameLobbyScreen({
                     </View>
                   ) : (
                     <AppText variant="body" color="textMuted">
-                      {c.t('games.quarterMileWaiting', {
+                      {c.t('games.quarterMileWaiting', isolateValues({
                         name:
                           c.players.find(
                             p => p.id === c.quarterMileActivePlayerId,
                           )?.name ?? c.t('games.noPlayer'),
-                      })}
+                      }))}
                     </AppText>
                   )}
                 </View>
@@ -362,7 +482,7 @@ export function GameLobbyScreen({
               {c.gameplay.state.phase === 'reveal' && c.gameplay.state.lastChoice ? (
                 <View style={styles.resultBox}>
                   <AppText variant="bodyStrong">
-                    {c.t('games.quarterMileRevealPair', {
+                    {c.t('games.quarterMileRevealPair', isolateValues({
                       name:
                         c.players.find(p => {
                           const choice =
@@ -375,36 +495,49 @@ export function GameLobbyScreen({
                         c.gameplay.state.lastChoice.choice === 'take'
                           ? c.t('games.quarterMileChoiceTake')
                           : c.t('games.quarterMileChoiceLeave'),
-                    })}
+                    }))}
                   </AppText>
                   <AppText variant="body">
                     {localizeText(c.gameplay.state.lastChoice.known.name, language)}{' '}
-                    /{' '}
+                    ({c.formatQuarterMileScore(c.gameplay.state.lastChoice.known.score)})
+                    {' / '}
                     {localizeText(
                       c.gameplay.state.lastChoice.hidden.name,
                       language,
-                    )}
+                    )}{' '}
+                    ({c.formatQuarterMileScore(c.gameplay.state.lastChoice.hidden.score)})
                   </AppText>
                   {c.isHost ? (
                     <AppButton
                       label={c.t('games.quarterMileNextPair')}
                       onPress={c.nextQuarterMile}
                     />
-                  ) : null}
+                  ) : (
+                    <AppText variant="body" color="textMuted">
+                      {c.t('games.waitingForHost')}
+                    </AppText>
+                  )}
                 </View>
               ) : null}
               {c.gameplay.state.phase === 'finished' ? (
                 <View style={styles.resultBox}>
                   <AppText variant="subheading">
                     {c.quarterMileWinner
-                      ? c.t('games.quarterMileWinner', {
+                      ? c.t('games.quarterMileWinner', isolateValues({
                           name:
                             c.players.find(
                               p => p.id === c.quarterMileWinner?.playerId,
                             )?.name ?? c.t('games.noPlayer'),
-                        })
+                        }))
                       : c.t('games.quarterMileScores')}
                   </AppText>
+                  {c.isHost ? (
+                    <AppButton
+                      label={c.t('games.playAgain')}
+                      disabled={!c.canStartNext}
+                      onPress={c.start}
+                    />
+                  ) : null}
                 </View>
               ) : null}
               <AppText variant="bodyStrong">
@@ -412,9 +545,11 @@ export function GameLobbyScreen({
               </AppText>
               {c.quarterMileScores.map(row => (
                 <AppText key={row.playerId} variant="body" color="textMuted">
-                  {c.players.find(p => p.id === row.playerId)?.name ??
-                    row.playerId}
-                  : {row.score}
+                  {c.quarterMileScoreLine(
+                    c.players.find(p => p.id === row.playerId)?.name ??
+                      row.playerId,
+                    row.score,
+                  )}
                 </AppText>
               ))}
             </AppCard>
@@ -438,11 +573,31 @@ export function GameLobbyScreen({
                     : c.t('games.icebreakerPromptPrivate')}
                 </AppText>
               </View>
-              <AppButton
-                label={c.t('games.nextPrompt')}
-                disabled={!c.isHost}
-                onPress={c.nextIcebreaker}
-              />
+              {c.canSeeIcebreakerPrompt ? (
+                <>
+                  <AppText variant="body" color="textMuted" align="center">
+                    {c.t('games.icebreakerYourTurn')}
+                  </AppText>
+                  <AppButton
+                    label={c.t('games.icebreakerDone')}
+                    disabled={c.myPendingIcebreakerNext}
+                    onPress={c.finishIcebreakerTurn}
+                  />
+                </>
+              ) : (
+                <AppText variant="body" color="textMuted" align="center">
+                  {c.t('games.icebreakerWaiting', isolateValues({
+                    name: c.gameplay.current?.player.name ?? c.t('games.noPlayer'),
+                  }))}
+                </AppText>
+              )}
+              {c.isHost && !c.canSeeIcebreakerPrompt ? (
+                <AppButton
+                  label={c.t('games.nextPrompt')}
+                  variant="outline"
+                  onPress={c.nextIcebreaker}
+                />
+              ) : null}
             </AppCard>
           ) : null}
         </>
@@ -456,6 +611,40 @@ export function GameLobbyScreen({
               </AppText>
             ))}
           </View>
+          {c.connectedPlayers.length < c.requiredConnectedPlayers ? (
+            <AppText variant="bodyStrong">
+              {c.t('games.needPlayers', {
+                count: c.requiredConnectedPlayers,
+                have: c.connectedPlayers.length,
+              })}
+            </AppText>
+          ) : !c.isHost ? (
+            <AppText variant="bodyStrong">{c.t('games.waitingForHostStart')}</AppText>
+          ) : null}
+          {c.game.id === 'quarter-mile' && c.quarterMilePacks.length > 1 ? (
+            <View style={styles.setupLines}>
+              <AppText variant="bodyStrong">
+                {c.t('games.quarterMileChooseCategory')}
+              </AppText>
+              <View style={styles.wrapRow}>
+                {c.quarterMilePacks.map(pack => (
+                  <AppButton
+                    key={pack.id}
+                    label={localizeText(pack.name, language)}
+                    size="sm"
+                    fullWidth={false}
+                    variant={
+                      c.selectedQuarterMilePackId === pack.id
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                    disabled={!c.isHost}
+                    onPress={() => c.selectQuarterMilePack(pack.id)}
+                  />
+                ))}
+              </View>
+            </View>
+          ) : null}
           {c.game.id === 'trivia-time' ? (
             <View style={styles.setupLines}>
               <AppText variant="bodyStrong">{c.t('games.choosePack')}</AppText>
@@ -538,15 +727,13 @@ export function GameLobbyScreen({
       )}
 
       <View style={styles.buttonRow}>
-        <AppButton
-          label={
-            c.current?.phase === 'in-game'
-              ? c.t('games.inGame')
-              : c.t('games.startGame')
-          }
-          disabled={!c.canStart || c.current?.phase === 'in-game'}
-          onPress={c.start}
-        />
+        {c.isHost && c.current?.phase !== 'in-game' ? (
+          <AppButton
+            label={c.t('games.startGame')}
+            disabled={!c.canStart}
+            onPress={c.start}
+          />
+        ) : null}
         <AppButton
           label={c.t('games.leaveLobby')}
           variant="secondary"

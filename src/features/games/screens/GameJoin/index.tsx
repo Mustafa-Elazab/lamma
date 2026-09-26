@@ -8,7 +8,9 @@ import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
 import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeader';
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import type { GamesStackParamList } from '../../../../navigation/types';
+import { trackEvent } from '../../../../services/analytics';
 import { useGameSession } from '../../core/session';
+import { ltrIsolate } from '../../../../utils/bidi';
 
 type Props = NativeStackScreenProps<GamesStackParamList, 'GameJoin'>;
 
@@ -36,6 +38,7 @@ export function GameJoinScreen({
       setFailed(true);
       return;
     }
+    void trackEvent('join_room', { game_id: joined.gameId, source: 'link' });
     navigation.replace('GameLobby', { gameId: joined.gameId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
@@ -57,7 +60,7 @@ export function GameJoinScreen({
       {failed ? (
         <AppErrorState
           title={t('games.joinCodeNotFound')}
-          message={t('games.inviteExpired', { code })}
+          message={t('games.inviteExpired', { code: ltrIsolate(code) })}
           retryLabel={t('games.retry')}
           onRetry={() => {
             void join();
@@ -66,7 +69,7 @@ export function GameJoinScreen({
       ) : (
         <AppEmptyState
           icon="group"
-          title={t('games.joiningRoom', { code })}
+          title={t('games.joiningRoom', { code: ltrIsolate(code) })}
           message={t('games.loadingContentMessage')}
         />
       )}

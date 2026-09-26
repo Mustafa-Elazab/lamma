@@ -1,6 +1,7 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 
 import type { Theme } from '../../../../design-system/theme/tokens';
+import { letterSpacingFor } from '../../../../utils/direction';
 
 export function createStyles(theme: Theme) {
   return StyleSheet.create({
@@ -13,7 +14,7 @@ export function createStyles(theme: Theme) {
     },
     headerCenter: { flex: 1, alignItems: 'center', gap: 2 },
     spacer: { width: 24 },
-    tagline: { letterSpacing: 1.2 },
+    tagline: { letterSpacing: letterSpacingFor(1.2, I18nManager.isRTL) },
     footerArt: {
       width: '100%',
       height: 100,

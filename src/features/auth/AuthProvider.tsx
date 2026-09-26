@@ -76,7 +76,11 @@ export function AuthProvider({
         } catch (tokenError) {
           reportError(tokenError, 'messaging.sync-after-sign-in', { provider });
         }
-        await trackEvent('sign_in_method', { method: provider });
+        await trackEvent('login', { method: provider });
+        if (provider === 'guest') {
+          // Every anonymous sign-in creates a new Firebase user.
+          await trackEvent('sign_up', { method: provider });
+        }
       } catch (err) {
         if (err instanceof AuthError && err.code === 'auth/cancelled') {
           return;

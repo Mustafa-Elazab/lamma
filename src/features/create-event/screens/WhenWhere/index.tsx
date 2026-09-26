@@ -3,6 +3,7 @@ import DateTimePicker, {
 } from '@react-native-community/datetimepicker';
 import React, { useCallback, useMemo } from 'react';
 import {
+  I18nManager,
   Image,
   ImageBackground,
   Platform,
@@ -23,6 +24,7 @@ import { DetailRow } from '../../components/DetailRow';
 import { LocationPickerModal } from '../../components/LocationPickerModal';
 import { createStyles } from './styles';
 import { useWhenWhereController, type ActivePicker } from './useController';
+import { letterSpacingFor } from '../../../../utils/direction';
 
 export function WhenWhereScreen(): React.ReactElement {
   const theme = useTheme();
@@ -273,7 +275,10 @@ function createLocalStyles(theme: Theme) {
       height: 44,
       justifyContent: 'center',
     },
-    eyebrow: { letterSpacing: 2.5, fontSize: 10 },
+    eyebrow: {
+      letterSpacing: letterSpacingFor(2.5, I18nManager.isRTL),
+      fontSize: 10,
+    },
     headerLogo: {
       width: 90,
       height: 48,

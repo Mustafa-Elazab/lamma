@@ -54,13 +54,13 @@ describe('game session', () => {
 
   it('creates room codes with a game prefix', () => {
     expect(roomCodeForGame('trivia-time')).toMatch(/^TT[A-Z0-9]{4}$/);
-    expect(roomCodeForGame('mafioso')).toMatch(/^M[A-Z0-9]{4}$/);
+    expect(roomCodeForGame('imposter')).toMatch(/^I[A-Z0-9]{4}$/);
   });
 
   it('handles host, join, disconnect, reconnect, and start in one reducer', () => {
     const hosted = sessionReducer(initialSessionState, {
       type: 'host',
-      gameId: 'mafioso',
+      gameId: 'imposter',
       host,
       code: 'MA1234',
       now: 1,
@@ -205,7 +205,7 @@ describe('game session', () => {
     });
     const state = sessionReducer(initialSessionState, {
       type: 'host',
-      gameId: 'mafioso',
+      gameId: 'imposter',
       host,
       code: 'MAROOM',
       now: 1,
@@ -279,7 +279,7 @@ describe('game session', () => {
     const adapter = new LocalRoomCodeSessionAdapter();
     const state = sessionReducer(initialSessionState, {
       type: 'host',
-      gameId: 'mafioso',
+      gameId: 'imposter',
       host,
       code: 'MAROOM',
       now: 1,

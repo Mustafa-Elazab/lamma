@@ -12,6 +12,7 @@ import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { AppStackParamList } from '../../../../navigation/types';
 import { createStyles } from './styles';
 import useShareInviteController from './useController';
+import { autoIsolate, isolateValues, ltrIsolate } from '../../../../utils/bidi';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ShareInvite'>;
 
@@ -33,18 +34,29 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
     inviteCardReady,
   );
 
+  // Reset the capture state only when the cover really changes. `heroKey` is
+  // a string so this effect cannot re-fire on every render (a fresh
+  // `{ uri }` object here caused "Maximum update depth exceeded").
   useEffect(() => {
-    setCardLayout({ width: 0, height: 0 });
+    setCardLayout(prev =>
+      prev.width === 0 && prev.height === 0 ? prev : { width: 0, height: 0 },
+    );
     setCardImageLoaded(false);
-  }, [route.params.eventId, c.heroImage]);
+  }, [route.params.eventId, c.heroKey]);
 
   const handleInviteCardLayout = useCallback(
     (event: { nativeEvent: { layout: { width: number; height: number } } }) => {
       const { width, height } = event.nativeEvent.layout;
-      setCardLayout({ width, height });
+      setCardLayout(prev =>
+        prev.width === width && prev.height === height
+          ? prev
+          : { width, height },
+      );
     },
     [],
   );
+
+  const handleImageLoaded = useCallback(() => setCardImageLoaded(true), []);
 
   if (c.isError || (!c.isLoading && !c.event)) {
     return (
@@ -69,8 +81,16 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
     </View>
   );
 
+  const footer = (
+    <Image
+      source={footerImages.shareExact}
+      style={styles.footerArt}
+      resizeMode="contain"
+    />
+  );
+
   return (
-    <AppScreenTemplate edges={['top']} header={header}>
+    <AppScreenTemplate edges={['top']} header={header} footer={footer}>
       {c.heroImage ? (
         <ViewShot
           ref={cardRef}
@@ -83,7 +103,7 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
               source={c.heroImage}
               style={styles.inviteImage}
               resizeMode="cover"
-              onLoadEnd={() => setCardImageLoaded(true)}
+              onLoadEnd={handleImageLoaded}
             />
             <View style={styles.inviteOverlay} pointerEvents="none">
               <AppText
@@ -94,7 +114,9 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
                 {c.event?.title ?? ''}
               </AppText>
               <AppText variant="caption" color="textInverse" numberOfLines={1}>
-                {c.event ? `${c.dateLabel} · ${c.event.venueName}` : ''}
+                {c.event
+                  ? `${c.dateLabel} · ${autoIsolate(c.event.venueName)}`
+                  : ''}
               </AppText>
             </View>
           </View>
@@ -104,7 +126,7 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
       <View style={styles.linkRow}>
         <AppIcon name="link" size={20} color="primary" />
         <AppText variant="body" numberOfLines={1} style={styles.linkText}>
-          {c.link.replace('https://', '')}
+          {ltrIsolate(c.link.replace('https://', ''))}
         </AppText>
         <Pressable onPress={c.copyLink} hitSlop={8}>
           <AppText variant="label" color="primary">
@@ -161,19 +183,15 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
         </View>
         <AppText variant="bodyStrong">
           {c.event
-            ? c.t('share.invitedTo', { title: c.event.title })
+            ? c.t('share.invitedTo', isolateValues({ title: c.event.title }))
             : ''}
         </AppText>
         <AppText variant="caption" color="textMuted">
-          {c.event ? `${c.dateLabel} · ${c.event.venueName}` : ''}
+          {c.event
+            ? `${c.dateLabel} · ${autoIsolate(c.event.venueName)}`
+            : ''}
         </AppText>
       </View>
-
-      <Image
-        source={footerImages.shareExact}
-        style={styles.footerArt}
-        resizeMode="contain"
-      />
     </AppScreenTemplate>
   );
 }

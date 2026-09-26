@@ -16,7 +16,7 @@ describe('format helpers', () => {
   });
 
   it('formats short dates in Arabic', () => {
-    expect(formatDateShort(friday, 'ar')).toBe('الجمعة, 18 ديسمبر');
+    expect(formatDateShort(friday, 'ar')).toBe('الجمعة، 18 ديسمبر');
   });
 
   it('formats long dates', () => {

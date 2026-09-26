@@ -1,12 +1,19 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { I18nManager, Image, ImageBackground, StyleSheet, View } from 'react-native';
+import {
+  I18nManager,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 import { branding, headerImages } from '../../../assets';
 import { AppAvatar } from '../../../design-system/atoms/Avatar';
 import { AppText } from '../../../design-system/atoms/Text';
 import { useTheme } from '../../../design-system/theme/ThemeProvider';
 import type { Theme } from '../../../design-system/theme/tokens';
+import { letterSpacingFor } from '../../../utils/direction';
 
 export type HomeHeaderProps = {
   greetingName: string;
@@ -77,16 +84,13 @@ function createStyles(theme: Theme) {
       alignItems: 'center',
       gap: theme.spacing.sm,
     },
-    greeting: {
-      // Keep the name/greeting flush to the outer edge in both LTR and RTL.
-      alignItems: I18nManager.isRTL ? 'flex-start' : 'flex-end',
-    },
+    // Greeting hugs the avatar: 'flex-end' is the trailing edge, which native
+    // RTL already mirrors (flipping it by hand again pushed it away).
+    greeting: { alignItems: 'flex-end' },
     tagline: {
-      letterSpacing: 2,
+      letterSpacing: letterSpacingFor(2, I18nManager.isRTL),
       fontSize: 9,
       marginTop: theme.spacing.xs,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
-      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
       alignSelf: 'stretch',
     },
   });

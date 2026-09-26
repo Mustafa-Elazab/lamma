@@ -7,6 +7,7 @@ import { AppAvatar } from '../../atoms/Avatar';
 import { AppText } from '../../atoms/Text';
 import { overflowLabel } from '../../../utils/format';
 import type { ImageSourcePropType } from 'react-native';
+import { ltrIsolate } from '../../../utils/bidi';
 
 export type StackAvatar = {
   id: string;
@@ -59,7 +60,7 @@ function AppAvatarStackComponent({
           ]}
         >
           <AppText variant="caption" color="textMuted" weight="700">
-            {overflow}
+            {ltrIsolate(overflow)}
           </AppText>
         </View>
       ) : null}

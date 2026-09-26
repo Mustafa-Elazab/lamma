@@ -1,11 +1,13 @@
 import { ICEBREAKER_PROMPTS } from '../../icebreakers/content/prompts';
 import { nextIcebreakerRound } from '../../icebreakers/engine';
 import {
-  advanceMafiosoPhase,
-  castMafiosoVote,
-  createMafiosoState,
-  revealMafiosoVote,
-} from '../../mafioso/engine';
+  allImposterVotesIn,
+  castImposterVote,
+  createImposterRound,
+  imposterGuess,
+  revealImposterVote,
+  startImposterVote,
+} from '../../imposter/engine';
 import {
   advanceTriviaQuestion,
   answerTriviaQuestion,
@@ -62,28 +64,59 @@ describe('game engines', () => {
     expect(first?.prompt.en).toBe(ICEBREAKER_PROMPTS[0]);
   });
 
-  it('creates host-authoritative Mafioso role assignments', () => {
-    const state = createMafiosoState(players);
-    expect(state.assignments).toHaveLength(players.length);
-    expect(state.assignments.some(item => item.role === 'mafia')).toBe(true);
+  it('deals one imposter and one shared word to everyone in the round', () => {
+    const state = createImposterRound({ players });
+    expect(state.playerIds).toHaveLength(4);
+    expect(state.playerIds).toContain(state.imposterId);
+    expect(state.phase).toBe('clues');
+    expect(state.word.en).toBeTruthy();
   });
 
-  it('runs Mafioso vote and reveal state', () => {
-    const state = createMafiosoState(players);
-    const votePhase = [
-      advanceMafiosoPhase,
-      advanceMafiosoPhase,
-      advanceMafiosoPhase,
-    ].reduce(next => advanceMafiosoPhase(next), state);
-    const voted = castMafiosoVote(
-      castMafiosoVote(votePhase, 'p1', 'p2'),
-      'p3',
-      'p2',
-    );
-    const revealed = revealMafiosoVote(voted);
+  it('players win when they vote out the imposter and the guess is wrong', () => {
+    const base = startImposterVote(createImposterRound({ players, rng: () => 0 }));
+    const imp = base.imposterId;
+    const others = base.playerIds.filter(id => id !== imp);
+    let state = base;
+    others.forEach(id => {
+      state = castImposterVote(state, id, imp);
+    });
+    state = castImposterVote(state, imp, others[0]!);
+    expect(castImposterVote(state, others[0]!, others[1]!).votes).toEqual(state.votes);
+    expect(castImposterVote(base, imp, imp).votes).toEqual({});
+    expect(allImposterVotesIn(state, base.playerIds)).toBe(true);
+    const guessing = revealImposterVote(state);
+    expect(guessing.phase).toBe('guess');
+    expect(guessing.guessOptions?.some(o => o.id === base.wordId)).toBe(true);
+    const wrong = guessing.guessOptions!.find(o => o.id !== base.wordId)!;
+    const done = imposterGuess(guessing, imp, wrong.id);
+    expect(done.winner).toBe('players');
+    others.forEach(id => expect(done.scores[id]).toBe(1));
+    expect(imposterGuess(guessing, imp, base.wordId).winner).toBe('imposter');
+  });
 
-    expect(voted.votes).toEqual({ p1: 'p2', p3: 'p2' });
-    expect(revealed.lastRevealedPlayerId).toBe('p2');
-    expect(revealed.eliminatedPlayerIds).toContain('p2');
+  it('imposter wins on a tie or when an innocent player is voted out', () => {
+    const base = startImposterVote(createImposterRound({ players, rng: () => 0 }));
+    const imp = base.imposterId;
+    const [a, b, c] = base.playerIds.filter(id => id !== imp) as [string, string, string];
+    const tie = revealImposterVote(
+      castImposterVote(castImposterVote(base, a, b), b, a),
+    );
+    expect(tie.tie).toBe(true);
+    expect(tie.winner).toBe('imposter');
+    const wrong = revealImposterVote(
+      castImposterVote(castImposterVote(castImposterVote(base, a, c), b, c), imp, c),
+    );
+    expect(wrong.votedOutId).toBe(c);
+    expect(wrong.winner).toBe('imposter');
+    expect(wrong.scores[imp]).toBe(2);
+  });
+
+  it('never repeats a word across rounds and keeps scores', () => {
+    const first = createImposterRound({ players });
+    const second = createImposterRound({ players, previous: first });
+    expect(second.round).toBe(2);
+    expect(`${second.categoryId}:${second.wordId}`).not.toBe(
+      `${first.categoryId}:${first.wordId}`,
+    );
   });
 });

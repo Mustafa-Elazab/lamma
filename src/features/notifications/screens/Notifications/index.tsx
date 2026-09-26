@@ -8,14 +8,17 @@ import { AppText } from '../../../../design-system/atoms/Text';
 import { AppEmptyState } from '../../../../design-system/molecules/EmptyState';
 import { AppErrorState } from '../../../../design-system/molecules/ErrorState';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
+import { autoIsolate } from '../../../../utils/bidi';
 import { formatDateShort } from '../../../../utils/format';
 import { createStyles } from './styles';
 import { useNotificationsController } from './useController';
+import { useLanguage } from '../../../../app/localization';
 
 export function NotificationsScreen(): React.ReactElement {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const c = useNotificationsController();
+  const { language } = useLanguage();
 
   const hasContent = c.sections.length > 0;
 
@@ -86,12 +89,12 @@ export function NotificationsScreen(): React.ReactElement {
                     <AppIcon name={c.iconFor(item.type)} size={20} color="primary" />
                   </View>
                   <View style={styles.itemBody}>
-                    <AppText variant="bodyStrong">{item.title}</AppText>
+                    <AppText variant="bodyStrong">{autoIsolate(item.title)}</AppText>
                     <AppText variant="caption" color="textMuted">
-                      {item.message}
+                      {autoIsolate(item.message)}
                     </AppText>
                     <AppText variant="caption" color="textMuted">
-                      {formatDateShort(item.createdAt)}
+                      {formatDateShort(item.createdAt, language)}
                     </AppText>
                   </View>
                   {!item.read ? <View style={styles.unreadDot} /> : null}

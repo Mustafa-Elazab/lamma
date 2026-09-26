@@ -33,6 +33,7 @@ import {
   searchPlaces,
   type GeoPlace,
 } from '../core/geocoding';
+import { ltrIsolate } from '../../../utils/bidi';
 
 export type EventLocation = {
   label: string;
@@ -380,7 +381,9 @@ export function LocationPickerModal({
           <View style={styles.coordinateCard}>
             <AppIcon name="location" size={20} color="primary" />
             <AppText variant="caption" color="textMuted">
-              {coordinate.latitude.toFixed(5)}, {coordinate.longitude.toFixed(5)}
+              {ltrIsolate(
+                `${coordinate.latitude.toFixed(5)}, ${coordinate.longitude.toFixed(5)}`,
+              )}
             </AppText>
           </View>
 

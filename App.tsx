@@ -7,13 +7,43 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 
-import { AppProviders } from './src/app';
+import { AppProviders, useLanguage } from './src/app';
 import { GlobalErrorBoundary } from './src/app/GlobalErrorBoundary';
 import { useTheme } from './src/design-system/theme/ThemeProvider';
+import { useAuth } from './src/features/auth';
 import { RootNavigator } from './src/navigation';
-import { reportError } from './src/services/crashReporting';
+import { setAnalyticsIdentity } from './src/services/analytics';
+import {
+  initializeCrashReporting,
+  reportError,
+  setCrashIdentity,
+} from './src/services/crashReporting';
 import { initializeMessaging } from './src/services/messaging';
 import { initializeRemoteConfig } from './src/services/remoteConfig';
+
+// Before the first render so render-time errors are captured too.
+initializeCrashReporting();
+
+/** Keeps the Analytics / Crashlytics user id and attributes in sync with auth. */
+function TelemetryIdentity(): null {
+  const { user, status } = useAuth();
+  const { language } = useLanguage();
+  const userId = user?.uid ?? null;
+  const accountType = !user
+    ? 'signed_out'
+    : user.isAnonymous
+      ? 'guest'
+      : 'signed_in';
+  useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+    const identity = { userId, accountType, language } as const;
+    setCrashIdentity(identity);
+    void setAnalyticsIdentity(identity);
+  }, [accountType, language, status, userId]);
+  return null;
+}
 
 function ThemedStatusBar(): React.ReactElement {
   const theme = useTheme();
@@ -54,6 +84,7 @@ function App(): React.ReactElement {
     <AppProviders>
       <GlobalErrorBoundary>
         <AppServices />
+        <TelemetryIdentity />
         <ThemedStatusBar />
         <RootNavigator />
       </GlobalErrorBoundary>
