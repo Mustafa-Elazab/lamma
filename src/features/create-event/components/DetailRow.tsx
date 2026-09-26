@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppIcon, type IconName } from '../../../design-system/atoms/Icon';
 import { AppText } from '../../../design-system/atoms/Text';
@@ -40,9 +40,7 @@ export function DetailRow({
           {value}
         </AppText>
       </View>
-      <View style={styles.chevron}>
-        <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} rtlMirror={false} />
-      </View>
+      <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} forward />
     </Pressable>
   );
 }
@@ -69,6 +67,5 @@ function createStyles(theme: Theme) {
       justifyContent: 'center',
     },
     text: { flex: 1, gap: 2 },
-    chevron: { transform: [{ scaleX: I18nManager.isRTL ? 1 : -1 }] },
   });
 }

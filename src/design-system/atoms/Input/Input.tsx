@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  I18nManager,
   Pressable,
   StyleSheet,
   TextInput,
@@ -24,6 +23,11 @@ export type InputProps = TextInputProps & {
   onPressRightIcon?: () => void;
   counterMax?: number;
   containerStyle?: StyleProp<ViewStyle>;
+  /**
+   * Content that is always left-to-right (room codes, emails, phone numbers,
+   * links): typed text stays LTR and left-aligned even in the Arabic UI.
+   */
+  ltr?: boolean;
 };
 
 function AppInputComponent({
@@ -35,6 +39,7 @@ function AppInputComponent({
   onPressRightIcon,
   counterMax,
   containerStyle,
+  ltr = false,
   value,
   onFocus,
   onBlur,
@@ -74,7 +79,6 @@ function AppInputComponent({
           value={value}
           multiline={multiline}
           placeholderTextColor={theme.colors.textMuted}
-          textAlign={I18nManager.isRTL ? 'right' : 'left'}
           onFocus={e => {
             setFocused(true);
             onFocus?.(e);
@@ -83,7 +87,12 @@ function AppInputComponent({
             setFocused(false);
             onBlur?.(e);
           }}
-          style={[styles.input, multiline && styles.inputMultiline, style]}
+          style={[
+            styles.input,
+            multiline && styles.inputMultiline,
+            ltr && styles.inputLtr,
+            style,
+          ]}
           {...rest}
         />
         {rightIcon ? (
@@ -132,11 +141,17 @@ function createStyles(theme: Theme) {
     fieldError: { borderColor: theme.colors.error },
     input: {
       flex: 1,
+      // 'start' is the leading edge on both platforms (right in Arabic).
+      // TextInput 'left'/'right' are physical on Android but flipped by
+      // native RTL on iOS, so neither works for both.
+      textAlign: 'start',
       color: theme.colors.text,
       fontSize: theme.typography.body.fontSize,
       paddingVertical: theme.spacing.md,
     },
     inputMultiline: { minHeight: 88, textAlignVertical: 'top' },
+    // Lays the field itself out LTR, so 'start' resolves to the left edge.
+    inputLtr: { direction: 'ltr', writingDirection: 'ltr' },
     helper: { marginTop: theme.spacing.xs },
   });
 }

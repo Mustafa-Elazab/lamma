@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import {
-  I18nManager,
   Pressable,
   StyleSheet,
   View,
@@ -64,9 +63,7 @@ function AppListItemComponent({
       </View>
       {trailing}
       {showChevron ? (
-        <View style={styles.chevron}>
-          <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} rtlMirror={false} />
-        </View>
+        <AppIcon name="back" size={18} color="textMuted" strokeWidth={2} forward />
       ) : null}
     </>
   );
@@ -105,7 +102,6 @@ function createStyles(theme: Theme) {
       justifyContent: 'center',
     },
     text: { flex: 1, gap: 2 },
-    chevron: { transform: [{ scaleX: I18nManager.isRTL ? 1 : -1 }] },
   });
 }
 

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../theme/ThemeProvider';
 import type { Theme } from '../../theme/tokens';
@@ -28,9 +28,7 @@ function AppSectionHeaderComponent({
           <AppText variant="label" color="primary">
             {actionLabel}
           </AppText>
-          <View style={styles.chevron}>
-            <AppIcon name="back" size={16} color="primary" strokeWidth={2} rtlMirror={false} />
-          </View>
+          <AppIcon name="back" size={16} color="primary" strokeWidth={2} forward />
         </Pressable>
       ) : null}
     </View>
@@ -49,7 +47,6 @@ function createStyles(theme: Theme) {
       alignItems: 'center',
       gap: theme.spacing.xs,
     },
-    chevron: { transform: [{ scaleX: I18nManager.isRTL ? 1 : -1 }] },
   });
 }
 

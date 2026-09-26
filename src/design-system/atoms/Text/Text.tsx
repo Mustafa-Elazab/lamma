@@ -14,6 +14,11 @@ import type { ColorToken, TypographyToken } from '../../theme/tokens';
 export type TextProps = RNTextProps & {
   variant?: TypographyToken;
   color?: ColorToken;
+  /**
+   * Logical alignment. 'left' means the leading edge: under native RTL both
+   * iOS and Android render it on the right. Never pass 'right' to get
+   * right-aligned Arabic text, native RTL would flip it back to the left.
+   */
   align?: TextStyle['textAlign'];
   weight?: TextStyle['fontWeight'];
 };
@@ -31,14 +36,15 @@ function AppTextComponent({
 
   const computed = useMemo<StyleProp<TextStyle>>(() => {
     const token = theme.typography[variant];
-    const resolvedAlign =
-      align ?? (I18nManager.isRTL ? 'right' : 'left');
     return {
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       fontWeight: weight ?? (token.fontWeight as TextStyle['fontWeight']),
       color: theme.colors[color],
-      textAlign: resolvedAlign,
+      // Leading edge in both directions ('left' is auto-flipped in RTL).
+      textAlign: align ?? 'left',
+      // Base bidi direction of the paragraph (iOS), so a line that starts
+      // with a Latin name or a number still reads right-to-left in Arabic.
       writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     };
   }, [align, color, theme, variant, weight]);
