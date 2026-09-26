@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  I18nManager,
   Pressable,
   StyleSheet,
   TextInput,
@@ -79,6 +80,9 @@ function AppInputComponent({
           value={value}
           multiline={multiline}
           placeholderTextColor={theme.colors.textMuted}
+          // Physical on both platforms for TextInput (unlike <Text>), so the
+          // leading edge has to be picked by hand here.
+          textAlign={ltr || !I18nManager.isRTL ? 'left' : 'right'}
           onFocus={e => {
             setFocused(true);
             onFocus?.(e);
@@ -141,17 +145,12 @@ function createStyles(theme: Theme) {
     fieldError: { borderColor: theme.colors.error },
     input: {
       flex: 1,
-      // 'start' is the leading edge on both platforms (right in Arabic).
-      // TextInput 'left'/'right' are physical on Android but flipped by
-      // native RTL on iOS, so neither works for both.
-      textAlign: 'start',
       color: theme.colors.text,
       fontSize: theme.typography.body.fontSize,
       paddingVertical: theme.spacing.md,
     },
     inputMultiline: { minHeight: 88, textAlignVertical: 'top' },
-    // Lays the field itself out LTR, so 'start' resolves to the left edge.
-    inputLtr: { direction: 'ltr', writingDirection: 'ltr' },
+    inputLtr: { writingDirection: 'ltr' },
     helper: { marginTop: theme.spacing.xs },
   });
 }

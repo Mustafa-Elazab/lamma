@@ -90,8 +90,9 @@ export function EditProfileScreen(): React.ReactElement {
           />
           {c.user?.email ? (
             <AppInput
-              label="Email"
+              label={t('info.contact.emailLabel')}
               value={c.user.email}
+              ltr
               editable={false}
               leftIcon="link"
             />

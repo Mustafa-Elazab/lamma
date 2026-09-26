@@ -8,11 +8,14 @@
  *
  * Because of that, code must NOT flip things by hand as well:
  * - no `isRTL ? 'row-reverse' : 'row'`
- * - no `textAlign: isRTL ? 'right' : 'left'` (native RTL turns 'right' into
- *   the physical left edge, i.e. it flips twice)
- * Use `textAlign: 'left'` (Text) / `'start'` (TextInput) for the leading
- * edge. The only things native RTL does not mirror are transforms (icons
- * drawn with a direction) and raw horizontal scroll offsets; helpers below.
+ * - no `textAlign: isRTL ? 'right' : 'left'` on <Text> (native RTL turns
+ *   'right' into the physical left edge, i.e. it flips twice); use 'left'
+ *   for the leading edge.
+ * Exception: <TextInput> textAlign is physical on both iOS and Android (RN
+ * does not pass the layout direction to the native input), so `AppInput`
+ * does use `isRTL ? 'right' : 'left'`.
+ * The only things native RTL does not mirror are transforms (icons drawn
+ * with a direction) and raw horizontal scroll offsets; helpers below.
  */
 
 /** Icons whose glyph points somewhere and must be mirrored in RTL. */
@@ -75,6 +78,15 @@ export function logicalScrollOffset(
     0,
     contentSize.width - layoutMeasurement.width - contentOffset.x,
   );
+}
+
+/**
+ * Tracking for decorative captions. Arabic is cursive: any letterSpacing
+ * pulls the joined letters apart ("مناسبات" renders as "منا سبات"), so it is
+ * dropped in RTL (the only RTL language is Arabic).
+ */
+export function letterSpacingFor(spacing: number, isRTL: boolean): number {
+  return isRTL ? 0 : spacing;
 }
 
 /**

@@ -1,4 +1,5 @@
 import {
+  letterSpacingFor,
   logicalScrollOffset,
   needsDirectionRestart,
   shouldMirrorIcon,
@@ -67,5 +68,12 @@ describe('needsDirectionRestart', () => {
     expect(needsDirectionRestart(false, true)).toBe(true);
     expect(needsDirectionRestart(true, true)).toBe(false);
     expect(needsDirectionRestart(false, false)).toBe(false);
+  });
+});
+
+describe('letterSpacingFor', () => {
+  it('keeps tracking for Latin and drops it for cursive Arabic', () => {
+    expect(letterSpacingFor(2, false)).toBe(2);
+    expect(letterSpacingFor(2, true)).toBe(0);
   });
 });

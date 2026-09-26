@@ -1,6 +1,7 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 
 import type { Theme } from '../../../../design-system/theme/tokens';
+import { letterSpacingFor } from '../../../../utils/direction';
 
 export function createStyles(theme: Theme, width: number) {
   return StyleSheet.create({
@@ -11,7 +12,7 @@ export function createStyles(theme: Theme, width: number) {
       gap: theme.spacing.xs,
     },
     logo: { width: 132, height: 48, resizeMode: 'contain' },
-    tagline: { letterSpacing: 1.5 },
+    tagline: { letterSpacing: letterSpacingFor(1.5, I18nManager.isRTL) },
     slide: {
       width,
       alignItems: 'center',
