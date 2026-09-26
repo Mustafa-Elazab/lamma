@@ -1,5 +1,11 @@
 import { formatQuarterMileScore } from '../../features/games/quarter-mile/content/packs';
-import { autoIsolate, directionMark, labelValueLine, ltrIsolate } from '../bidi';
+import {
+  autoIsolate,
+  directionMark,
+  isolateValues,
+  labelValueLine,
+  ltrIsolate,
+} from '../bidi';
 
 describe('bidi helpers', () => {
   it('wraps prices in LRI…PDI so Arabic text shows "$120k"', () => {
@@ -15,5 +21,13 @@ describe('bidi helpers', () => {
     expect(labelValueLine('مصطفي', '$12k', 'en')).toBe(
       '\u200E\u2068مصطفي\u2069: \u2066$12k\u2069',
     );
+  });
+
+  it('isolates string interpolation values but keeps numbers', () => {
+    expect(isolateValues({ name: 'Mostafa', count: 3, empty: '' })).toEqual({
+      name: '\u2068Mostafa\u2069',
+      count: 3,
+      empty: '',
+    });
   });
 });

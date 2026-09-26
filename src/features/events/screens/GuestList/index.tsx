@@ -15,6 +15,7 @@ import type { AppStackParamList } from '../../../../navigation/types';
 import type { Attendee } from '../../core/entity';
 import { createStyles } from './styles';
 import { useGuestListController } from './useController';
+import { ltrIsolate } from '../../../../utils/bidi';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'GuestList'>;
 
@@ -38,7 +39,7 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
       return c.t('event.eventCreator');
     }
     if (guest.plusOnes > 0) {
-      return `+${guest.plusOnes}`;
+      return ltrIsolate(`+${guest.plusOnes}`);
     }
     return undefined;
   };

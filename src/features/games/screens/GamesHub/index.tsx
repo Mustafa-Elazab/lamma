@@ -116,6 +116,7 @@ export function GamesHubScreen(): React.ReactElement {
                     value={c.joinCode}
                     autoCapitalize="characters"
                     autoCorrect={false}
+                    ltr
                     onChangeText={c.setJoinCode}
                     errorText={c.joinError ?? undefined}
                   />

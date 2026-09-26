@@ -10,6 +10,7 @@ import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTem
 import type { GamesStackParamList } from '../../../../navigation/types';
 import { trackEvent } from '../../../../services/analytics';
 import { useGameSession } from '../../core/session';
+import { ltrIsolate } from '../../../../utils/bidi';
 
 type Props = NativeStackScreenProps<GamesStackParamList, 'GameJoin'>;
 
@@ -59,7 +60,7 @@ export function GameJoinScreen({
       {failed ? (
         <AppErrorState
           title={t('games.joinCodeNotFound')}
-          message={t('games.inviteExpired', { code })}
+          message={t('games.inviteExpired', { code: ltrIsolate(code) })}
           retryLabel={t('games.retry')}
           onRetry={() => {
             void join();
@@ -68,7 +69,7 @@ export function GameJoinScreen({
       ) : (
         <AppEmptyState
           icon="group"
-          title={t('games.joiningRoom', { code })}
+          title={t('games.joiningRoom', { code: ltrIsolate(code) })}
           message={t('games.loadingContentMessage')}
         />
       )}

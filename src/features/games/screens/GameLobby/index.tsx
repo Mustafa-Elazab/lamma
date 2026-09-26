@@ -13,6 +13,7 @@ import { AppScreenHeader } from '../../../../design-system/molecules/ScreenHeade
 import { AppScreenTemplate } from '../../../../design-system/templates/ScreenTemplate';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { GamesStackParamList } from '../../../../navigation/types';
+import { autoIsolate, directionMark, isolateValues } from '../../../../utils/bidi';
 import { localizeText } from '../../core/localized';
 import { createStyles } from './styles';
 import { useGameLobbyController } from './useController';
@@ -124,7 +125,8 @@ export function GameLobbyScreen({
         {c.players.map(player => (
           <View key={player.id} style={styles.playerRow}>
             <AppText variant="bodyStrong">
-              {player.name}
+              {directionMark(language)}
+              {autoIsolate(player.name)}
               {player.isHost ? ` · ${c.t('games.host')}` : ''}
               {!player.connected ? ` · ${c.t('games.disconnected')}` : ''}
             </AppText>
@@ -144,9 +146,9 @@ export function GameLobbyScreen({
                   {c.t('games.imposterRound', { round: c.imposter.round })}
                 </AppText>
                 <AppText variant="caption" color="textMuted">
-                  {c.t('games.imposterCategory', {
+                  {c.t('games.imposterCategory', isolateValues({
                     category: localizeText(c.imposter.categoryName, language),
-                  })}
+                  }))}
                 </AppText>
               </View>
               <View style={styles.promptBox}>
@@ -183,7 +185,8 @@ export function GameLobbyScreen({
                   </AppText>
                   {c.imposter.playerIds.map((id, index) => (
                     <AppText key={id} variant="body">
-                      {index + 1}. {c.imposter?.playerNames[id] ?? id}
+                      {directionMark(language)}
+                      {index + 1}. {autoIsolate(c.imposter?.playerNames[id] ?? id)}
                       {id === c.localPlayerId ? ' ⭐' : ''}
                     </AppText>
                   ))}
@@ -246,9 +249,9 @@ export function GameLobbyScreen({
                     </>
                   ) : (
                     <AppText variant="bodyStrong">
-                      {c.t('games.imposterGuessWaiting', {
+                      {c.t('games.imposterGuessWaiting', isolateValues({
                         name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
-                      })}
+                      }))}
                     </AppText>
                   )}
                   {c.isHost && !c.amImposter ? (
@@ -265,38 +268,38 @@ export function GameLobbyScreen({
                 <View style={styles.resultBox}>
                   <AppText variant="subheading">
                     {c.imposter.winner === 'players'
-                      ? c.t('games.imposterPlayersWin', {
+                      ? c.t('games.imposterPlayersWin', isolateValues({
                           name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
-                        })
-                      : c.t('games.imposterWins', {
+                        }))
+                      : c.t('games.imposterWins', isolateValues({
                           name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
-                        })}
+                        }))}
                   </AppText>
                   <AppText variant="body" color="textMuted">
                     {c.imposter.tie
                       ? c.t('games.imposterTie')
                       : c.imposter.votedOutId && c.imposter.votedOutId !== c.imposter.imposterId
-                        ? c.t('games.imposterWrongOut', {
+                        ? c.t('games.imposterWrongOut', isolateValues({
                             name: c.imposter.playerNames[c.imposter.votedOutId] ?? '',
-                          })
+                          }))
                         : c.imposter.guessWordId
                           ? c.imposter.guessWordId === c.imposter.wordId
-                            ? c.t('games.imposterGuessedRight', {
+                            ? c.t('games.imposterGuessedRight', isolateValues({
                                 name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
-                              })
-                            : c.t('games.imposterGuessedWrong', {
+                              }))
+                            : c.t('games.imposterGuessedWrong', isolateValues({
                                 name: c.imposter.playerNames[c.imposter.imposterId] ?? '',
-                              })
+                              }))
                           : ''}
                   </AppText>
                   <AppText variant="bodyStrong">
-                    {c.t('games.imposterWordWas', {
+                    {c.t('games.imposterWordWas', isolateValues({
                       word: localizeText(c.imposter.word, language),
-                    })}
+                    }))}
                   </AppText>
                   {c.imposterVoteCounts.map(row => (
                     <AppText key={row.playerId} variant="body" color="textMuted">
-                      {c.t('games.imposterVotesFor', { name: row.name, count: row.count })}
+                      {c.t('games.imposterVotesFor', isolateValues({ name: row.name, count: row.count }))}
                     </AppText>
                   ))}
                   {c.isHost ? (
@@ -405,15 +408,15 @@ export function GameLobbyScreen({
               {c.gameplay.round.phase === 'finished' && c.triviaWinner ? (
                 <View style={styles.resultBox}>
                   <AppText variant="subheading">
-                    {c.t('games.triviaWinner', {
+                    {c.t('games.triviaWinner', isolateValues({
                       name: c.triviaWinner.name,
-                    })}
+                    }))}
                   </AppText>
                   {c.gameplay.round.settings.prize ? (
                     <AppText variant="body" color="textMuted">
-                      {c.t('games.triviaPrizeAward', {
+                      {c.t('games.triviaPrizeAward', isolateValues({
                         prize: c.gameplay.round.settings.prize,
-                      })}
+                      }))}
                     </AppText>
                   ) : null}
                   {c.isHost ? (
@@ -466,12 +469,12 @@ export function GameLobbyScreen({
                     </View>
                   ) : (
                     <AppText variant="body" color="textMuted">
-                      {c.t('games.quarterMileWaiting', {
+                      {c.t('games.quarterMileWaiting', isolateValues({
                         name:
                           c.players.find(
                             p => p.id === c.quarterMileActivePlayerId,
                           )?.name ?? c.t('games.noPlayer'),
-                      })}
+                      }))}
                     </AppText>
                   )}
                 </View>
@@ -479,7 +482,7 @@ export function GameLobbyScreen({
               {c.gameplay.state.phase === 'reveal' && c.gameplay.state.lastChoice ? (
                 <View style={styles.resultBox}>
                   <AppText variant="bodyStrong">
-                    {c.t('games.quarterMileRevealPair', {
+                    {c.t('games.quarterMileRevealPair', isolateValues({
                       name:
                         c.players.find(p => {
                           const choice =
@@ -492,7 +495,7 @@ export function GameLobbyScreen({
                         c.gameplay.state.lastChoice.choice === 'take'
                           ? c.t('games.quarterMileChoiceTake')
                           : c.t('games.quarterMileChoiceLeave'),
-                    })}
+                    }))}
                   </AppText>
                   <AppText variant="body">
                     {localizeText(c.gameplay.state.lastChoice.known.name, language)}{' '}
@@ -520,12 +523,12 @@ export function GameLobbyScreen({
                 <View style={styles.resultBox}>
                   <AppText variant="subheading">
                     {c.quarterMileWinner
-                      ? c.t('games.quarterMileWinner', {
+                      ? c.t('games.quarterMileWinner', isolateValues({
                           name:
                             c.players.find(
                               p => p.id === c.quarterMileWinner?.playerId,
                             )?.name ?? c.t('games.noPlayer'),
-                        })
+                        }))
                       : c.t('games.quarterMileScores')}
                   </AppText>
                   {c.isHost ? (
@@ -583,9 +586,9 @@ export function GameLobbyScreen({
                 </>
               ) : (
                 <AppText variant="body" color="textMuted" align="center">
-                  {c.t('games.icebreakerWaiting', {
+                  {c.t('games.icebreakerWaiting', isolateValues({
                     name: c.gameplay.current?.player.name ?? c.t('games.noPlayer'),
-                  })}
+                  }))}
                 </AppText>
               )}
               {c.isHost && !c.canSeeIcebreakerPrompt ? (

@@ -19,6 +19,19 @@ export function autoIsolate(text: string): string {
 }
 
 /**
+ * Isolates every string value of i18n interpolation params, e.g. names in
+ * "{{name}} فاز", so a Latin name can't flip the sentence to LTR.
+ * Numbers are left alone (they already follow the surrounding text).
+ */
+export function isolateValues<T extends Record<string, unknown>>(values: T): T {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(values)) {
+    out[key] = typeof value === 'string' && value ? autoIsolate(value) : value;
+  }
+  return out as T;
+}
+
+/**
  * Mark forcing the paragraph direction of the UI language, so a line that
  * starts with an Arabic name still lays out LTR in the English UI and vice versa.
  */

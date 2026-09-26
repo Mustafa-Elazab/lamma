@@ -12,6 +12,7 @@ import { useTheme } from '../../../../design-system/theme/ThemeProvider';
 import type { AppStackParamList } from '../../../../navigation/types';
 import { createStyles } from './styles';
 import useShareInviteController from './useController';
+import { autoIsolate, isolateValues, ltrIsolate } from '../../../../utils/bidi';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ShareInvite'>;
 
@@ -113,7 +114,9 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
                 {c.event?.title ?? ''}
               </AppText>
               <AppText variant="caption" color="textInverse" numberOfLines={1}>
-                {c.event ? `${c.dateLabel} · ${c.event.venueName}` : ''}
+                {c.event
+                  ? `${c.dateLabel} · ${autoIsolate(c.event.venueName)}`
+                  : ''}
               </AppText>
             </View>
           </View>
@@ -123,7 +126,7 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
       <View style={styles.linkRow}>
         <AppIcon name="link" size={20} color="primary" />
         <AppText variant="body" numberOfLines={1} style={styles.linkText}>
-          {c.link.replace('https://', '')}
+          {ltrIsolate(c.link.replace('https://', ''))}
         </AppText>
         <Pressable onPress={c.copyLink} hitSlop={8}>
           <AppText variant="label" color="primary">
@@ -180,11 +183,13 @@ export function ShareInviteScreen({ route }: Props): React.ReactElement {
         </View>
         <AppText variant="bodyStrong">
           {c.event
-            ? c.t('share.invitedTo', { title: c.event.title })
+            ? c.t('share.invitedTo', isolateValues({ title: c.event.title }))
             : ''}
         </AppText>
         <AppText variant="caption" color="textMuted">
-          {c.event ? `${c.dateLabel} · ${c.event.venueName}` : ''}
+          {c.event
+            ? `${c.dateLabel} · ${autoIsolate(c.event.venueName)}`
+            : ''}
         </AppText>
       </View>
     </AppScreenTemplate>
