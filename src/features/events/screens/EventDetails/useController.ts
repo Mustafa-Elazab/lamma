@@ -83,6 +83,7 @@ export function useEventDetailsController(eventId: string) {
 
   return {
     t,
+    language,
     event,
     isLoading: query.isLoading,
     isError: query.isError,

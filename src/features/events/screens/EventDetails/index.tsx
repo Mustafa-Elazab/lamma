@@ -12,6 +12,7 @@ import { AppRsvpButton } from '../../../../design-system/molecules/RsvpButton';
 import { AppSectionHeader } from '../../../../design-system/molecules/SectionHeader';
 import { AppAvatarStack } from '../../../../design-system/organisms/AvatarStack';
 import { useTheme } from '../../../../design-system/theme/ThemeProvider';
+import { autoIsolate } from '../../../../utils/bidi';
 import { formatDateShort } from '../../../../utils/format';
 import { createStyles } from './styles';
 import type { EventDetailsScreenProps } from './types';
@@ -76,9 +77,9 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
                   icon="check"
                 />
               ) : null}
-              <AppText variant="heading">{event.title}</AppText>
+              <AppText variant="heading">{autoIsolate(event.title)}</AppText>
               <AppText variant="body" color="textMuted">
-                {event.description}
+                {autoIsolate(event.description)}
               </AppText>
             </View>
 
@@ -221,9 +222,9 @@ export function EventDetailsScreen({ route }: EventDetailsScreenProps): React.Re
                         ) : null}
                       </View>
                       <AppText variant="caption" color="textMuted">
-                        {formatDateShort(update.createdAt)}
+                        {formatDateShort(update.createdAt, c.language)}
                       </AppText>
-                      <AppText variant="body">{update.message}</AppText>
+                      <AppText variant="body">{autoIsolate(update.message)}</AppText>
                     </View>
                   </View>
                 ))}

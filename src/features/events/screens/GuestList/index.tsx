@@ -15,7 +15,7 @@ import type { AppStackParamList } from '../../../../navigation/types';
 import type { Attendee } from '../../core/entity';
 import { createStyles } from './styles';
 import { useGuestListController } from './useController';
-import { ltrIsolate } from '../../../../utils/bidi';
+import { autoIsolate, ltrIsolate } from '../../../../utils/bidi';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'GuestList'>;
 
@@ -73,7 +73,7 @@ export function GuestListScreen({ route }: Props): React.ReactElement {
           <View style={styles.summaryText}>
             <AppText variant="subheading">{c.summaryLabel}</AppText>
             <AppText variant="caption" color="textMuted" numberOfLines={1}>
-              {event.description}
+              {autoIsolate(event.description)}
             </AppText>
           </View>
         </View>

@@ -13,6 +13,7 @@ import { AppBadge, type BadgeTone } from '../../atoms/Badge';
 import { AppIcon } from '../../atoms/Icon';
 import { AppText } from '../../atoms/Text';
 import { AppAvatarStack, type StackAvatar } from '../AvatarStack';
+import { autoIsolate } from '../../../utils/bidi';
 
 export type EventCardStatus = {
   label: string;
@@ -76,10 +77,10 @@ function AppEventCardComponent({
               </Pressable>
             ) : null}
           </View>
-          <AppText variant="heading">{data.title}</AppText>
+          <AppText variant="heading">{autoIsolate(data.title)}</AppText>
           <View style={styles.metaRow}>
             <AppIcon name="calendar" size={16} color="textMuted" />
-            <AppText variant="caption" color="textMuted">
+            <AppText variant="caption" color="textMuted" style={styles.shrink}>
               {data.timeLabel
                 ? `${data.dateLabel}  ·  ${data.timeLabel}`
                 : data.dateLabel}
@@ -87,8 +88,8 @@ function AppEventCardComponent({
           </View>
           <View style={styles.metaRow}>
             <AppIcon name="location" size={16} color="textMuted" />
-            <AppText variant="caption" color="textMuted">
-              {data.locationLabel}
+            <AppText variant="caption" color="textMuted" style={styles.shrink}>
+              {autoIsolate(data.locationLabel)}
             </AppText>
           </View>
           <View style={styles.attendeeRow}>
@@ -103,7 +104,7 @@ function AppEventCardComponent({
           </View>
           {data.description ? (
             <AppText variant="caption" color="textMuted" numberOfLines={2}>
-              {data.description}
+              {autoIsolate(data.description)}
             </AppText>
           ) : null}
         </View>
@@ -124,7 +125,7 @@ function AppEventCardComponent({
       <View style={styles.compactBody}>
         <View style={styles.compactTopRow}>
           <AppText variant="bodyStrong" numberOfLines={1} style={styles.flex}>
-            {data.title}
+            {autoIsolate(data.title)}
           </AppText>
           {data.status ? (
             <AppBadge
@@ -136,7 +137,7 @@ function AppEventCardComponent({
         </View>
         <View style={styles.metaRow}>
           <AppIcon name="calendar" size={14} color="textMuted" />
-          <AppText variant="caption" color="textMuted">
+          <AppText variant="caption" color="textMuted" style={styles.shrink}>
             {data.timeLabel
               ? `${data.dateLabel}  ·  ${data.timeLabel}`
               : data.dateLabel}
@@ -144,8 +145,13 @@ function AppEventCardComponent({
         </View>
         <View style={styles.metaRow}>
           <AppIcon name="location" size={14} color="textMuted" />
-          <AppText variant="caption" color="textMuted" numberOfLines={1}>
-            {data.locationLabel}
+          <AppText
+            variant="caption"
+            color="textMuted"
+            numberOfLines={1}
+            style={styles.shrink}
+          >
+            {autoIsolate(data.locationLabel)}
           </AppText>
         </View>
         <View style={styles.attendeeRow}>
@@ -168,6 +174,8 @@ function createStyles(theme: Theme) {
   return StyleSheet.create({
     pressed: { opacity: 0.95 },
     flex: { flex: 1 },
+    /** Lets long meta text wrap inside the row instead of overflowing the card. */
+    shrink: { flexShrink: 1 },
     metaRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -175,6 +183,7 @@ function createStyles(theme: Theme) {
     },
     attendeeRow: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       alignItems: 'center',
       gap: theme.spacing.sm,
       marginTop: theme.spacing.xs,
